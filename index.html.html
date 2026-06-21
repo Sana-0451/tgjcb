@@ -1,0 +1,2170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TG 机器人后台</title>
+<style>
+  .icon { display:inline-block; vertical-align:middle; flex-shrink:0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F0F2F5;
+    --surface: #FFFFFF;
+    --sidebar-bg: #1C2333;
+    --primary: #1E90FF;
+    --primary-light: #E6F2FF;
+    --text: #222222;
+    --text-muted: #666666;
+    --text-faint: #999999;
+    --border: #E4E7ED;
+    --green: #52C41A;
+    --green-bg: #F6FFED;
+    --red: #FF4D4F;
+    --red-bg: #FFF1F0;
+    --amber: #FAAD14;
+    --amber-bg: #FFFBE6;
+    --radius: 4px;
+    --shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 200px;
+    background: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+
+  .sidebar-logo {
+    padding: 14px 14px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .logo-row { display: flex; align-items: center; gap: 9px; }
+
+  .logo-icon {
+    width: 30px; height: 30px;
+    border-radius: var(--radius);
+    background: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; flex-shrink: 0;
+  }
+
+  .logo-name { font-size: 13px; font-weight: 600; color: #fff; }
+  .logo-handle { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 1px; }
+
+  .nav { padding: 6px 0; flex: 1; }
+
+  .nav-section {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.6px; color: rgba(255,255,255,0.22);
+    text-transform: uppercase; padding: 12px 14px 3px;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px; font-size: 12px;
+    color: rgba(255,255,255,0.55);
+    cursor: pointer; transition: all 0.12s;
+  }
+
+  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
+
+  .nav-item.active { color: #fff; background: var(--primary); }
+
+  .nav-badge {
+    margin-left: auto; font-size: 10px;
+    background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.75);
+    padding: 1px 5px; border-radius: 10px;
+  }
+
+  /* ── Collapsible nav group ── */
+  .nav-group { margin-top: 4px; }
+
+  .nav-group-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px; font-size: 12px;
+    color: rgba(255,255,255,0.55);
+    cursor: pointer; transition: all 0.12s;
+  }
+
+  .nav-group-header:hover { color: #fff; background: rgba(255,255,255,0.05); }
+
+  .nav-group-header span { flex: 1; }
+
+  .nav-group-arrow {
+    transition: transform 0.15s;
+    font-size: 11px;
+  }
+
+  .nav-group.collapsed .nav-group-arrow { transform: rotate(-90deg); }
+
+  .nav-group-body {
+    overflow: hidden;
+    max-height: 400px;
+    transition: max-height 0.2s ease;
+  }
+
+  .nav-group.collapsed .nav-group-body { max-height: 0; }
+
+  .nav-item.nav-sub { padding-left: 30px; }
+
+  .sidebar-footer {
+    padding: 8px 0 12px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* ── Main ── */
+  .main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; min-width: 0; }
+
+  /* ── Topbar ── */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 18px; height: 48px;
+    display: flex; align-items: center; gap: 10px;
+    flex-shrink: 0; position: sticky; top: 0; z-index: 10;
+  }
+
+  .topbar-hamburger { font-size: 17px; color: var(--text-muted); cursor: pointer; margin-right: 4px; }
+
+  .breadcrumb { display: flex; align-items: center; gap: 5px; font-size: 12px; flex: 1; }
+  .breadcrumb-item { color: var(--text-muted); }
+  .breadcrumb-item:last-child { color: var(--text); font-weight: 500; }
+  .breadcrumb-sep { color: #ccc; }
+
+  .topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+  .topbar-setting { display: flex; align-items: center; gap: 3px; font-size: 12px; color: var(--text-muted); cursor: pointer; }
+
+  .topbar-server { font-size: 12px; color: #1E90FF; font-weight: 500; }
+
+  .topbar-icon-btn {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-muted); transition: background 0.12s;
+  }
+
+  .topbar-icon-btn:hover { background: #f0f0f0; color: var(--text); }
+
+  .topbar-avatar {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #4A90D9; display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 11px; font-weight: 600; cursor: pointer;
+  }
+
+  .avatar-menu { position: relative; }
+
+  .avatar-dropdown {
+    display: none;
+    position: absolute;
+    top: 36px; right: 0;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    min-width: 140px;
+    padding: 6px 0;
+    z-index: 100;
+  }
+
+  .avatar-dropdown.open { display: block; }
+
+  .avatar-dropdown-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px; font-size: 12px;
+    color: #333; cursor: pointer; white-space: nowrap;
+  }
+
+  .avatar-dropdown-item:hover { background: #f5f5f5; }
+
+  .avatar-dropdown-danger { color: #F56C6C; }
+  .avatar-dropdown-danger:hover { background: #FFF1F0; }
+
+  .avatar-dropdown-divider {
+    height: 1px; background: var(--border); margin: 4px 0;
+  }
+
+  /* ── Tab bar ── */
+  .tab-bar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 18px; display: flex; align-items: center;
+    flex-shrink: 0; overflow-x: auto;
+  }
+
+  .tab-item {
+    display: flex; align-items: center; gap: 5px;
+    padding: 8px 12px; font-size: 12px;
+    color: var(--text-muted); cursor: pointer;
+    border-bottom: 2px solid transparent; white-space: nowrap;
+    transition: all 0.12s;
+  }
+
+  .tab-item:hover { color: var(--text); }
+
+  .tab-item.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+  .tab-close { font-size: 10px; color: var(--text-faint); padding: 1px 2px; border-radius: 2px; }
+  .tab-close:hover { background: #eee; color: var(--text); }
+
+  .tab-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); flex-shrink: 0; }
+
+  /* ── Content ── */
+  .content { padding: 14px 18px; flex: 1; }
+
+  /* ── Stat cards ── */
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 16px;
+    box-shadow: var(--shadow); text-align: center;
+  }
+
+  .stat-label { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+  .stat-value { font-size: 26px; font-weight: 700; color: var(--text); }
+
+  /* ── Filter panel ── */
+  .filter-panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px 14px;
+    margin-bottom: 10px; box-shadow: var(--shadow);
+  }
+
+  .filter-row {
+    display: flex; gap: 7px; align-items: center;
+    flex-wrap: wrap; margin-bottom: 7px;
+  }
+
+  .filter-row:last-child { margin-bottom: 0; }
+
+  .fi {
+    height: 32px; padding: 0 11px;
+    border: 1px solid #DCDFE6; border-radius: 3px;
+    font-size: 13px; font-family: inherit; background: #fff;
+    color: #333; outline: none;
+  }
+
+  .fi:focus { border-color: #409EFF; box-shadow: 0 0 0 2px rgba(64,158,255,0.1); }
+  .fi::placeholder { color: #C0C4CC; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 0 15px; height: 32px; font-size: 13px;
+    border-radius: 3px; cursor: pointer;
+    border: 1px solid #d9d9d9; background: #fff;
+    color: #333; font-weight: 400;
+    transition: all 0.12s; white-space: nowrap;
+    font-family: inherit; line-height: 1;
+  }
+
+  .btn:hover { background: #f5f5f5; border-color: #aaa; }
+  .btn-green  { background: #55C92A; color:#fff; border-color:#55C92A; font-weight:400; }
+  .btn-green:hover  { background:#45a81f!important; border-color:#45a81f!important; }
+  .btn-blue   { background: #3AAFE8; color:#fff; border-color:#3AAFE8; font-weight:400; }
+  .btn-blue:hover   { background:#2490c9!important; border-color:#2490c9!important; }
+  .btn-teal   { background: #3AAFE8; color:#fff; border-color:#3AAFE8; font-weight:400; }
+  .btn-teal:hover   { background:#2490c9!important; border-color:#2490c9!important; }
+  .btn-red    { background: #F56C6C; color:#fff; border-color:#F56C6C; font-weight:400; }
+  .btn-red:hover    { background:#d94f4f!important; border-color:#d94f4f!important; }
+  .btn-outline-red { background:#fff; color:#F56C6C; border-color:#F56C6C; font-weight:400; }
+  .btn-outline-red:hover { background:#fff5f5!important; }
+  .btn-dark   { background: #606266; color:#fff; border-color:#606266; font-weight:400; }
+  .btn-dark:hover { background:#4e5053!important; }
+  .btn-purple { background: #5b6ee1; color:#fff; border-color:#5b6ee1; }
+  .btn-gray   { background: #909399; color:#fff; border-color:#909399; }
+  .btn-sm { padding: 0 9px; height: 26px; font-size: 12px; border-radius: 3px; }
+
+  /* ── Action / batch bars ── */
+  .action-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .batch-bar  { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+
+  /* ── Table card ── */
+  .table-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden;
+  }
+
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+
+  .data-table th {
+    text-align: left; font-size: 11px; font-weight: 500;
+    color: var(--text-muted); padding: 9px 10px;
+    border-bottom: 1px solid var(--border);
+    background: #FAFAFA; white-space: nowrap;
+  }
+
+  .data-table td {
+    padding: 7px 10px; border-bottom: 1px solid #f2f2f2;
+    color: var(--text); vertical-align: middle;
+  }
+
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: #f9fafc; }
+
+  /* ── Table action links ── */
+  .tbl-actions { display: flex; flex-direction: column; gap: 3px; }
+  .tbl-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+  .tl { font-size: 11px; cursor: pointer; white-space: nowrap; }
+  .tl-blue { color: #1E90FF; }
+  .tl-blue:hover { text-decoration: underline; }
+  .tl-red { color: #FF4D4F; }
+  .tl-red:hover { text-decoration: underline; }
+  .tl-gray { color: var(--text-muted); }
+  .tl-gray:hover { text-decoration: underline; }
+
+  .tbl-info {
+    background: #EBF5FF; color: #1E90FF;
+    font-size: 11px; padding: 1px 8px; border-radius: 2px;
+    cursor: pointer; white-space: nowrap; display: inline-block; margin-bottom: 3px;
+  }
+
+  .tbl-bal {
+    background: #F6FFED; color: var(--green);
+    font-size: 11px; padding: 1px 8px; border-radius: 2px;
+    white-space: nowrap; display: inline-block;
+  }
+
+  /* ── Badges ── */
+  .badge {
+    display: inline-block; font-size: 11px;
+    padding: 1px 7px; border-radius: var(--radius);
+    font-weight: 500; white-space: nowrap;
+  }
+
+  .badge-active { background: var(--green-bg); color: var(--green); }
+  .badge-block  { background: var(--red-bg);   color: var(--red); }
+  .badge-vip    { background: var(--amber-bg);  color: var(--amber); }
+  .badge-normal { background: #f0f0f0; color: #555; }
+
+  /* ── Pages ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #d0d0d0; border-radius: 2px; }
+
+  /* ── Overview ── */
+  .metrics { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 14px; }
+
+  .metric-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow);
+  }
+
+  .metric-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .metric-label { font-size: 12px; color: var(--text-muted); }
+
+  .metric-icon {
+    width: 26px; height: 26px; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .metric-value { font-size: 20px; font-weight: 700; color: var(--text); }
+
+  /* ── Settings ── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow);
+  }
+
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+
+  /* ── Toggle switch ── */
+  .toggle-switch {
+    display: inline-block;
+    width: 38px; height: 20px;
+    background: #DCDFE6;
+    border-radius: 10px;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.15s;
+    vertical-align: middle;
+  }
+
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 16px; height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    transition: left 0.15s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  }
+
+  .toggle-switch.on {
+    background: #52C41A;
+  }
+
+  .toggle-switch.on::after {
+    left: 20px;
+  }
+
+  .col-toggle-link {
+    font-size: 11px; font-weight: 400;
+    color: #409EFF; cursor: pointer;
+  }
+  .col-toggle-link:hover { text-decoration: underline; }
+
+  .site-tag {
+    display: inline-block;
+    font-size: 11px;
+    color: #409EFF;
+    background: #EBF5FF;
+    padding: 1px 7px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  /* ── Multi-site selector (dropdown with checkboxes) ── */
+  .multi-site-selector { position: relative; display: inline-block; }
+
+  .multi-site-trigger {
+    height: 32px; padding: 0 11px;
+    border: 1px solid #DCDFE6; border-radius: 3px;
+    font-size: 13px; color: #333; background: #fff;
+    display: flex; align-items: center; gap: 6px;
+    cursor: pointer; min-width: 140px; justify-content: space-between;
+  }
+
+  .multi-site-trigger:hover { border-color: #409EFF; }
+
+  .multi-site-panel {
+    display: none;
+    position: absolute;
+    top: 36px; left: 0;
+    width: 320px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    z-index: 100;
+    overflow: hidden;
+  }
+
+  .multi-site-panel.open { display: block; }
+
+  .multi-site-panes {
+    display: flex;
+    height: 280px;
+  }
+
+  .multi-site-cat-pane {
+    width: 110px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    background: #FAFAFA;
+    overflow-y: auto;
+    padding: 6px 0;
+  }
+
+  .multi-site-cat-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; font-size: 12px; color: #333;
+    cursor: pointer;
+  }
+
+  .multi-site-cat-item:hover { background: #f0f0f0; }
+
+  .multi-site-cat-item.active {
+    background: #fff;
+    color: #409EFF;
+    font-weight: 600;
+    box-shadow: inset 2px 0 0 #409EFF;
+  }
+
+  .multi-site-cat-badge {
+    font-size: 10px;
+    background: #409EFF;
+    color: #fff;
+    padding: 0 5px;
+    border-radius: 8px;
+    min-width: 14px;
+    text-align: center;
+    line-height: 16px;
+  }
+
+  .multi-site-site-pane {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 0;
+  }
+
+  .multi-site-option {
+    display: flex; align-items: center; gap: 7px;
+    padding: 5px 12px; font-size: 12px; color: #333;
+    cursor: pointer;
+  }
+
+  .multi-site-option:hover { background: #f5f5f5; }
+
+  .multi-site-footer {
+    border-top: 1px solid var(--border);
+    padding: 6px 12px;
+    display: flex; justify-content: space-between;
+    gap: 6px;
+  }
+
+  .multi-site-footer span {
+    font-size: 12px; color: #409EFF; cursor: pointer;
+  }
+
+  .card-title { font-size: 13px; font-weight: 600; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* ── Pagination ── */
+  .pagination {
+    padding: 9px 14px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+
+  .page-info { font-size: 12px; color: var(--text-muted); }
+  .page-btns { display: flex; gap: 4px; }
+
+  .page-btn {
+    min-width: 26px; height: 26px; padding: 0 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; border: 1px solid var(--border); border-radius: var(--radius);
+    cursor: pointer; background: #fff; color: var(--text); font-family: inherit;
+  }
+
+  .page-btn:hover { background: #f5f5f5; }
+  .page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+  @media (max-width: 900px) {
+    .stat-row, .metrics { grid-template-columns: repeat(2,1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+  /* ── Avatar ── */
+  .avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; flex-shrink: 0;
+  }
+  .av-blue   { background: #DBEAFE; color: #1D4ED8; }
+  .av-teal   { background: #CCFBF1; color: #0F766E; }
+  .av-pink   { background: #FCE7F3; color: #BE185D; }
+  .av-purple { background: #EDE9FE; color: #7C3AED; }
+  .av-amber  { background: #FEF3C7; color: #92400E; }
+</style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-row">
+      <div class="logo-icon"><i class="ti ti-robot"></i></div>
+      <div>
+        <div class="logo-name">TG 机器人</div>
+        <div class="logo-handle">@mybot_official</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-item" onclick="showPage('overview', this)">
+      <i class="ti ti-layout-dashboard"></i> 首页
+    </div>
+    <div class="nav-item" onclick="showPage('users', this)">
+      <i class="ti ti-users"></i> 用户管理
+    </div>
+    <div class="nav-item" onclick="showPage('deposit-order', this)">
+      <i class="ti ti-send"></i> 上分订单
+    </div>
+    <div class="nav-item" onclick="showPage('withdraw-order', this)">
+      <i class="ti ti-arrow-down"></i> 下分订单
+    </div>
+    <!-- 指令说明：暂时隐藏，需要恢复时取消注释即可
+    <div class="nav-item" onclick="showPage('commands', this)">
+      <i class="ti ti-terminal-2"></i> 指令说明
+    </div>
+    -->
+    <div class="nav-item" onclick="showPage('limits', this)">
+      <i class="ti ti-adjustments"></i> 限制设置
+    </div>
+    <div class="nav-item" onclick="showPage('blacklist', this)">
+      <i class="ti ti-shield-x"></i> IP白名单
+    </div>
+    <div class="nav-item" onclick="showPage('settings', this)">
+      <i class="ti ti-settings"></i> 站点功能权限
+    </div>
+    <div class="nav-item" onclick="showPage('admin', this)">
+      <i class="ti ti-user-circle"></i> 管理员
+    </div>
+  </nav>
+</aside>
+
+<!-- ── Main ── -->
+<div class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <span class="topbar-hamburger">&#9776;</span>
+    <div class="breadcrumb" id="topbar-breadcrumb">
+      <span class="breadcrumb-item">首页</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-item">用户管理</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-item">用户列表</span>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-setting"><i class="ti ti-settings" style="font-size:12px"></i>&nbsp;提示设置</div>
+      <div class="topbar-server" id="topbar-clock">服务器：2026-06-18 09:19:23 (Z)</div>
+      <div class="topbar-icon-btn"><i class="ti ti-search" style="font-size:13px"></i></div>
+      <div class="avatar-menu" id="avatar-menu">
+        <div class="topbar-avatar" onclick="toggleAvatarMenu(event)">A</div>
+        <div class="avatar-dropdown" id="avatar-dropdown">
+          <div class="avatar-dropdown-item">
+            <i class="ti ti-user-circle"></i> 管理员
+          </div>
+          <div class="avatar-dropdown-divider"></div>
+          <div class="avatar-dropdown-item avatar-dropdown-danger">
+            <i class="ti ti-logout"></i> 退出登录
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab bar -->
+  <div class="tab-bar">
+    <div class="tab-item" onclick="showPage('overview',null)">首页</div>
+    <div class="tab-item" onclick="showPage('users',null)">用户管理 <span class="tab-close">×</span></div>
+    <div class="tab-item" onclick="showPage('commands',null)">角色管理 <span class="tab-close">×</span></div>
+    <div class="tab-item active" onclick="showPage('users',null)"><span class="tab-dot"></span> 用户列表 <span class="tab-close">×</span></div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ 概览 ══ -->
+    <div class="page" id="page-overview">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <span style="font-size:13px;color:#606266">站点：</span>
+        <div class="multi-site-selector" id="overview-site-selector" style="display:inline-block"></div>
+        <span style="color:var(--text-muted);font-size:12px;margin-left:6px">今日数据：上分总额 / 下分总额 / 订单数</span>
+      </div>
+      <div class="metrics">
+        <div class="metric-card">
+          <div class="metric-top">
+            <span class="metric-label">今日上分总额</span>
+            <div class="metric-icon" style="background:#EFF6FF;color:#2563EB"><i class="ti ti-send"></i></div>
+          </div>
+          <div class="metric-value" id="site-up-amount">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-top">
+            <span class="metric-label">今日下分总额</span>
+            <div class="metric-icon" style="background:#FEF2F2;color:#DC2626"><i class="ti ti-ban"></i></div>
+          </div>
+          <div class="metric-value" id="site-down-amount">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-top">
+            <span class="metric-label">上分订单数（今日）</span>
+            <div class="metric-icon" style="background:#FFFBEB;color:#D97706"><i class="ti ti-plus"></i></div>
+          </div>
+          <div class="metric-value" id="site-up-orders">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-top">
+            <span class="metric-label">下分订单数（今日）</span>
+            <div class="metric-icon" style="background:#F5F3FF;color:#7C3AED"><i class="ti ti-message"></i></div>
+          </div>
+          <div class="metric-value" id="site-down-orders">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 用户列表 ══ -->
+    <div class="page active" id="page-users">
+
+      <!-- Filter panel -->
+      <div class="filter-panel">
+        <div class="filter-row" style="margin-bottom:10px">
+          <span style="font-size:13px;color:#606266;margin-right:6px;flex-shrink:0">站点：</span>
+          <div class="multi-site-selector" id="users-site-selector"></div>
+        </div>
+        <div class="filter-row">
+          <input class="fi" style="width:180px" id="search-tgid" placeholder="请输入 TGID（如 @sunny_trader）...">
+          <span style="font-size:13px;color:#606266">注册时间：</span>
+          <input class="fi" type="date" style="width:150px" id="search-date-start">
+          <span style="color:#999">至</span>
+          <input class="fi" type="date" style="width:150px" id="search-date-end">
+          <button class="btn btn-green" onclick="searchUsers()"><i class="ti ti-search"></i> 搜索</button>
+          <button class="btn btn-teal" onclick="resetSearch()"><i class="ti ti-rotate-clockwise"></i> 重置</button>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="action-bar">
+        <button class="btn" style="background:#fff" onclick="openAddModal()"><i class="ti ti-plus"></i> 添加</button>
+        <button class="btn" onclick="batchToggleStatus()">批量启用(禁用)</button>
+        <button class="btn" onclick="batchGoogleAuth()">批量启用谷歌验证</button>
+      </div>
+
+      <!-- Table -->
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:36px;padding-left:12px"><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)"></th>
+              <th>站点</th>
+              <th>用户名称</th>
+              <th>Telegram ID</th>
+              <th>注册时间</th>
+              <th>状态</th>
+              <th>备注</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="user-table-body">
+            <tr data-site="EX01" data-date="2026-01-15">
+              <td style="padding-left:12px"><input type="checkbox" class="user-checkbox" value="104821"></td>
+              <td><span class="site-tag">交易所-01</span></td>
+              <td style="color:#333">sunny</td>
+              <td style="color:#333">@sunny_trader</td>
+              <td style="color:#666;font-size:12px">2026-01-15</td>
+              <td><span class="badge badge-active" data-status="normal">启用</span></td>
+              <td style="color:#666;font-size:12px"></td>
+              <td>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openPwdModal('104821')">&#9998; 修改密码</span><span style="color:#909399;font-size:12px;cursor:pointer;margin-right:10px" onclick="changeStatus(this,'104821')">&#9998; 禁用</span><span style="color:#409EFF;font-size:12px;cursor:pointer">&#9998; 谷歌验证</span>
+              </td>
+            </tr>
+            <tr data-site="ST01" data-date="2026-02-08">
+              <td style="padding-left:12px"><input type="checkbox" class="user-checkbox" value="208374"></td>
+              <td><span class="site-tag">股票-01</span></td>
+              <td style="color:#333">ace024</td>
+              <td style="color:#333">@ace024</td>
+              <td style="color:#666;font-size:12px">2026-02-08</td>
+              <td><span class="badge badge-active" data-status="normal">启用</span></td>
+              <td style="color:#666;font-size:12px"></td>
+              <td>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openPwdModal('208374')">&#9998; 修改密码</span><span style="color:#909399;font-size:12px;cursor:pointer;margin-right:10px" onclick="changeStatus(this,'208374')">&#9998; 禁用</span><span style="color:#409EFF;font-size:12px;cursor:pointer">&#9998; 谷歌验证</span>
+              </td>
+            </tr>
+            <tr data-site="PB01" data-date="2025-12-20">
+              <td style="padding-left:12px"><input type="checkbox" class="user-checkbox" value="301928"></td>
+              <td><span class="site-tag">充电宝-01</span></td>
+              <td style="color:#333">ace024</td>
+              <td style="color:#333">@powerbank_li</td>
+              <td style="color:#666;font-size:12px">2025-12-20</td>
+              <td><span class="badge badge-block" data-status="blocked">禁用</span></td>
+              <td style="color:#666;font-size:12px"></td>
+              <td>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openPwdModal('301928')">&#9998; 修改密码</span><span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="changeStatus(this,'301928')">&#9998; 启用</span><span style="color:#409EFF;font-size:12px;cursor:pointer">&#9998; 谷歌验证</span>
+              </td>
+            </tr>
+            <tr data-site="PB02" data-date="2026-03-11">
+              <td style="padding-left:12px"><input type="checkbox" class="user-checkbox" value="418203"></td>
+              <td><span class="site-tag">充电宝-02</span></td>
+              <td style="color:#333">ace024</td>
+              <td style="color:#333">@stock_chen</td>
+              <td style="color:#666;font-size:12px">2026-03-11</td>
+              <td><span class="badge badge-active" data-status="normal">启用</span></td>
+              <td style="color:#666;font-size:12px"></td>
+              <td>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openPwdModal('418203')">&#9998; 修改密码</span><span style="color:#909399;font-size:12px;cursor:pointer;margin-right:10px" onclick="changeStatus(this,'418203')">&#9998; 禁用</span><span style="color:#409EFF;font-size:12px;cursor:pointer">&#9998; 谷歌验证</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span class="page-info">共 12,847 名用户</span>
+          <div class="page-btns">
+            <button class="page-btn">上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">下一页</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 上分订单 ══ -->
+    <div class="page" id="page-deposit-order">
+      <div class="filter-panel">
+        <div class="filter-row" style="margin-bottom:10px">
+          <span style="font-size:13px;color:#606266;margin-right:6px;flex-shrink:0">站点：</span>
+          <div class="multi-site-selector" id="dep-site-selector" style="display:inline-block"></div>
+        </div>
+        <div class="filter-row">
+          <input class="fi" style="width:180px" id="dep-search-order" placeholder="请输入订单号...">
+          <input class="fi" style="width:150px" id="dep-search-uid" placeholder="请输入用户ID...">
+          <span style="font-size:13px;color:#606266">申请时间：</span>
+          <input class="fi" type="date" style="width:150px" id="dep-date-start">
+          <span style="color:#999">至</span>
+          <input class="fi" type="date" style="width:150px" id="dep-date-end">
+          <button class="btn btn-green" onclick="searchDepositOrders()"><i class="ti ti-search"></i> 搜索</button>
+          <button class="btn btn-teal" onclick="resetDepositOrders()"><i class="ti ti-rotate-clockwise"></i> 重置</button>
+        </div>
+      </div>
+      <div class="action-bar">
+        <button class="btn btn-gray"><i class="ti ti-download"></i> 导出</button>
+      </div>
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:36px;padding-left:12px"><input type="checkbox"></th>
+              <th>站点</th>
+              <th>订单号</th>
+              <th>申请人（TG账号）</th>
+              <th>用户ID</th>
+              <th>金额</th>
+              <th>申请时间</th>
+              <th>完成时间</th>
+              <th>状态</th>
+              <th>失败原因</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-site="EX01" data-date="2026-06-18">
+              <td style="padding-left:12px"><input type="checkbox"></td>
+              <td><span class="site-tag">交易所-01</span></td>
+              <td style="font-family:monospace;font-size:12px;color:#333">ORD20260618001</td>
+              <td style="color:#666;font-size:12px">@sunny_trader</td>
+              <td style="color:#666">104821</td>
+              <td style="color:#55C92A;font-weight:500">¥500</td>
+              <td style="color:#666;font-size:12px">2026-06-18 14:30</td>
+              <td style="color:#666;font-size:12px">2026-06-18 14:32</td>
+              <td><span class="badge badge-active">成功</span></td>
+              <td style="color:#ccc;font-size:12px">—</td>
+            </tr>
+            <tr data-site="ST01" data-date="2026-06-18">
+              <td style="padding-left:12px"><input type="checkbox"></td>
+              <td><span class="site-tag">股票-01</span></td>
+              <td style="font-family:monospace;font-size:12px;color:#333">ORD20260618002</td>
+              <td style="color:#666;font-size:12px">@ace024</td>
+              <td style="color:#666">208374</td>
+              <td style="color:#55C92A;font-weight:500">¥1000</td>
+              <td style="color:#666;font-size:12px">2026-06-18 13:45</td>
+              <td style="color:#666;font-size:12px">2026-06-18 13:47</td>
+              <td><span class="badge badge-active">成功</span></td>
+              <td style="color:#ccc;font-size:12px">—</td>
+            </tr>
+            <tr data-site="PB01" data-date="2026-06-18">
+              <td style="padding-left:12px"><input type="checkbox"></td>
+              <td><span class="site-tag">充电宝-01</span></td>
+              <td style="font-family:monospace;font-size:12px;color:#333">ORD20260618003</td>
+              <td style="color:#666;font-size:12px">@powerbank_li</td>
+              <td style="color:#666">418203</td>
+              <td style="color:#55C92A;font-weight:500">¥200</td>
+              <td style="color:#666;font-size:12px">2026-06-18 12:15</td>
+              <td style="color:#ccc;font-size:12px">—</td>
+              <td><span class="badge badge-vip">待确认</span></td>
+              <td style="color:#ccc;font-size:12px">—</td>
+            </tr>
+            <tr data-site="EX02" data-date="2026-06-18">
+              <td style="padding-left:12px"><input type="checkbox"></td>
+              <td><span class="site-tag">交易所-02</span></td>
+              <td style="font-family:monospace;font-size:12px;color:#333">ORD20260618004</td>
+              <td style="color:#666;font-size:12px">@sunyan_88</td>
+              <td style="color:#666">519042</td>
+              <td style="color:#55C92A;font-weight:500">¥800</td>
+              <td style="color:#666;font-size:12px">2026-06-18 10:05</td>
+              <td style="color:#666;font-size:12px">2026-06-18 10:07</td>
+              <td><span class="badge badge-block">失败</span></td>
+              <td style="color:#F56C6C;font-size:12px">钱包地址校验失败</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span class="page-info">共 4 条记录</span>
+          <div class="page-btns">
+            <button class="page-btn">上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">下一页</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 下分订单 ══ -->
+    <div class="page" id="page-withdraw-order">
+      <div class="filter-panel">
+        <div class="filter-row" style="margin-bottom:10px">
+          <span style="font-size:13px;color:#606266;margin-right:6px;flex-shrink:0">站点：</span>
+          <div class="multi-site-selector" id="wit-site-selector" style="display:inline-block"></div>
+        </div>
+        <div class="filter-row">
+          <input class="fi" style="width:180px" id="wit-search-order" placeholder="请输入订单号...">
+          <input class="fi" style="width:150px" id="wit-search-uid" placeholder="请输入用户ID...">
+          <span style="font-size:13px;color:#606266">申请时间：</span>
+          <input class="fi" type="date" style="width:150px" id="wit-date-start">
+          <span style="color:#999">至</span>
+          <input class="fi" type="date" style="width:150px" id="wit-date-end">
+          <button class="btn btn-green" onclick="searchWithdrawOrders()"><i class="ti ti-search"></i> 搜索</button>
+          <button class="btn btn-teal" onclick="resetWithdrawOrders()"><i class="ti ti-rotate-clockwise"></i> 重置</button>
+        </div>
+      </div>
+      <div class="action-bar">
+        <button class="btn btn-gray"><i class="ti ti-download"></i> 导出</button>
+      </div>
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:36px;padding-left:12px"><input type="checkbox"></th>
+              <th>站点</th>
+              <th>订单号</th>
+              <th>申请人（TG账号）</th>
+              <th>用户ID</th>
+              <th>金额</th>
+              <th>申请时间</th>
+              <th>完成时间</th>
+              <th>状态</th>
+              <th>失败原因</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-site="EX01" data-date="2026-06-18">
+              <td style="padding-left:12px"><input type="checkbox"></td>
+              <td><span class="site-tag">交易所-01</span></td>
+              <td style="font-family:monospace;font-size:12px;color:#333">WTH20260618001</td>
+              <td style="color:#666;font-size:12px">@sunny_trader</td>
+              <td style="color:#666">104821</td>
+              <td style="color:#F56C6C;font-weight:500">¥300</td>
+              <td style="color:#666;font-size:12px">2026-06-18 14:20</td>
+              <td style="color:#666;font-size:12px">2026-06-18 14:25</td>
+              <td><span class="badge badge-active">成功</span></td>
+              <td style="color:#ccc;font-size:12px">—</td>
+            </tr>
+            <tr data-site="ST01" data-date="2026-06-18">
+              <td style="padding-left:12px"><input type="checkbox"></td>
+              <td><span class="site-tag">股票-01</span></td>
+              <td style="font-family:monospace;font-size:12px;color:#333">WTH20260618002</td>
+              <td style="color:#666;font-size:12px">@ace024</td>
+              <td style="color:#666">208374</td>
+              <td style="color:#F56C6C;font-weight:500">¥500</td>
+              <td style="color:#666;font-size:12px">2026-06-18 13:10</td>
+              <td style="color:#666;font-size:12px">2026-06-18 13:18</td>
+              <td><span class="badge badge-active">成功</span></td>
+              <td style="color:#ccc;font-size:12px">—</td>
+            </tr>
+            <tr data-site="PB01" data-date="2026-06-18">
+              <td style="padding-left:12px"><input type="checkbox"></td>
+              <td><span class="site-tag">充电宝-01</span></td>
+              <td style="font-family:monospace;font-size:12px;color:#333">WTH20260618003</td>
+              <td style="color:#666;font-size:12px">@powerbank_li</td>
+              <td style="color:#666">418203</td>
+              <td style="color:#F56C6C;font-weight:500">¥150</td>
+              <td style="color:#666;font-size:12px">2026-06-18 11:55</td>
+              <td style="color:#ccc;font-size:12px">—</td>
+              <td><span class="badge badge-vip">处理中</span></td>
+              <td style="color:#ccc;font-size:12px">—</td>
+            </tr>
+            <tr data-site="ST02" data-date="2026-06-18">
+              <td style="padding-left:12px"><input type="checkbox"></td>
+              <td><span class="site-tag">股票-02</span></td>
+              <td style="font-family:monospace;font-size:12px;color:#333">WTH20260618004</td>
+              <td style="color:#666;font-size:12px">@stock_chen</td>
+              <td style="color:#666">631928</td>
+              <td style="color:#F56C6C;font-weight:500">¥600</td>
+              <td style="color:#666;font-size:12px">2026-06-18 09:40</td>
+              <td style="color:#666;font-size:12px">2026-06-18 09:43</td>
+              <td><span class="badge badge-block">失败</span></td>
+              <td style="color:#F56C6C;font-size:12px">账户余额不足</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span class="page-info">共 4 条记录</span>
+          <div class="page-btns">
+            <button class="page-btn">上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">下一页</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 指令说明 ══ -->
+    <div class="page" id="page-commands">
+      <div class="table-card" style="margin-bottom:14px">
+        <table class="data-table">
+          <thead>
+            <tr><th style="padding-left:14px">指令</th><th>说明</th><th>权限</th><th>状态</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding-left:14px;font-family:monospace;color:var(--primary)">/start</td>
+              <td style="color:#666">启动机器人，发送欢迎消息</td>
+              <td><span class="badge badge-active">所有人</span></td>
+              <td><span class="badge badge-active">启用</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left:14px;font-family:monospace;color:var(--primary)">/help</td>
+              <td style="color:#666">查看帮助说明与可用指令列表</td>
+              <td><span class="badge badge-active">所有人</span></td>
+              <td><span class="badge badge-active">启用</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left:14px;font-family:monospace;color:var(--primary)">/admin</td>
+              <td style="color:#666">打开管理员操作面板</td>
+              <td><span class="badge badge-vip">仅管理员</span></td>
+              <td><span class="badge badge-active">启用</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left:14px;font-family:monospace;color:var(--primary)">/balance</td>
+              <td style="color:#666">查询当前账户余额</td>
+              <td><span class="badge badge-active">所有人</span></td>
+              <td><span class="badge badge-active">启用</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left:14px;font-family:monospace;color:var(--primary)">/deposit</td>
+              <td style="color:#666">发起上分（充值）申请</td>
+              <td><span class="badge badge-active">所有人</span></td>
+              <td><span class="badge badge-active">启用</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left:14px;font-family:monospace;color:var(--primary)">/withdraw</td>
+              <td style="color:#666">发起下分（提现）申请</td>
+              <td><span class="badge badge-active">所有人</span></td>
+              <td><span class="badge badge-active">启用</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">使用说明</span></div>
+        <div style="color:#666;font-size:13px;line-height:1.9">
+          <p>1. 所有指令均需以「/」开头，在与机器人的私聊或已授权群组中发送。</p>
+          <p>2. 「仅管理员」权限的指令仅限后台设置的管理员账号使用，其他用户发送将被忽略。</p>
+          <p>3. 指令的启用状态由后台统一控制，禁用后用户发送该指令将收到提示消息。</p>
+          <p>4. 如需调整指令文案或新增自定义指令，请联系技术人员协助配置。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 限制设置（全局） ══ -->
+    <div class="page" id="page-limits">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">上下分限制 — 全局设定</span>
+          <span style="font-size:12px;color:#999">当前对所有站点统一生效</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="card" style="box-shadow:none;border:1px solid var(--border)">
+            <div class="card-header"><span class="card-title">&#9650; 上分限制</span></div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px">每日最多上分次数</label>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <input class="fi" type="number" id="limit-deposit-count" value="5" style="width:100px">
+                  <span style="font-size:12px;color:#999">次 / 天</span>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px">单笔金额范围</label>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <input class="fi" type="number" id="limit-deposit-min" value="50" style="width:100px">
+                  <span style="font-size:12px;color:#999">至</span>
+                  <input class="fi" type="number" id="limit-deposit-max" value="50000" style="width:100px">
+                  <span style="font-size:12px;color:#999">元</span>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px">每日累计上限</label>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <input class="fi" type="number" id="limit-deposit-daily" value="100000" style="width:160px">
+                  <span style="font-size:12px;color:#999">元 / 天</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="box-shadow:none;border:1px solid var(--border)">
+            <div class="card-header"><span class="card-title">&#9660; 下分限制</span></div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px">每日最多下分次数</label>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <input class="fi" type="number" id="limit-withdraw-count" value="3" style="width:100px">
+                  <span style="font-size:12px;color:#999">次 / 天</span>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px">单笔金额范围</label>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <input class="fi" type="number" id="limit-withdraw-min" value="100" style="width:100px">
+                  <span style="font-size:12px;color:#999">至</span>
+                  <input class="fi" type="number" id="limit-withdraw-max" value="20000" style="width:100px">
+                  <span style="font-size:12px;color:#999">元</span>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px">每日累计上限</label>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <input class="fi" type="number" id="limit-withdraw-daily" value="50000" style="width:160px">
+                  <span style="font-size:12px;color:#999">元 / 天</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;display:flex;justify-content:flex-end">
+          <button class="btn btn-green" onclick="saveGlobalLimits()">保存设置</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ IP白名单 ══ -->
+    <div class="page" id="page-blacklist">
+      <div class="filter-panel">
+        <div class="filter-row">
+          <input class="fi" style="width:200px" placeholder="请输入 IP 地址...">
+          <button class="btn btn-green"><i class="ti ti-search"></i> 搜索</button>
+          <button class="btn btn-teal"><i class="ti ti-rotate-clockwise"></i> 重置</button>
+        </div>
+      </div>
+      <div class="action-bar">
+        <button class="btn" style="background:#fff"><i class="ti ti-plus"></i> 添加IP</button>
+      </div>
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:36px;padding-left:12px"><input type="checkbox"></th>
+              <th>IP 地址</th>
+              <th>说明</th>
+              <th>添加时间</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding-left:12px"><input type="checkbox"></td>
+              <td style="font-family:monospace;font-size:12px;color:#333">192.168.1.100</td>
+              <td style="color:#666">主服务器</td>
+              <td style="color:#666;font-size:12px">2026-01-15</td>
+              <td><span class="badge badge-active">启用</span></td>
+              <td>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px">&#9998; 编辑</span>
+                <span style="color:#F56C6C;font-size:12px;cursor:pointer">&#9998; 删除</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding-left:12px"><input type="checkbox"></td>
+              <td style="font-family:monospace;font-size:12px;color:#333">10.0.0.50</td>
+              <td style="color:#666">备用服务器</td>
+              <td style="color:#666;font-size:12px">2026-02-08</td>
+              <td><span class="badge badge-active">启用</span></td>
+              <td>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px">&#9998; 编辑</span>
+                <span style="color:#F56C6C;font-size:12px;cursor:pointer">&#9998; 删除</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span class="page-info">共 2 条记录</span>
+          <div class="page-btns">
+            <button class="page-btn">上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">下一页</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 站点功能权限 ══ -->
+    <div class="page" id="page-settings">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">站点功能权限</span>
+          <span style="font-size:12px;color:#999">设定各站点可使用的机器人功能，未开放会收到"功能未开放"的提示</span>
+        </div>
+        <div id="site-perm-tabs" style="margin-bottom:12px"></div>
+        <div id="site-perm-batch-bar" class="action-bar" style="margin-bottom:10px"></div>
+        <div class="table-card" style="box-shadow:none;border:1px solid var(--border);max-height:420px;overflow-y:auto">
+          <table class="data-table" id="site-perm-table">
+            <thead id="site-perm-thead"></thead>
+            <tbody id="site-perm-body"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:12px;display:flex;justify-content:flex-end">
+          <button class="btn btn-green" onclick="saveSitePerms()">保存设置</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 管理员 ══ -->
+    <div class="page" id="page-admin">
+      <div class="filter-panel">
+        <div class="filter-row">
+          <input class="fi" style="width:200px" id="admin-search-account" placeholder="请输入管理员账号...">
+          <button class="btn btn-green" onclick="searchAdmins()"><i class="ti ti-search"></i> 搜索</button>
+          <button class="btn btn-teal" onclick="resetAdminSearch()"><i class="ti ti-rotate-clockwise"></i> 重置</button>
+        </div>
+      </div>
+      <div class="action-bar">
+        <button class="btn" style="background:#fff"><i class="ti ti-plus"></i> 添加管理员</button>
+      </div>
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="padding-left:14px">账号</th>
+              <th>姓名</th>
+              <th>角色</th>
+              <th>最后登录</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="admin-table-body">
+            <tr data-status="normal">
+              <td style="padding-left:14px;font-family:monospace;font-size:12px;color:#333">admin</td>
+              <td style="color:#333">超级管理员</td>
+              <td><span class="badge badge-vip">超级管理员</span></td>
+              <td style="color:#666;font-size:12px">2026-06-19 09:12</td>
+              <td><span class="badge badge-active" data-status="normal">启用</span></td>
+              <td>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openPwdModal('admin')">&#9998; 修改密码</span>
+                <span style="color:#909399;font-size:12px;cursor:pointer;margin-right:10px" onclick="changeAdminStatus(this)">&#9998; 禁用</span>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer">&#9998; 谷歌验证</span>
+              </td>
+            </tr>
+            <tr data-status="normal">
+              <td style="padding-left:14px;font-family:monospace;font-size:12px;color:#333">operator01</td>
+              <td style="color:#333">客服小李</td>
+              <td><span class="badge badge-normal">客服</span></td>
+              <td style="color:#666;font-size:12px">2026-06-18 22:40</td>
+              <td><span class="badge badge-active" data-status="normal">启用</span></td>
+              <td>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openPwdModal('operator01')">&#9998; 修改密码</span>
+                <span style="color:#909399;font-size:12px;cursor:pointer;margin-right:10px" onclick="changeAdminStatus(this)">&#9998; 禁用</span>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer">&#9998; 谷歌验证</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+const ICONS = {
+  'layout-dashboard':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>',
+  'users':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg>',
+  'terminal-2':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7l5 5-5 5"/><line x1="12" y1="17" x2="19" y2="17"/></svg>',
+  'shield-x':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 4.4-3.4 8.5-8 10-4.6-1.5-8-5.6-8-10V7l8-4z"/><line x1="9.5" y1="9.5" x2="14.5" y2="14.5"/><line x1="14.5" y1="9.5" x2="9.5" y2="14.5"/></svg>',
+  'settings':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72 1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>',
+  'robot':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="9" cy="16" r="1" fill="currentColor"/><circle cx="15" cy="16" r="1" fill="currentColor"/><path d="M12 11V7"/><path d="M8 7h8a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1z"/><line x1="5" y1="15" x2="3" y2="15"/><line x1="21" y1="15" x2="19" y2="15"/></svg>',
+  'search':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+  'send':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
+  'ban':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>',
+  'plus':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  'message':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6l-4 4V6a2 2 0 0 1 2-2z"/></svg>',
+  'filter':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>',
+  'download':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  'file-text':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+  'rotate-clockwise':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/></svg>',
+  'edit':'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+  'eye':'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+  'arrow-down':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>',
+  'user-circle':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="8" r="3"/><path d="M6 20a6 6 0 0 1 12 0"/></svg>',
+  'logout':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>',
+  'chevron-down':'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
+  'adjustments':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="9" cy="6" r="2" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="2" fill="currentColor" stroke="none"/></svg>',
+};
+
+function renderIcons() {
+  document.querySelectorAll('i[class]').forEach(el => {
+    const match = el.className.match(/ti-([a-z0-9-]+)/);
+    if (!match) return;
+    const svg = ICONS[match[1]];
+    if (!svg) return;
+    const w = document.createElement('span');
+    w.className = 'icon';
+    w.style.cssText = el.style.cssText;
+    w.innerHTML = svg;
+    el.replaceWith(w);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', renderIcons);
+
+const pageMeta = {
+  overview:        ['首页', '概览'],
+  users:           ['首页', '用户管理', '用户列表'],
+  'deposit-order': ['首页', '上分订单'],
+  'withdraw-order':['首页', '下分订单'],
+  commands:        ['首页', '指令说明'],
+  limits:          ['首页', '限制设置'],
+  blacklist:       ['首页', 'IP白名单'],
+  settings:        ['首页', '站点功能权限'],
+  admin:           ['首页', '管理员'],
+};
+
+function toggleAvatarMenu(e) {
+  e.stopPropagation();
+  document.getElementById('avatar-dropdown').classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+  const dropdown = document.getElementById('avatar-dropdown');
+  if (dropdown && !e.target.closest('.avatar-menu')) {
+    dropdown.classList.remove('open');
+  }
+});
+
+function showPage(id, navEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pg = document.getElementById('page-' + id);
+  if (pg) pg.classList.add('active');
+  if (navEl) navEl.classList.add('active');
+  const crumbs = pageMeta[id] || ['首页'];
+  document.getElementById('topbar-breadcrumb').innerHTML = crumbs.map((c,i) =>
+    `<span class="breadcrumb-item">${c}</span>${i<crumbs.length-1?'<span class="breadcrumb-sep">/</span>':''}`
+  ).join('');
+}
+
+// ── 站点功能权限：数据驱动配置 ──
+// 站点数量可能很多（如充电宝类别下有 40 个），所以按类别分页展示，避免表格过长。
+// 以后新增功能，只要在 SITE_FEATURES 数组里加一项即可，每个类别的表格都会自动多一列。
+// 以后新增类别或站点，只要改 SITE_CATEGORIES（定义在下方）即可，这里不用改。
+const SITE_FEATURES = [
+  { key: 'deposit',  label: '上分（充值）' },
+  { key: 'withdraw', label: '下分（提现）' },
+];
+
+// 权限数据：siteId -> { featureKey: boolean }（实际应来自后端）
+const sitePermData = {};
+
+let activePermCategoryId = null;
+
+function renderSitePermTabs() {
+  const tabBar = document.getElementById('site-perm-tabs');
+  if (!tabBar) return;
+  if (!activePermCategoryId) activePermCategoryId = SITE_CATEGORIES[0].id;
+
+  let html = '';
+  SITE_CATEGORIES.forEach(function(cat) {
+    const active = cat.id === activePermCategoryId;
+    html += '<button class="btn' + (active ? ' btn-green' : '') + '" style="margin-right:6px" onclick="switchPermCategory(\'' + cat.id + '\')">' +
+      cat.name + ' <span style="opacity:0.7">(' + cat.sites.length + ')</span></button>';
+  });
+  tabBar.innerHTML = html;
+  renderSitePermTable();
+}
+
+function switchPermCategory(catId) {
+  activePermCategoryId = catId;
+  renderSitePermTabs();
+}
+
+function renderSitePermTable() {
+  const thead = document.getElementById('site-perm-thead');
+  const tbody = document.getElementById('site-perm-body');
+  if (!thead || !tbody) return;
+  const cat = getCategoryById(activePermCategoryId);
+  if (!cat) return;
+
+  // 初始化该类别下站点的权限数据（首次渲染时默认全部开启，实际应来自后端）
+  cat.sites.forEach(function(site) {
+    if (!sitePermData[site.id]) {
+      sitePermData[site.id] = {};
+      SITE_FEATURES.forEach(function(f) { sitePermData[site.id][f.key] = true; });
+    }
+  });
+
+  // 表头：每个功能列附带"全开/全关"快捷按钮，方便整类一键切换
+  let headHtml = '<tr><th style="width:34px;padding-left:12px"><input type="checkbox" onchange="toggleSelectAllSites(this)"></th><th style="padding-left:4px">站点</th>';
+  SITE_FEATURES.forEach(function(f) {
+    headHtml += '<th style="text-align:center">' +
+      '<div style="display:flex;flex-direction:column;align-items:center;gap:4px">' +
+      '<span>' + f.label + '</span>' +
+      '<span>' +
+        '<span class="col-toggle-link" onclick="setCategoryFeature(\'' + f.key + '\', true)">全开</span>' +
+        '<span style="color:#ddd;margin:0 3px">|</span>' +
+        '<span class="col-toggle-link" onclick="setCategoryFeature(\'' + f.key + '\', false)">全关</span>' +
+      '</span>' +
+      '</div></th>';
+  });
+  headHtml += '</tr>';
+  thead.innerHTML = headHtml;
+
+  // 表身
+  let bodyHtml = '';
+  cat.sites.forEach(function(site) {
+    bodyHtml += '<tr data-site="' + site.id + '">';
+    bodyHtml += '<td style="padding-left:12px"><input type="checkbox" class="site-perm-checkbox" value="' + site.id + '"></td>';
+    bodyHtml += '<td style="padding-left:4px;font-weight:500;color:#333">' + site.name + '</td>';
+    SITE_FEATURES.forEach(function(f) {
+      const on = sitePermData[site.id] && sitePermData[site.id][f.key];
+      bodyHtml += '<td style="text-align:center"><div class="toggle-switch' + (on ? ' on' : '') +
+        '" onclick="toggleSitePerm(this)" data-site="' + site.id + '" data-feature="' + f.key + '"></div></td>';
+    });
+    bodyHtml += '</tr>';
+  });
+  tbody.innerHTML = bodyHtml;
+
+  renderSitePermBatchBar();
+}
+
+function renderSitePermBatchBar() {
+  const bar = document.getElementById('site-perm-batch-bar');
+  if (!bar) return;
+  let html = '<span style="font-size:12px;color:#909399;display:flex;align-items:center;margin-right:4px">勾选站点后批量设置：</span>';
+  SITE_FEATURES.forEach(function(f) {
+    html += '<button class="btn" onclick="batchSetFeature(\'' + f.key + '\', true)">开启 ' + f.label + '</button>';
+    html += '<button class="btn" onclick="batchSetFeature(\'' + f.key + '\', false)">关闭 ' + f.label + '</button>';
+  });
+  bar.innerHTML = html;
+}
+
+function toggleSelectAllSites(cb) {
+  document.querySelectorAll('.site-perm-checkbox').forEach(function(c) { c.checked = cb.checked; });
+}
+
+// 整个类别下，某功能"全开/全关"
+function setCategoryFeature(featureKey, value) {
+  const cat = getCategoryById(activePermCategoryId);
+  if (!cat) return;
+  cat.sites.forEach(function(site) {
+    if (!sitePermData[site.id]) sitePermData[site.id] = {};
+    sitePermData[site.id][featureKey] = value;
+  });
+  renderSitePermTable();
+}
+
+// 勾选的站点，批量设置某功能开/关
+function batchSetFeature(featureKey, value) {
+  const selected = Array.from(document.querySelectorAll('.site-perm-checkbox:checked')).map(function(c) { return c.value; });
+  if (!selected.length) { alert('请先勾选站点'); return; }
+  selected.forEach(function(siteId) {
+    if (!sitePermData[siteId]) sitePermData[siteId] = {};
+    sitePermData[siteId][featureKey] = value;
+  });
+  renderSitePermTable();
+}
+
+function toggleSitePerm(el) {
+  el.classList.toggle('on');
+  const site = el.dataset.site;
+  const feature = el.dataset.feature;
+  if (!sitePermData[site]) sitePermData[site] = {};
+  sitePermData[site][feature] = el.classList.contains('on');
+}
+
+function saveSitePerms() {
+  const cat = getCategoryById(activePermCategoryId);
+  if (!cat) return;
+  const lines = cat.sites.map(function(site) {
+    const perms = sitePermData[site.id] || {};
+    const parts = SITE_FEATURES.map(function(f) {
+      return f.label + '=' + (perms[f.key] ? '开' : '关');
+    });
+    return site.name + ': ' + parts.join(', ');
+  });
+  alert('已保存「' + cat.name + '」类别设置\n\n' + lines.join('\n'));
+}
+
+function updateClock() {
+  const el = document.getElementById('topbar-clock');
+  if (!el) return;
+  const n = new Date(), p = v => String(v).padStart(2,'0');
+  el.textContent = `服务器：${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())} ${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())} (Z)`;
+}
+setInterval(updateClock, 1000);
+
+// ── 全局站点数据：类别 → 站点 ──
+// 业务上"站点"之上还有一层类别（充电宝/交易所/股票），数量差异很大（40 / 4 / 2）
+// 以后新增类别或站点，只需要改这里的数据，不用动任何 HTML/UI 逻辑
+const SITE_CATEGORIES = [
+  {
+    id: 'powerbank',
+    name: '充电宝',
+    sites: Array.from({length: 40}, (_, i) => {
+      const n = i + 1;
+      return { id: 'PB' + String(n).padStart(2, '0'), name: '充电宝-' + String(n).padStart(2, '0') };
+    })
+  },
+  {
+    id: 'exchange',
+    name: '交易所',
+    sites: [
+      { id: 'EX01', name: '交易所-01' },
+      { id: 'EX02', name: '交易所-02' },
+      { id: 'EX03', name: '交易所-03' },
+      { id: 'EX04', name: '交易所-04' },
+    ]
+  },
+  {
+    id: 'stock',
+    name: '股票',
+    sites: [
+      { id: 'ST01', name: '股票-01' },
+      { id: 'ST02', name: '股票-02' },
+    ]
+  },
+];
+
+function getCategoryById(catId) {
+  return SITE_CATEGORIES.find(c => c.id === catId);
+}
+
+function getSiteById(siteId) {
+  for (const cat of SITE_CATEGORIES) {
+    const site = cat.sites.find(s => s.id === siteId);
+    if (site) return site;
+  }
+  return null;
+}
+
+// 渲染一个"类别 + 站点"两级下拉选择器到指定容器
+// onSiteChange(siteId) 会在站点选择改变时触发，siteId 为 'all' 表示全部站点（仅当 opts.allowAll 为 true 时可选）
+// （旧的 renderSiteSelector / populateSiteOptions 两级 <select> 实现已废弃，
+//  统一改用上方的 renderSitePicker 通用组件，所有页面共用一套逻辑。）
+// 示例数据：实际数据应来自后端，按站点ID查询
+const SITE_METRICS = {}; // siteId -> {upAmount, downAmount, upOrders, downOrders}
+(function seedSiteMetrics() {
+  SITE_CATEGORIES.forEach(cat => {
+    cat.sites.forEach(site => {
+      SITE_METRICS[site.id] = {
+        upAmount:  (Math.random() * 20000).toFixed(0),
+        downAmount:(Math.random() * 8000).toFixed(0),
+        upOrders:  Math.floor(Math.random() * 150),
+        downOrders:Math.floor(Math.random() * 50),
+      };
+    });
+  });
+})();
+
+function selectSiteForOverview(siteIds) {
+  // siteIds 为空数组代表"全部站点"；多个站点时聚合求和
+  const ids = (siteIds && siteIds.length) ? siteIds : Object.keys(SITE_METRICS);
+  let upAmount = 0, downAmount = 0, upOrders = 0, downOrders = 0;
+  ids.forEach(function(id) {
+    const s = SITE_METRICS[id];
+    if (!s) return;
+    upAmount += Number(s.upAmount) || 0;
+    downAmount += Number(s.downAmount) || 0;
+    upOrders += Number(s.upOrders) || 0;
+    downOrders += Number(s.downOrders) || 0;
+  });
+  document.getElementById('site-up-amount').textContent = upAmount;
+  document.getElementById('site-down-amount').textContent = downAmount;
+  document.getElementById('site-up-orders').textContent = upOrders;
+  document.getElementById('site-down-orders').textContent = downOrders;
+}
+
+function toggleSelectAll(cb){document.querySelectorAll('.user-checkbox').forEach(c=>c.checked=cb.checked);}
+
+// ── 通用站点选择器组件（两栏：左侧类别 / 右侧该类别站点） ──
+// 任何页面要选站点都调用 renderSitePicker，不用各自重写一遍。
+// 支持 mode: 'multi'（默认，可多选，含"全部站点"）或 'single'（单选，选完立即触发回调并收起面板）
+//
+// 用法：
+//   renderSitePicker('containerId', {
+//     mode: 'multi',                 // 'multi' | 'single'
+//     onApply: function(selectedIds) {...}   // multi 模式：点"确定"后触发，selectedIds 为数组（空数组=全部站点）
+//     onChange: function(siteId) {...}       // single 模式：选中站点后立即触发
+//   });
+//
+// 每个实例的状态（已选站点、当前查看的类别）保存在 _pickerRegistry[containerId] 中，互不干扰。
+const _pickerRegistry = {};
+
+function renderSitePicker(containerId, options) {
+  options = options || {};
+  const mode = options.mode || 'multi';
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  _pickerRegistry[containerId] = {
+    mode: mode,
+    selected: new Set(),
+    activeCat: SITE_CATEGORIES[0].id,
+    onApply: options.onApply || null,
+    onChange: options.onChange || null,
+  };
+
+  const triggerLabel = mode === 'single' ? (getCategoryById(SITE_CATEGORIES[0].id).sites[0] ? SITE_CATEGORIES[0].name : '请选择') : '全部站点';
+
+  container.innerHTML =
+    '<div class="multi-site-trigger" onclick="toggleSitePickerPanel(\'' + containerId + '\')">' +
+      '<span id="' + containerId + '-label">' + (mode === 'single' ? SITE_CATEGORIES[0].sites[0].name : '全部站点') + '</span>' +
+      '<i class="ti ti-chevron-down" style="font-size:11px"></i>' +
+    '</div>' +
+    '<div class="multi-site-panel" id="' + containerId + '-panel"></div>';
+
+  // single 模式默认选中第一个类别第一个站点，并立即触发一次回调，方便页面初始化展示数据
+  if (mode === 'single') {
+    const firstSite = SITE_CATEGORIES[0].sites[0];
+    _pickerRegistry[containerId].selected.add(firstSite.id);
+    if (options.onChange) options.onChange(firstSite.id);
+  } else if (mode === 'multi' && options.onApply) {
+    // multi 模式初始为"全部站点"（空数组），立即触发一次回调展示汇总数据
+    options.onApply([]);
+  }
+}
+
+function renderSitePickerPanel(containerId) {
+  const state = _pickerRegistry[containerId];
+  const panel = document.getElementById(containerId + '-panel');
+  if (!state || !panel) return;
+
+  let catListHtml = '';
+  SITE_CATEGORIES.forEach(function(cat) {
+    const active = cat.id === state.activeCat;
+    const selectedInCat = cat.sites.filter(function(s) { return state.selected.has(s.id); }).length;
+    catListHtml += '<div class="multi-site-cat-item' + (active ? ' active' : '') + '" onclick="switchSitePickerCat(\'' + containerId + '\', \'' + cat.id + '\')">' +
+      '<span>' + cat.name + '</span>' +
+      (selectedInCat > 0 ? '<span class="multi-site-cat-badge">' + selectedInCat + '</span>' : '') +
+      '</div>';
+  });
+
+  const activeCat = getCategoryById(state.activeCat);
+  let siteListHtml = '';
+  if (activeCat) {
+    activeCat.sites.forEach(function(site) {
+      const checked = state.selected.has(site.id);
+      const inputType = state.mode === 'single' ? 'radio' : 'checkbox';
+      siteListHtml += '<div class="multi-site-option" onclick="onSitePickerOptionClick(\'' + containerId + '\', \'' + site.id + '\', this)">' +
+        '<input type="' + inputType + '" ' + (checked ? 'checked' : '') + ' style="pointer-events:none">' +
+        '<span>' + site.name + '</span></div>';
+    });
+  }
+
+  let footerHtml = '';
+  if (state.mode === 'multi') {
+    footerHtml = '<div class="multi-site-footer"><span onclick="clearSitePickerSelection(\'' + containerId + '\')">清空</span><span onclick="applySitePickerSelection(\'' + containerId + '\')">确定</span></div>';
+  }
+
+  panel.innerHTML =
+    '<div class="multi-site-panes">' +
+      '<div class="multi-site-cat-pane">' + catListHtml + '</div>' +
+      '<div class="multi-site-site-pane">' + siteListHtml + '</div>' +
+    '</div>' + footerHtml;
+}
+
+function switchSitePickerCat(containerId, catId) {
+  const state = _pickerRegistry[containerId];
+  if (!state) return;
+  state.activeCat = catId;
+  renderSitePickerPanel(containerId);
+}
+
+function toggleSitePickerPanel(containerId) {
+  const panel = document.getElementById(containerId + '-panel');
+  if (!panel) return;
+  const isOpen = panel.classList.contains('open');
+  document.querySelectorAll('.multi-site-panel').forEach(function(p) { p.classList.remove('open'); });
+  if (!isOpen) {
+    renderSitePickerPanel(containerId);
+    panel.classList.add('open');
+  }
+}
+
+function onSitePickerOptionClick(containerId, siteId, el) {
+  const state = _pickerRegistry[containerId];
+  if (!state) return;
+
+  if (state.mode === 'single') {
+    state.selected.clear();
+    state.selected.add(siteId);
+    const site = getSiteById(siteId);
+    document.getElementById(containerId + '-label').textContent = site ? site.name : siteId;
+    document.getElementById(containerId + '-panel').classList.remove('open');
+    if (state.onChange) state.onChange(siteId);
+    return;
+  }
+
+  // multi 模式
+  if (state.selected.has(siteId)) {
+    state.selected.delete(siteId);
+  } else {
+    state.selected.add(siteId);
+  }
+  const cb = el.querySelector('input');
+  if (cb) cb.checked = state.selected.has(siteId);
+
+  // 局部更新当前类别的角标计数，避免整个面板重渲染导致滚动位置跳动
+  const cat = getCategoryById(state.activeCat);
+  if (cat) {
+    const selectedInCat = cat.sites.filter(function(s) { return state.selected.has(s.id); }).length;
+    const catItems = document.querySelectorAll('#' + containerId + '-panel .multi-site-cat-item');
+    const idx = SITE_CATEGORIES.findIndex(function(c) { return c.id === state.activeCat; });
+    if (catItems[idx]) {
+      let badge = catItems[idx].querySelector('.multi-site-cat-badge');
+      if (selectedInCat > 0) {
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'multi-site-cat-badge';
+          catItems[idx].appendChild(badge);
+        }
+        badge.textContent = selectedInCat;
+      } else if (badge) {
+        badge.remove();
+      }
+    }
+  }
+}
+
+function clearSitePickerSelection(containerId) {
+  const state = _pickerRegistry[containerId];
+  if (!state) return;
+  state.selected.clear();
+  renderSitePickerPanel(containerId);
+}
+
+function applySitePickerSelection(containerId) {
+  const state = _pickerRegistry[containerId];
+  if (!state) return;
+  const label = document.getElementById(containerId + '-label');
+  if (state.selected.size === 0) {
+    label.textContent = '全部站点';
+  } else if (state.selected.size === 1) {
+    const site = getSiteById([...state.selected][0]);
+    label.textContent = site ? site.name : '已选 1 个站点';
+  } else {
+    label.textContent = '已选 ' + state.selected.size + ' 个站点';
+  }
+  document.getElementById(containerId + '-panel').classList.remove('open');
+  if (state.onApply) state.onApply([...state.selected]);
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.multi-site-selector')) {
+    document.querySelectorAll('.multi-site-panel').forEach(function(p) { p.classList.remove('open'); });
+  }
+});
+
+function changeAdminStatus(btn){
+  const row = btn.closest('tr');
+  const badge = row.querySelector('[data-status]');
+  const cur = badge.getAttribute('data-status');
+  if (cur === 'normal') {
+    badge.setAttribute('data-status', 'blocked');
+    badge.textContent = '禁用';
+    badge.className = 'badge badge-block';
+    row.dataset.status = 'blocked';
+    btn.innerHTML = '&#9998; 启用';
+    btn.style.color = '#409EFF';
+  } else {
+    badge.setAttribute('data-status', 'normal');
+    badge.textContent = '启用';
+    badge.className = 'badge badge-active';
+    row.dataset.status = 'normal';
+    btn.innerHTML = '&#9998; 禁用';
+    btn.style.color = '#909399';
+  }
+}
+
+function saveGlobalLimits() {
+  const depCount = document.getElementById('limit-deposit-count').value;
+  const depMin = document.getElementById('limit-deposit-min').value;
+  const depMax = document.getElementById('limit-deposit-max').value;
+  const depDaily = document.getElementById('limit-deposit-daily').value;
+  const witCount = document.getElementById('limit-withdraw-count').value;
+  const witMin = document.getElementById('limit-withdraw-min').value;
+  const witMax = document.getElementById('limit-withdraw-max').value;
+  const witDaily = document.getElementById('limit-withdraw-daily').value;
+
+  if (Number(depMin) > Number(depMax)) { alert('上分单笔金额：最低不可大于最高'); return; }
+  if (Number(witMin) > Number(witMax)) { alert('下分单笔金额：最低不可大于最高'); return; }
+
+  alert(
+    '已保存全局限制设置\n\n' +
+    '上分：每日 ' + depCount + ' 次，单笔 ' + depMin + '–' + depMax + ' 元，每日累计上限 ' + depDaily + ' 元\n' +
+    '下分：每日 ' + witCount + ' 次，单笔 ' + witMin + '–' + witMax + ' 元，每日累计上限 ' + witDaily + ' 元'
+  );
+}
+
+function searchAdmins(){
+  const account = document.getElementById('admin-search-account').value.trim();
+  document.querySelectorAll('#admin-table-body tr').forEach(function(row){
+    const show = !account || row.textContent.includes(account);
+    row.style.display = show ? '' : 'none';
+  });
+}
+
+function resetAdminSearch(){
+  document.getElementById('admin-search-account').value = '';
+  document.querySelectorAll('#admin-table-body tr').forEach(function(row){ row.style.display = ''; });
+}
+
+function searchUsers(siteIds){
+  const tgid=document.getElementById('search-tgid').value.trim();
+  const status=document.getElementById('search-status') ? document.getElementById('search-status').value : '';
+  const dateStart=document.getElementById('search-date-start') ? document.getElementById('search-date-start').value : '';
+  const dateEnd=document.getElementById('search-date-end') ? document.getElementById('search-date-end').value : '';
+  const state = _pickerRegistry['users-site-selector'];
+  const ids = siteIds || (state ? [...state.selected] : []);
+  document.querySelectorAll('.user-checkbox').forEach(cb=>{
+    const row=cb.closest('tr');
+    const badge=row.querySelector('[data-status]');
+    const rowDate=row.dataset.date || '';
+    let show=true;
+    if(tgid&&!row.textContent.includes(tgid))show=false;
+    if(status&&badge&&badge.getAttribute('data-status')!==status)show=false;
+    if(ids.length > 0 && !ids.includes(row.dataset.site)) show=false;
+    if(dateStart && rowDate && rowDate < dateStart) show=false;
+    if(dateEnd && rowDate && rowDate > dateEnd) show=false;
+    row.style.display=show?'':'none';
+  });
+}
+
+function resetSearch(){
+  document.getElementById('search-tgid').value='';
+  if(document.getElementById('search-status')) document.getElementById('search-status').value='';
+  if(document.getElementById('search-date-start')) document.getElementById('search-date-start').value='';
+  if(document.getElementById('search-date-end')) document.getElementById('search-date-end').value='';
+  const state = _pickerRegistry['users-site-selector'];
+  if (state) state.selected.clear();
+  const label = document.getElementById('users-site-selector-label');
+  if (label) label.textContent = '全部站点';
+  document.querySelectorAll('.user-checkbox').forEach(cb=>{cb.closest('tr').style.display='';cb.checked=false;});
+  document.getElementById('select-all').checked=false;
+}
+
+
+// ── Remark modal ──
+let _remarkCallback = null;
+
+function openRemarkModal(title, callback) {
+  _remarkCallback = callback;
+  document.getElementById('remark-modal-title').textContent = title;
+  document.getElementById('remark-input').value = '';
+  var m = document.getElementById('remark-modal');
+  m.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;display:block';
+}
+
+function closeRemarkModal() {
+  document.getElementById('remark-modal').style.display = 'none';
+  _remarkCallback = null;
+}
+
+function confirmRemarkModal() {
+  const remark = document.getElementById('remark-input').value.trim();
+  if (_remarkCallback) _remarkCallback(remark);
+  closeRemarkModal();
+}
+
+function openAddModal() {
+  document.getElementById('add-username').value = '';
+  document.getElementById('add-tgid').value = '';
+  document.getElementById('add-remark').value = '';
+  document.getElementById('add-modal').style.display = 'block';
+}
+
+function closeAddModal() {
+  document.getElementById('add-modal').style.display = 'none';
+}
+
+function openPwdModal(tgid) {
+  document.getElementById('pwd-modal-title').textContent = '修改密码 - ' + tgid;
+  document.getElementById('pwd-new').value = '';
+  document.getElementById('pwd-confirm').value = '';
+  document.getElementById('pwd-modal').style.display = 'block';
+}
+
+function closePwdModal() {
+  document.getElementById('pwd-modal').style.display = 'none';
+}
+
+function confirmPwdModal() {
+  var pwd = document.getElementById('pwd-new').value;
+  var confirmPwd = document.getElementById('pwd-confirm').value;
+  if (!pwd) { alert('请输入新密码'); return; }
+  if (pwd !== confirmPwd) { alert('两次输入的密码不一致'); return; }
+  alert('密码修改成功');
+  closePwdModal();
+}
+
+function confirmAddModal() {
+  var username = document.getElementById('add-username').value.trim();
+  var tgid = document.getElementById('add-tgid').value.trim();
+  var remark = document.getElementById('add-remark').value.trim();
+  if (!username || !tgid) { alert('请填写用户名称和 Telegram ID'); return; }
+  var tbody = document.getElementById('user-table-body');
+  var tr = document.createElement('tr');
+  var today = new Date().toISOString().slice(0,10);
+  tr.innerHTML =
+    '<td style="padding-left:12px"><input type="checkbox" class="user-checkbox" value="' + tgid + '"></td>' +
+    '<td><span class="site-tag">—</span></td>' +
+    '<td style="color:#333">' + username + '</td>' +
+    '<td style="color:#333">' + tgid + '</td>' +
+    '<td style="color:#666;font-size:12px">' + today + '</td>' +
+    '<td><span class="badge badge-active" data-status="normal">启用</span></td>' +
+    '<td style="color:#666;font-size:12px">' + remark + '</td>' +
+    '<td>' +
+      '<span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openPwdModal(\'' + tgid + '\')">&#9998; 修改密码</span>' +
+      '<span style="color:#909399;font-size:12px;cursor:pointer;margin-right:10px" onclick="changeStatus(this,\'' + tgid + '\')">&#9998; 禁用</span>' +
+      '<span style="color:#409EFF;font-size:12px;cursor:pointer">&#9998; 谷歌验证</span>' +
+    '</td>';
+  tbody.appendChild(tr);
+  closeAddModal();
+}
+
+// click backdrop to close
+document.addEventListener('click', function(e) {
+  if (e.target === document.getElementById('remark-modal')) closeRemarkModal();
+  if (e.target === document.getElementById('add-modal')) closeAddModal();
+});
+
+function changeStatus(btn, tgid) {
+  const row = btn.closest('tr');
+  const badge = row.querySelector('[data-status]');
+  const cur = badge.getAttribute('data-status');
+  const action = cur === 'normal' ? '禁用' : '启用';
+  openRemarkModal(action + '用户 ' + tgid, function(remark) {
+    const remarkTd = row.cells[row.cells.length - 2]; // 备注列
+    if (cur === 'normal') {
+      badge.setAttribute('data-status', 'blocked');
+      badge.textContent = '禁用';
+      badge.className = 'badge badge-block';
+      btn.innerHTML = '&#9998; 启用';
+      btn.style.color = '#409EFF';
+    } else {
+      badge.setAttribute('data-status', 'normal');
+      badge.textContent = '启用';
+      badge.className = 'badge badge-active';
+      btn.innerHTML = '&#9998; 禁用';
+      btn.style.color = '#909399';
+    }
+    if (remark && remarkTd) remarkTd.textContent = remark;
+  });
+}
+
+function batchToggleStatus() {
+  var selected = Array.from(document.querySelectorAll('.user-checkbox:checked'));
+  if (!selected.length) { alert('请先勾选用户'); return; }
+  openRemarkModal('批量启用/禁用 (' + selected.length + ' 人)', function(remark) {
+    selected.forEach(function(cb) {
+      var row = cb.closest('tr');
+      var badge = row.querySelector('[data-status]');
+      var btn = row.querySelector('span[onclick*="changeStatus"]');
+      var remarkTd = row.cells[row.cells.length - 2];
+      if (badge.getAttribute('data-status') === 'normal') {
+        badge.setAttribute('data-status','blocked'); badge.textContent='禁用'; badge.className='badge badge-block';
+        if (btn) { btn.innerHTML='&#9998; 启用'; btn.style.color='#409EFF'; }
+      } else {
+        badge.setAttribute('data-status','normal'); badge.textContent='启用'; badge.className='badge badge-active';
+        if (btn) { btn.innerHTML='&#9998; 禁用'; btn.style.color='#909399'; }
+      }
+      if (remarkTd) remarkTd.textContent = remark || '';
+    });
+  });
+}
+
+function batchGoogleAuth() {
+  var selected = Array.from(document.querySelectorAll('.user-checkbox:checked'));
+  if (!selected.length) { alert('请先勾选用户'); return; }
+  openRemarkModal('批量启用谷歌验证 (' + selected.length + ' 人)', function(remark) {
+    selected.forEach(function(cb) {
+      var row = cb.closest('tr');
+      var remarkTd = row.cells[row.cells.length - 2];
+      if (remarkTd) remarkTd.textContent = remark || '';
+    });
+  });
+}
+
+function batchBlock() {
+  const sel = [...document.querySelectorAll('.user-checkbox:checked')].map(c=>c.value);
+  if (!sel.length) { alert('请先选择用户'); return; }
+  if (confirm(`确定封锁 ${sel.length} 个用户？`)) {
+    sel.forEach(id => {
+      const row = document.querySelector(`.user-checkbox[value="${id}"]`).closest('tr');
+      const b = row.querySelector('[data-status]');
+      b.setAttribute('data-status','blocked'); b.textContent='封禁'; b.className='badge badge-block';
+    });
+  }
+}
+
+function batchUnblock() {
+  const sel = [...document.querySelectorAll('.user-checkbox:checked')].map(c=>c.value);
+  if (!sel.length) { alert('请先选择用户'); return; }
+  if (confirm(`确定解封 ${sel.length} 个用户？`)) {
+    sel.forEach(id => {
+      const row = document.querySelector(`.user-checkbox[value="${id}"]`).closest('tr');
+      const b = row.querySelector('[data-status]');
+      b.setAttribute('data-status','normal'); b.textContent='正常'; b.className='badge badge-active';
+    });
+  }
+}
+
+
+function depSiteFilter(siteIds) {
+  // 站点选择器回调：仅更新选中站点状态，实际过滤统一走 searchDepositOrders
+  searchDepositOrders(siteIds);
+}
+
+function searchDepositOrders(siteIds) {
+  const orderNo = document.getElementById('dep-search-order') ? document.getElementById('dep-search-order').value.trim() : '';
+  const uid = document.getElementById('dep-search-uid') ? document.getElementById('dep-search-uid').value.trim() : '';
+  const dateStart = document.getElementById('dep-date-start') ? document.getElementById('dep-date-start').value : '';
+  const dateEnd = document.getElementById('dep-date-end') ? document.getElementById('dep-date-end').value : '';
+  const state = _pickerRegistry['dep-site-selector'];
+  const ids = siteIds || (state ? [...state.selected] : []);
+  document.querySelectorAll('#page-deposit-order tbody tr').forEach(function(row) {
+    const rowDate = row.dataset.date || '';
+    let show = true;
+    if (ids.length > 0 && !ids.includes(row.dataset.site)) show = false;
+    if (orderNo && !row.textContent.includes(orderNo)) show = false;
+    if (uid && !row.textContent.includes(uid)) show = false;
+    if (dateStart && rowDate && rowDate < dateStart) show = false;
+    if (dateEnd && rowDate && rowDate > dateEnd) show = false;
+    row.style.display = show ? '' : 'none';
+  });
+}
+
+function resetDepositOrders() {
+  if (document.getElementById('dep-search-order')) document.getElementById('dep-search-order').value = '';
+  if (document.getElementById('dep-search-uid')) document.getElementById('dep-search-uid').value = '';
+  if (document.getElementById('dep-date-start')) document.getElementById('dep-date-start').value = '';
+  if (document.getElementById('dep-date-end')) document.getElementById('dep-date-end').value = '';
+  const state = _pickerRegistry['dep-site-selector'];
+  if (state) state.selected.clear();
+  const label = document.getElementById('dep-site-selector-label');
+  if (label) label.textContent = '全部站点';
+  document.querySelectorAll('#page-deposit-order tbody tr').forEach(function(row) { row.style.display = ''; });
+}
+
+function witSiteFilter(siteIds) {
+  searchWithdrawOrders(siteIds);
+}
+
+function searchWithdrawOrders(siteIds) {
+  const orderNo = document.getElementById('wit-search-order') ? document.getElementById('wit-search-order').value.trim() : '';
+  const uid = document.getElementById('wit-search-uid') ? document.getElementById('wit-search-uid').value.trim() : '';
+  const dateStart = document.getElementById('wit-date-start') ? document.getElementById('wit-date-start').value : '';
+  const dateEnd = document.getElementById('wit-date-end') ? document.getElementById('wit-date-end').value : '';
+  const state = _pickerRegistry['wit-site-selector'];
+  const ids = siteIds || (state ? [...state.selected] : []);
+  document.querySelectorAll('#page-withdraw-order tbody tr').forEach(function(row) {
+    const rowDate = row.dataset.date || '';
+    let show = true;
+    if (ids.length > 0 && !ids.includes(row.dataset.site)) show = false;
+    if (orderNo && !row.textContent.includes(orderNo)) show = false;
+    if (uid && !row.textContent.includes(uid)) show = false;
+    if (dateStart && rowDate && rowDate < dateStart) show = false;
+    if (dateEnd && rowDate && rowDate > dateEnd) show = false;
+    row.style.display = show ? '' : 'none';
+  });
+}
+
+function resetWithdrawOrders() {
+  if (document.getElementById('wit-search-order')) document.getElementById('wit-search-order').value = '';
+  if (document.getElementById('wit-search-uid')) document.getElementById('wit-search-uid').value = '';
+  if (document.getElementById('wit-date-start')) document.getElementById('wit-date-start').value = '';
+  if (document.getElementById('wit-date-end')) document.getElementById('wit-date-end').value = '';
+  const state = _pickerRegistry['wit-site-selector'];
+  if (state) state.selected.clear();
+  const label = document.getElementById('wit-site-selector-label');
+  if (label) label.textContent = '全部站点';
+  document.querySelectorAll('#page-withdraw-order tbody tr').forEach(function(row) { row.style.display = ''; });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  try{
+    updateClock();
+    renderSitePicker('overview-site-selector', { mode: 'multi', onApply: selectSiteForOverview });
+    renderSitePicker('dep-site-selector', { mode: 'multi', onApply: depSiteFilter });
+    renderSitePicker('wit-site-selector', { mode: 'multi', onApply: witSiteFilter });
+    renderSitePicker('users-site-selector', { mode: 'multi', onApply: function(ids) { searchUsers(ids); } });
+    renderSitePermTabs();
+  }catch(e){}
+});
+</script>
+
+<!-- ── 弹窗遮罩 ── -->
+<div id="remark-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:6px;width:380px;box-shadow:0 4px 24px rgba(0,0,0,0.18);overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center">
+      <span id="remark-modal-title" style="font-size:14px;font-weight:600;color:#333">操作备注</span>
+      <span onclick="closeRemarkModal()" style="cursor:pointer;color:#999;font-size:20px;line-height:1">&times;</span>
+    </div>
+    <div style="padding:18px 18px 12px">
+      <label style="font-size:13px;color:#606266;display:block;margin-bottom:6px">备注内容</label>
+      <textarea id="remark-input" style="width:100%;height:88px;padding:8px 10px;border:1px solid #DCDFE6;border-radius:3px;font-size:13px;font-family:inherit;resize:none;outline:none;box-sizing:border-box" placeholder="请输入备注（可选）"></textarea>
+    </div>
+    <div style="padding:8px 18px 16px;display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn" onclick="closeRemarkModal()">取消</button>
+      <button class="btn btn-green" onclick="confirmRemarkModal()">确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 添加用户弹窗 ── -->
+<div id="add-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:6px;width:400px;box-shadow:0 4px 24px rgba(0,0,0,0.18);overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:14px;font-weight:600;color:#333">添加用户</span>
+      <span onclick="closeAddModal()" style="cursor:pointer;color:#999;font-size:20px;line-height:1">&times;</span>
+    </div>
+    <div style="padding:18px;display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">用户名称</label>
+        <input id="add-username" class="fi" style="width:100%" placeholder="请输入用户名称">
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">Telegram ID</label>
+        <input id="add-tgid" class="fi" style="width:100%" placeholder="请输入 Telegram ID（如 @sunny_trader）">
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">备注</label>
+        <textarea id="add-remark" style="width:100%;height:72px;padding:8px 10px;border:1px solid #DCDFE6;border-radius:3px;font-size:13px;font-family:inherit;resize:none;outline:none;box-sizing:border-box" placeholder="请输入备注（可选）"></textarea>
+      </div>
+    </div>
+    <div style="padding:8px 18px 16px;display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn" onclick="closeAddModal()">取消</button>
+      <button class="btn btn-green" onclick="confirmAddModal()">确认添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 修改密码弹窗 ── -->
+<div id="pwd-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:6px;width:380px;box-shadow:0 4px 24px rgba(0,0,0,0.18);overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center">
+      <span id="pwd-modal-title" style="font-size:14px;font-weight:600;color:#333">修改密码</span>
+      <span onclick="closePwdModal()" style="cursor:pointer;color:#999;font-size:20px;line-height:1">&times;</span>
+    </div>
+    <div style="padding:18px;display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">新密码</label>
+        <input id="pwd-new" type="password" class="fi" style="width:100%" placeholder="请输入新密码">
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">确认新密码</label>
+        <input id="pwd-confirm" type="password" class="fi" style="width:100%" placeholder="请再次输入新密码">
+      </div>
+    </div>
+    <div style="padding:8px 18px 16px;display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn" onclick="closePwdModal()">取消</button>
+      <button class="btn btn-green" onclick="confirmPwdModal()">确认修改</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
