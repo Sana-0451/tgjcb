@@ -1,191 +1,269 @@
 <style>
-.wrap{background:var(--color-background-secondary);border-radius:12px;padding:16px;max-width:400px;margin:0 auto}
-.hdr{display:flex;align-items:center;gap:10px;padding-bottom:12px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:12px}
-.av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0}
-.av-group{background:#1D9E75;color:#E1F5EE}
-.av-user{background:#7F77DD;color:#EEEDFE}
-.av-bot{background:#5DCAA5;color:#04342C}
-.ttl{font-size:14px;font-weight:500;color:var(--color-text-primary);margin:0}
-.sub{font-size:11px;color:var(--color-text-secondary);margin:0}
-.feed{display:flex;flex-direction:column;gap:10px}
-.step{font-size:11px;color:var(--color-text-tertiary);text-align:center;margin:6px 0 2px;letter-spacing:.02em}
-.row{display:flex;gap:7px;align-items:flex-end}
-.row.u{flex-direction:row-reverse}
-.bbl{max-width:82%;padding:8px 11px;border-radius:12px;font-size:13px;line-height:1.5;color:var(--color-text-primary)}
-.bbl.u{background:#BBDEFB;color:#0D47A1;border-bottom-right-radius:3px}
-.bbl.b{background:#FFF9E6;border:0.5px solid var(--color-border-secondary);border-bottom-left-radius:3px;color:var(--color-text-primary)}
-.time{font-size:10px;color:var(--color-text-tertiary);margin-top:3px}
-.row.u .time{text-align:right}
-.bbl.u .time{color:#1565C0}
-.btns{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
-.btn{font-size:12px;padding:5px 11px;border-radius:6px;border:1px solid #999;background:var(--color-background-secondary);color:var(--color-text-primary);white-space:nowrap}
-.mention{color:#185FA5;font-weight:500}
-.mono{font-family:monospace;font-size:12px;background:var(--color-background-tertiary);padding:2px 6px;border-radius:4px;display:inline-block}
-.tag-ok{display:inline-block;background:#EAF3DE;color:#3B6D11;font-size:11px;padding:1px 7px;border-radius:4px}
-.tag-no{display:inline-block;background:#FCEBEB;color:#A32D2D;font-size:11px;padding:1px 7px;border-radius:4px}
-.divd{border:none;border-top:0.5px solid var(--color-border-tertiary);margin:4px 0}
-.note{font-size:11px;color:var(--color-text-tertiary);margin-top:5px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.phone{background:#17212B;border-radius:14px;max-width:420px;margin:0 auto;overflow:hidden}
+.tg-hdr{background:#17212B;display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:0.5px solid #0D1821}
+.av-g{width:38px;height:38px;border-radius:50%;background:#1D9E75;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;flex-shrink:0}
+.hdr-name{font-size:14px;font-weight:600;color:#fff}
+.hdr-sub{font-size:11px;color:#7C8E9A}
+.feed{padding:10px 10px 6px;display:flex;flex-direction:column;gap:6px}
+.step-lbl{font-size:10px;color:#4A6278;text-align:center;padding:6px 0 2px;letter-spacing:.04em}
+
+/* 用戶氣泡 */
+.row-u{display:flex;justify-content:flex-end}
+.bbl-u{background:#2B5278;color:#fff;padding:7px 12px;border-radius:12px 12px 2px 12px;font-size:14px;max-width:80%;word-break:break-word;overflow-wrap:anywhere}
+.bbl-time-u{font-size:10px;color:#7EB6D4;text-align:right;margin-top:2px}
+
+/* 機器人氣泡 */
+.row-b{display:flex;gap:7px;align-items:flex-start}
+.av-b{width:32px;height:32px;border-radius:50%;background:#1F4D3B;display:flex;align-items:center;justify-content:center;font-size:10px;color:#5DCAA5;flex-shrink:0;margin-top:2px}
+.bbl-b-wrap{flex:1;min-width:0}
+.bbl-b{background:#182533;color:#fff;padding:8px 12px;border-radius:2px 12px 12px 12px;font-size:13px;line-height:1.5;word-break:break-word;overflow-wrap:anywhere}
+.bbl-name{font-size:11px;color:#5DCAA5;font-weight:600;margin-bottom:3px}
+.bbl-time-b{font-size:10px;color:#4A6278;margin-top:2px}
+.mention{color:#71B7E6}
+
+/* keyboard */
+.kbd{margin-top:6px;display:flex;flex-direction:column;gap:3px}
+.kbd-row{display:flex;gap:3px}
+.kbd-btn{flex:1;background:#1E3347;color:#fff;font-size:12px;padding:8px 6px;border-radius:5px;text-align:center}
+.kbd-nav{display:flex;gap:3px}
+.kbd-nav .kbd-btn{background:#162130;color:#7C8E9A;font-size:11px;padding:7px 6px}
+.kbd-cancel{background:#2A1A1A;color:#E06060;font-size:12px;padding:8px;border-radius:5px;text-align:center;margin-top:1px}
+
+.tag-ok{display:inline-block;background:#1A3320;color:#5DB874;font-size:11px;padding:1px 8px;border-radius:4px;margin-right:4px}
+.tag-no{display:inline-block;background:#2A1515;color:#E06060;font-size:11px;padding:1px 8px;border-radius:4px;margin-right:4px}
+.tag-warn{display:inline-block;background:#2A2010;color:#D4A843;font-size:11px;padding:1px 8px;border-radius:4px;margin-right:4px}
+.mono{font-family:monospace;font-size:12px;background:#0D1821;padding:2px 7px;border-radius:4px;color:#A8C7E0}
+.note{font-size:11px;color:#4A6278;margin-top:4px}
+.divd{border:none;border-top:0.5px solid #1E2D3D;margin:6px 0}
 </style>
 
-<div class="wrap">
-  <div class="hdr">
-    <div class="av av-group">群</div>
+<div class="phone">
+  <div class="tg-hdr">
+    <div class="av-g">群</div>
     <div>
-      <p class="ttl">營運操作群</p>
-      <p class="sub">42 members · 8 online</p>
+      <div class="hdr-name">營運操作群</div>
+      <div class="hdr-sub">42 members, 8 online</div>
     </div>
   </div>
 
   <div class="feed">
 
-    <!-- Step 1 -->
-    <div class="step">步驟 1 — 操作員 @ 機器人</div>
-    <div class="row u">
-      <div class="av av-user">A</div>
+    <!-- 情境A：已有進行中 -->
+    <div class="step-lbl">情境 A — 已有進行中的操作</div>
+    <div class="row-u">
       <div>
-        <div class="bbl u"><span class="mention">@CreditBot</span></div>
-        <div class="time">14:02</div>
+        <div class="bbl-u"><span style="color:#A8C7E0">@CreditBot</span></div>
+        <div class="bbl-time-u">14:01 ✓✓</div>
+      </div>
+    </div>
+    <div class="row-b">
+      <div class="av-b">Bot</div>
+      <div class="bbl-b-wrap">
+        <div class="bbl-b">
+          <div class="bbl-name">CreditBot</div>
+          <span class="mention">@操作員A</span> <span class="tag-warn">操作進行中</span><br>
+          您有一筆上分操作尚未完成，請先完成或取消後再發起新操作。
+          <div class="kbd">
+            <div class="kbd-cancel">✕ 取消目前操作</div>
+          </div>
+        </div>
+        <div class="bbl-time-b">14:01</div>
       </div>
     </div>
 
     <hr class="divd">
 
-    <!-- Step 2 -->
-    <div class="step">步驟 2 — 選擇操作類型</div>
-    <div class="row">
-      <div class="av av-bot">Bot</div>
+    <!-- Step 1：機器人顯示功能選單 -->
+    <div class="step-lbl">步驟 1 — 機器人顯示功能選單</div>
+    <div class="row-u">
       <div>
-        <div class="bbl b">
+        <div class="bbl-u"><span style="color:#A8C7E0">@CreditBot</span></div>
+        <div class="bbl-time-u">14:02 ✓✓</div>
+      </div>
+    </div>
+    <div class="row-b">
+      <div class="av-b">Bot</div>
+      <div class="bbl-b-wrap">
+        <div class="bbl-b">
+          <div class="bbl-name">CreditBot</div>
           <span class="mention">@操作員A</span> 請選擇操作類型：
-          <div class="btns">
-            <span class="btn">＋ 加款</span>
-            <span class="btn">－ 扣款</span>
+          <div class="kbd">
+            <div class="kbd-row">
+              <div class="kbd-btn">＋ 上分</div>
+              <div class="kbd-btn">－ 下分</div>
+            </div>
+            <div class="kbd-cancel">✕ 取消</div>
           </div>
         </div>
-        <div class="time">14:02</div>
+        <div class="bbl-time-b">14:02</div>
       </div>
     </div>
 
-    <div class="row u">
-      <div class="av av-user">A</div>
+    <!-- 操作員點「上分」→ TG 發出訊息 -->
+    <div class="step-lbl">操作員點選「上分」，TG 發出訊息</div>
+    <div class="row-u">
       <div>
-        <div class="bbl u">＋ 加款</div>
-        <div class="time">14:02</div>
+        <div class="bbl-u">＋ 上分</div>
+        <div class="bbl-time-u">14:02 ✓✓</div>
       </div>
     </div>
 
     <hr class="divd">
 
-    <!-- Step 3 -->
-    <div class="step">步驟 3 — 選擇產品別（查權限後顯示）</div>
-    <div class="row">
-      <div class="av av-bot">Bot</div>
-      <div>
-        <div class="bbl b">
-          請選擇產品別：
-          <div class="btns">
-            <span class="btn">交易所</span>
-            <span class="btn">充电宝</span>
-            <span class="btn">股票</span>
+    <!-- Step 2：機器人顯示產品別 -->
+    <div class="step-lbl">步驟 2 — 機器人顯示產品別選單</div>
+    <div class="row-b">
+      <div class="av-b">Bot</div>
+      <div class="bbl-b-wrap">
+        <div class="bbl-b">
+          <div class="bbl-name">CreditBot</div>
+          <span class="mention">@操作員A</span> 請選擇產品別：
+          <div class="kbd">
+            <div class="kbd-row">
+              <div class="kbd-btn">交易所</div>
+              <div class="kbd-btn">股票</div>
+            </div>
+            <div class="kbd-row">
+              <div class="kbd-btn">充电宝</div>
+            </div>
+            <div class="kbd-nav">
+              <div class="kbd-btn">← 上一步</div>
+              <div class="kbd-btn">⌂ 主選單</div>
+            </div>
+            <div class="kbd-cancel">✕ 取消</div>
           </div>
-          <div class="note">僅顯示您有加款權限的產品</div>
         </div>
-        <div class="time">14:02</div>
+        <div class="bbl-time-b">14:02</div>
       </div>
     </div>
 
-    <div class="row u">
-      <div class="av av-user">A</div>
+    <!-- 操作員點「股票」 -->
+    <div class="step-lbl">操作員點選「股票」，TG 發出訊息</div>
+    <div class="row-u">
       <div>
-        <div class="bbl u">交易所</div>
-        <div class="time">14:02</div>
+        <div class="bbl-u">股票</div>
+        <div class="bbl-time-u">14:02 ✓✓</div>
       </div>
     </div>
 
     <hr class="divd">
 
-    <!-- Step 4 -->
-    <div class="step">步驟 4 — 選擇站台</div>
-    <div class="row">
-      <div class="av av-bot">Bot</div>
-      <div>
-        <div class="bbl b">
-          請選擇站台：
-          <div class="btns">
-            <span class="btn">站台 A</span>
-            <span class="btn">站台 B</span>
-            <span class="btn">站台 C</span>
+    <!-- Step 3：機器人顯示站台 -->
+    <div class="step-lbl">步驟 3 — 機器人顯示站台選單</div>
+    <div class="row-b">
+      <div class="av-b">Bot</div>
+      <div class="bbl-b-wrap">
+        <div class="bbl-b">
+          <div class="bbl-name">CreditBot</div>
+          <span class="mention">@操作員A</span> 請選擇站台：
+          <div class="kbd">
+            <div class="kbd-row">
+              <div class="kbd-btn">站台 A</div>
+              <div class="kbd-btn">站台 B</div>
+            </div>
+            <div class="kbd-nav">
+              <div class="kbd-btn">← 上一步</div>
+              <div class="kbd-btn">⌂ 主選單</div>
+            </div>
+            <div class="kbd-cancel">✕ 取消</div>
           </div>
-          <div class="note">僅顯示交易所・加款已開放的站台</div>
         </div>
-        <div class="time">14:03</div>
+        <div class="bbl-time-b">14:02</div>
       </div>
     </div>
 
-    <div class="row u">
-      <div class="av av-user">A</div>
+    <!-- 操作員點「站台 A」 -->
+    <div class="step-lbl">操作員點選「站台 A」，TG 發出訊息</div>
+    <div class="row-u">
       <div>
-        <div class="bbl u">站台 A</div>
-        <div class="time">14:03</div>
+        <div class="bbl-u">站台 A</div>
+        <div class="bbl-time-u">14:03 ✓✓</div>
       </div>
     </div>
 
     <hr class="divd">
 
-    <!-- Step 5 -->
-    <div class="step">步驟 5 — 輸入指令</div>
-    <div class="row">
-      <div class="av av-bot">Bot</div>
-      <div>
-        <div class="bbl b">
-          已選擇：<b>加款 · 交易所 · 站台 A</b><br><br>
+    <!-- Step 4：確認並輸入 -->
+    <div class="step-lbl">步驟 4 — 機器人確認，提示輸入</div>
+    <div class="row-b">
+      <div class="av-b">Bot</div>
+      <div class="bbl-b-wrap">
+        <div class="bbl-b">
+          <div class="bbl-name">CreditBot</div>
+          <span class="mention">@操作員A</span> 已選擇：<b>上分 · 理財 · 站台 A</b><br><br>
           請輸入：<span class="mono">帳號，金額，備注</span><br>
-          <span class="note">例：123456，100，獎金</span>
+          <div class="note">例：123456，100，獎金</div>
+          <div class="kbd">
+            <div class="kbd-nav">
+              <div class="kbd-btn">← 上一步</div>
+              <div class="kbd-btn">⌂ 主選單</div>
+            </div>
+            <div class="kbd-cancel">✕ 取消</div>
+          </div>
         </div>
-        <div class="time">14:03</div>
+        <div class="bbl-time-b">14:03</div>
       </div>
     </div>
 
-    <div class="row u">
-      <div class="av av-user">A</div>
+    <!-- 操作員輸入指令 -->
+    <div class="step-lbl">操作員輸入指令</div>
+    <div class="row-u">
       <div>
-        <div class="bbl u">123456，100，獎金</div>
-        <div class="time">14:03</div>
+        <div class="bbl-u">123456，100，獎金</div>
+        <div class="bbl-time-u">14:03 ✓✓</div>
       </div>
     </div>
 
     <hr class="divd">
 
-    <!-- Step 6a 成功 -->
-    <div class="step">步驟 6a — 執行成功</div>
-    <div class="row">
-      <div class="av av-bot">Bot</div>
-      <div>
-        <div class="bbl b">
+    <!-- 結果A：成功 -->
+    <div class="step-lbl">結果 A — 成功</div>
+    <div class="row-b">
+      <div class="av-b">Bot</div>
+      <div class="bbl-b-wrap">
+        <div class="bbl-b">
+          <div class="bbl-name">CreditBot</div>
           <span class="tag-ok">成功</span> <span class="mention">@操作員A</span><br>
           帳號：123456<br>
           金額：＋100<br>
           備注：獎金<br>
-          產品：交易所 · 站台 A<br>
-          <span class="note">14:03 · 操作員A</span>
+          產品：理財 · 站台 A<br>
+          <div class="note">14:03 · 操作員A</div>
         </div>
-        <div class="time">14:03</div>
+        <div class="bbl-time-b">14:03</div>
       </div>
     </div>
 
-    <!-- Step 6b 失敗 -->
-    <div class="step">步驟 6b — 驳回 / 執行失敗</div>
-    <div class="row">
-      <div class="av av-bot">Bot</div>
-      <div>
-        <div class="bbl b">
+    <!-- 結果B：失敗 -->
+    <div class="step-lbl">結果 B — 驳回 / 失敗</div>
+    <div class="row-b">
+      <div class="av-b">Bot</div>
+      <div class="bbl-b-wrap">
+        <div class="bbl-b">
+          <div class="bbl-name">CreditBot</div>
           <span class="tag-no">失敗</span> <span class="mention">@操作員A</span><br>
           原因：超過單筆限額（上限 5,000）<br>
-          <span class="note">請轉人工處理</span>
+          <div class="note">請轉人工處理</div>
         </div>
-        <div class="time">14:03</div>
+        <div class="bbl-time-b">14:03</div>
+      </div>
+    </div>
+
+    <!-- 結果C：取消 -->
+    <div class="step-lbl">結果 C — 主動取消</div>
+    <div class="row-b">
+      <div class="av-b">Bot</div>
+      <div class="bbl-b-wrap">
+        <div class="bbl-b">
+          <div class="bbl-name">CreditBot</div>
+          <span class="mention">@操作員A</span> 操作已取消。
+        </div>
+        <div class="bbl-time-b">14:03</div>
       </div>
     </div>
 
   </div>
+  <div style="height:10px"></div>
 </div>
