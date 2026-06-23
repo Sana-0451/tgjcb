@@ -800,9 +800,9 @@
               <th>用户ID</th>
               <th>TG用户名</th>
               <th>名称</th>
+              <th>账号类型</th>
               <th>邮箱</th>
               <th>手机号</th>
-              <th>账号类型</th>
               <th>加入时间</th>
               <th>状态</th>
               <th>操作</th>
@@ -814,9 +814,9 @@
               <td style="color:#666;font-size:12px;font-family:monospace">104821</td>
               <td style="color:#333">@sunny_trader</td>
               <td style="color:#666">Sunny</td>
-              <td style="color:#666;font-size:12px">—</td>
-              <td style="color:#666;font-size:12px">—</td>
               <td><span class="badge badge-normal">一般</span></td>
+              <td style="color:#666;font-size:12px"></td>
+              <td style="color:#666;font-size:12px"></td>
               <td style="color:#666;font-size:12px">2026-01-15</td>
               <td><span class="badge badge-block" data-status="blocked">禁用</span></td>
               <td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openUserEditModal(this)">&#9998; 编辑</span></td>
@@ -826,9 +826,9 @@
               <td style="color:#666;font-size:12px;font-family:monospace">208374</td>
               <td style="color:#333">@ace024</td>
               <td style="color:#666">Ace</td>
-              <td style="color:#666;font-size:12px">—</td>
-              <td style="color:#666;font-size:12px">—</td>
               <td><span class="badge badge-normal">一般</span></td>
+              <td style="color:#666;font-size:12px"></td>
+              <td style="color:#666;font-size:12px"></td>
               <td style="color:#666;font-size:12px">2026-02-08</td>
               <td><span class="badge badge-block" data-status="blocked">禁用</span></td>
               <td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openUserEditModal(this)">&#9998; 编辑</span></td>
@@ -838,9 +838,9 @@
               <td style="color:#666;font-size:12px;font-family:monospace">301928</td>
               <td style="color:#333">@powerbank_li</td>
               <td style="color:#666">Power Li</td>
-              <td style="color:#666;font-size:12px">—</td>
-              <td style="color:#666;font-size:12px">—</td>
               <td><span class="badge" style="background:#FFF3E0;color:#E6A23C">测试</span></td>
+              <td style="color:#666;font-size:12px"></td>
+              <td style="color:#666;font-size:12px"></td>
               <td style="color:#666;font-size:12px">2025-12-20</td>
               <td><span class="badge badge-block" data-status="blocked">禁用</span></td>
               <td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openUserEditModal(this)">&#9998; 编辑</span></td>
@@ -850,9 +850,9 @@
               <td style="color:#666;font-size:12px;font-family:monospace">418203</td>
               <td style="color:#333">@stock_chen</td>
               <td style="color:#666">Stock Chen</td>
-              <td style="color:#666;font-size:12px">—</td>
-              <td style="color:#666;font-size:12px">—</td>
               <td><span class="badge badge-normal">一般</span></td>
+              <td style="color:#666;font-size:12px"></td>
+              <td style="color:#666;font-size:12px"></td>
               <td style="color:#666;font-size:12px">2026-03-11</td>
               <td><span class="badge badge-block" data-status="blocked">禁用</span></td>
               <td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openUserEditModal(this)">&#9998; 编辑</span></td>
@@ -904,8 +904,8 @@
               <th>金额</th>
               <th>申请时间</th>
               <th>完成时间</th>
-              <th>状态</th>
-              <th>操作</th>
+              <th>传送状态</th>
+              <th>备注</th>
             </tr>
           </thead>
           <tbody>
@@ -918,8 +918,8 @@
               <td style="color:#55C92A;font-weight:500">¥500</td>
               <td style="color:#666;font-size:12px">2026-06-18 14:30</td>
               <td style="color:#666;font-size:12px">2026-06-18 14:32</td>
-              <td><span class="badge badge-active">成功</span></td>
-              <td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openOrderDetail({no:'ORD20260618001',type:'deposit',product:'交易所',site:'01',applicant:'@sunny_trader',uid:'104821',amount:'500',currency:'USDT',tradeType:'合约委托',fee:'0',accountAmountBefore:'199981.38',accountAmountAfter:'200481.38',bonusBefore:'0',bonusAfter:'0',lockBefore:'0',lockAfter:'0',status:'成功',applyTime:'2026-06-18 14:30',finishTime:'2026-06-18 14:32',fail:''})">&#9998; 详情</span></td>
+              <td><span class="badge badge-active">传送成功</span></td>
+              <td style="color:#ccc;font-size:12px">—</td>
             </tr>
             <tr data-site="ST01" data-date="2026-06-18">
               <td><span class="site-tag">股票</span></td>
@@ -930,8 +930,8 @@
               <td style="color:#55C92A;font-weight:500">¥1000</td>
               <td style="color:#666;font-size:12px">2026-06-18 13:45</td>
               <td style="color:#666;font-size:12px">2026-06-18 13:47</td>
-              <td><span class="badge badge-active">成功</span></td>
-              <td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openOrderDetail({no:'ORD20260618002',type:'deposit',product:'股票',site:'01',applicant:'@ace024',uid:'208374',amount:'1000',currency:'USDT',tradeType:'合约委托',fee:'0',accountAmountBefore:'50000.00',accountAmountAfter:'51000.00',bonusBefore:'0',bonusAfter:'0',lockBefore:'0',lockAfter:'0',status:'成功',applyTime:'2026-06-18 13:45',finishTime:'2026-06-18 13:47',fail:''})">&#9998; 详情</span></td>
+              <td><span class="badge badge-active">传送成功</span></td>
+              <td style="color:#ccc;font-size:12px">—</td>
             </tr>
             <tr data-site="PB01" data-date="2026-06-18">
               <td><span class="site-tag">充电宝</span></td>
@@ -942,8 +942,8 @@
               <td style="color:#55C92A;font-weight:500">¥200</td>
               <td style="color:#666;font-size:12px">2026-06-18 12:15</td>
               <td style="color:#ccc;font-size:12px">—</td>
-              <td><span class="badge badge-vip">待确认</span></td>
-              <td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openOrderDetail({no:'ORD20260618003',type:'deposit',product:'充电宝',site:'01',applicant:'@powerbank_li',uid:'418203',amount:'200',currency:'USDT',tradeType:'充值',fee:'0',accountAmountBefore:'8000.00',accountAmountAfter:'',bonusBefore:'0',bonusAfter:'',lockBefore:'0',lockAfter:'',status:'待确认',applyTime:'2026-06-18 12:15',finishTime:'',fail:''})">&#9998; 详情</span></td>
+              <td><span class="badge badge-active">传送成功</span></td>
+              <td style="color:#ccc;font-size:12px">—</td>
             </tr>
             <tr data-site="EX02" data-date="2026-06-18">
               <td><span class="site-tag">交易所</span></td>
@@ -954,8 +954,8 @@
               <td style="color:#55C92A;font-weight:500">¥800</td>
               <td style="color:#666;font-size:12px">2026-06-18 10:05</td>
               <td style="color:#666;font-size:12px">2026-06-18 10:07</td>
-              <td><span class="badge badge-block">失败</span></td>
-              <td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openOrderDetail({no:'ORD20260618004',type:'deposit',product:'交易所',site:'02',applicant:'@sunyan_88',uid:'519042',amount:'800',currency:'USDT',tradeType:'合约委托',fee:'0',accountAmountBefore:'12000.00',accountAmountAfter:'12000.00',bonusBefore:'0',bonusAfter:'0',lockBefore:'0',lockAfter:'0',status:'失败',applyTime:'2026-06-18 10:05',finishTime:'2026-06-18 10:07',fail:'钱包地址校验失败'})">&#9998; 详情</span></td>
+              <td><span class="badge badge-block">传送失败</span></td>
+              <td style="color:#F56C6C;font-size:12px">服务器无回应（连接超时）</td>
             </tr>
           </tbody>
         </table>
@@ -1003,8 +1003,8 @@
               <th>金额</th>
               <th>申请时间</th>
               <th>完成时间</th>
-              <th>状态</th>
-              <th>操作</th>
+              <th>传送状态</th>
+              <th>备注</th>
             </tr>
           </thead>
           <tbody>
@@ -1017,32 +1017,8 @@
               <td style="color:#F56C6C;font-weight:500">¥300</td>
               <td style="color:#666;font-size:12px">2026-06-18 14:20</td>
               <td style="color:#666;font-size:12px">2026-06-18 14:25</td>
-              <td><span class="badge badge-active">成功</span></td>
-              <td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openOrderDetail({no:'WTH20260618001',type:'withdraw',product:'交易所',site:'01',applicant:'@sunny_trader',uid:'104821',amount:'300',currency:'USDT',tradeType:'合约委托',fee:'0',accountAmountBefore:'200481.38',accountAmountAfter:'200181.38',bonusBefore:'0',bonusAfter:'0',lockBefore:'0',lockAfter:'0',status:'成功',applyTime:'2026-06-18 14:20',finishTime:'2026-06-18 14:25',fail:''})">&#9998; 详情</span></td>
-            </tr>
-            <tr data-site="ST01" data-date="2026-06-18">
-              <td><span class="site-tag">股票</span></td>
-              <td style="color:#666;font-size:12px">01</td>
-              <td style="font-family:monospace;font-size:12px;color:#333">WTH20260618002</td>
-              <td style="color:#666;font-size:12px">@ace024</td>
-              <td style="color:#666">208374</td>
-              <td style="color:#F56C6C;font-weight:500">¥500</td>
-              <td style="color:#666;font-size:12px">2026-06-18 13:10</td>
-              <td style="color:#666;font-size:12px">2026-06-18 13:18</td>
-              <td><span class="badge badge-active">成功</span></td>
-              <td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openOrderDetail({no:'WTH20260618002',type:'withdraw',product:'股票',site:'01',applicant:'@ace024',uid:'208374',amount:'500',currency:'USDT',tradeType:'合约委托',fee:'0',accountAmountBefore:'51000.00',accountAmountAfter:'50500.00',bonusBefore:'0',bonusAfter:'0',lockBefore:'0',lockAfter:'0',status:'成功',applyTime:'2026-06-18 13:10',finishTime:'2026-06-18 13:18',fail:''})">&#9998; 详情</span></td>
-            </tr>
-            <tr data-site="PB01" data-date="2026-06-18">
-              <td><span class="site-tag">充电宝</span></td>
-              <td style="color:#666;font-size:12px">01</td>
-              <td style="font-family:monospace;font-size:12px;color:#333">WTH20260618003</td>
-              <td style="color:#666;font-size:12px">@powerbank_li</td>
-              <td style="color:#666">418203</td>
-              <td style="color:#F56C6C;font-weight:500">¥150</td>
-              <td style="color:#666;font-size:12px">2026-06-18 11:55</td>
+              <td><span class="badge badge-active">传送成功</span></td>
               <td style="color:#ccc;font-size:12px">—</td>
-              <td><span class="badge badge-vip">处理中</span></td>
-              <td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openOrderDetail({no:'WTH20260618003',type:'withdraw',product:'充电宝',site:'01',applicant:'@powerbank_li',uid:'418203',amount:'150',currency:'USDT',tradeType:'提现',fee:'0',accountAmountBefore:'8000.00',accountAmountAfter:'',bonusBefore:'0',bonusAfter:'',lockBefore:'0',lockAfter:'',status:'处理中',applyTime:'2026-06-18 11:55',finishTime:'',fail:''})">&#9998; 详情</span></td>
             </tr>
             <tr data-site="ST02" data-date="2026-06-18">
               <td><span class="site-tag">股票</span></td>
@@ -1053,8 +1029,8 @@
               <td style="color:#F56C6C;font-weight:500">¥600</td>
               <td style="color:#666;font-size:12px">2026-06-18 09:40</td>
               <td style="color:#666;font-size:12px">2026-06-18 09:43</td>
-              <td><span class="badge badge-block">失败</span></td>
-              <td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openOrderDetail({no:'WTH20260618004',type:'withdraw',product:'股票',site:'02',applicant:'@stock_chen',uid:'631928',amount:'600',currency:'USDT',tradeType:'合约委托',fee:'0',accountAmountBefore:'30000.00',accountAmountAfter:'30000.00',bonusBefore:'0',bonusAfter:'0',lockBefore:'0',lockAfter:'0',status:'失败',applyTime:'2026-06-18 09:40',finishTime:'2026-06-18 09:43',fail:'账户余额不足'})">&#9998; 详情</span></td>
+              <td><span class="badge badge-block">传送失败</span></td>
+              <td style="color:#F56C6C;font-size:12px">HTTP 502 Bad Gateway</td>
             </tr>
           </tbody>
         </table>
@@ -1103,13 +1079,13 @@
             </tr>
             <tr>
               <td style="padding-left:14px;font-family:monospace;color:var(--primary)">/deposit</td>
-              <td style="color:#666">发起上分（充值）申请</td>
+              <td style="color:#666">发起上分申请</td>
               <td><span class="badge badge-active">所有人</span></td>
               <td><span class="badge badge-active">启用</span></td>
             </tr>
             <tr>
               <td style="padding-left:14px;font-family:monospace;color:var(--primary)">/withdraw</td>
-              <td style="color:#666">发起下分（提现）申请</td>
+              <td style="color:#666">发起下分申请</td>
               <td><span class="badge badge-active">所有人</span></td>
               <td><span class="badge badge-active">启用</span></td>
             </tr>
@@ -1269,16 +1245,57 @@
           <span class="card-title">站点功能设置</span>
           <span style="font-size:12px;color:#999">设定各站点可使用的机器人功能，未开放会收到"功能未开放"的提示</span>
         </div>
-        <div id="site-perm-tabs" style="margin-bottom:12px"></div>
-        <div id="site-perm-batch-bar" class="action-bar" style="margin-bottom:10px"></div>
-        <div class="table-card" style="box-shadow:none;border:1px solid var(--border);max-height:420px;overflow-y:auto">
-          <table class="data-table" id="site-perm-table">
-            <thead id="site-perm-thead"></thead>
-            <tbody id="site-perm-body"></tbody>
-          </table>
+        <div class="action-bar" style="margin-bottom:12px">
+          <button class="btn" style="background:#fff" onclick="openSiteSettingModal()"><i class="ti ti-plus"></i> 添加站点</button>
         </div>
-        <div style="margin-top:12px;display:flex;justify-content:flex-end">
-          <button class="btn btn-green" onclick="saveSitePerms()">保存设置</button>
+        <div class="table-card" style="box-shadow:none;border:1px solid var(--border)">
+          <table class="data-table" id="site-setting-table">
+            <thead>
+              <tr>
+                <th style="padding-left:14px">产品</th>
+                <th>站点</th>
+                <th>URL</th>
+                <th>上分</th>
+                <th>下分</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="site-setting-body">
+              <tr>
+                <td style="padding-left:14px"><span class="site-tag">交易所</span></td>
+                <td style="color:#333;font-weight:500">交易所-01</td>
+                <td style="color:#666;font-size:12px;font-family:monospace">https://ex01.example.com/api</td>
+                <td><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></td>
+                <td><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></td>
+                <td>
+                  <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openSiteSettingModal(this.closest('tr'))">&#9998; 编辑</span>
+                  <span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteSiteSetting(this)">&#9998; 删除</span>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding-left:14px"><span class="site-tag">股票</span></td>
+                <td style="color:#333;font-weight:500">股票-01</td>
+                <td style="color:#666;font-size:12px;font-family:monospace">https://st01.example.com/api</td>
+                <td><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></td>
+                <td><div class="toggle-switch" onclick="this.classList.toggle('on')"></div></td>
+                <td>
+                  <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openSiteSettingModal(this.closest('tr'))">&#9998; 编辑</span>
+                  <span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteSiteSetting(this)">&#9998; 删除</span>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding-left:14px"><span class="site-tag">充电宝</span></td>
+                <td style="color:#333;font-weight:500">充电宝-01</td>
+                <td style="color:#666;font-size:12px;font-family:monospace">https://pb01.example.com/api</td>
+                <td><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></td>
+                <td><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></td>
+                <td>
+                  <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openSiteSettingModal(this.closest('tr'))">&#9998; 编辑</span>
+                  <span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteSiteSetting(this)">&#9998; 删除</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -1324,52 +1341,75 @@
           </thead>
           <tbody id="oplog-table-body">
             <tr data-page="账号管理" data-action="新增" data-date="2026-06-22">
-              <td style="padding-left:14px;color:#666;font-size:12px">2026-06-22 09:15</td>
+              <td style="padding-left:14px;color:#666;font-size:12px;white-space:nowrap">2026-06-22 09:15</td>
               <td style="color:#333">admin</td>
               <td><span class="badge badge-normal">账号管理</span></td>
               <td><span class="badge badge-active">新增</span></td>
-              <td style="color:#333">operator01</td>
-              <td style="color:#666;font-size:12px">新增账号 operator01，名称：客服小李，角色：客服</td>
+              <td style="color:#333;font-size:12px">operator01</td>
+              <td style="color:#666;font-size:12px;line-height:1.8">
+                <div>账号：operator01</div>
+                <div>名称：客服小李</div>
+                <div>角色：客服</div>
+              </td>
             </tr>
             <tr data-page="角色管理" data-action="编辑" data-date="2026-06-22">
-              <td style="padding-left:14px;color:#666;font-size:12px">2026-06-22 08:30</td>
+              <td style="padding-left:14px;color:#666;font-size:12px;white-space:nowrap">2026-06-22 08:30</td>
               <td style="color:#333">admin</td>
               <td><span class="badge badge-normal">角色管理</span></td>
               <td><span class="badge badge-vip">编辑</span></td>
-              <td style="color:#333">一般管理员</td>
-              <td style="color:#666;font-size:12px">修改可访问菜单：新增「限制设置」</td>
+              <td style="color:#333;font-size:12px">一般管理员</td>
+              <td style="color:#666;font-size:12px;line-height:1.8">
+                <div>可访问菜单：新增「限制设置」</div>
+              </td>
             </tr>
             <tr data-page="TG用户列表" data-action="编辑" data-date="2026-06-21">
-              <td style="padding-left:14px;color:#666;font-size:12px">2026-06-21 16:44</td>
+              <td style="padding-left:14px;color:#666;font-size:12px;white-space:nowrap">2026-06-21 16:44</td>
               <td style="color:#333">operator01</td>
-              <td><span class="badge badge-normal">TG用户列表</span></td>
+              <td><span class="badge badge-normal">用户列表</span></td>
               <td><span class="badge badge-vip">编辑</span></td>
-              <td style="color:#333">104821 (@sunny_trader)</td>
-              <td style="color:#666;font-size:12px">修改账号类型：一般 → 测试；状态：禁用 → 启用</td>
+              <td style="color:#333;font-size:12px">104821 (@sunny_trader)</td>
+              <td style="color:#666;font-size:12px;line-height:1.8">
+                <div>账号类型：一般 → 测试</div>
+                <div>状态：禁用 → 启用</div>
+              </td>
             </tr>
             <tr data-page="站点功能设置" data-action="编辑" data-date="2026-06-21">
-              <td style="padding-left:14px;color:#666;font-size:12px">2026-06-21 14:20</td>
+              <td style="padding-left:14px;color:#666;font-size:12px;white-space:nowrap">2026-06-21 14:20</td>
               <td style="color:#333">admin</td>
               <td><span class="badge badge-normal">站点功能设置</span></td>
               <td><span class="badge badge-vip">编辑</span></td>
-              <td style="color:#333">充电宝-01 ～ 充电宝-05</td>
-              <td style="color:#666;font-size:12px">批量关闭下分（提现）功能</td>
+              <td style="color:#333;font-size:12px;line-height:1.8">
+                <div>充电宝-01</div>
+                <div>充电宝-02</div>
+                <div>充电宝-03</div>
+                <div>充电宝-04</div>
+                <div>充电宝-05</div>
+              </td>
+              <td style="color:#666;font-size:12px;line-height:1.8">
+                <div>下分（提现）：开启 → 关闭</div>
+              </td>
             </tr>
             <tr data-page="限制设置" data-action="编辑" data-date="2026-06-20">
-              <td style="padding-left:14px;color:#666;font-size:12px">2026-06-20 11:05</td>
+              <td style="padding-left:14px;color:#666;font-size:12px;white-space:nowrap">2026-06-20 11:05</td>
               <td style="color:#333">admin</td>
               <td><span class="badge badge-normal">限制设置</span></td>
               <td><span class="badge badge-vip">编辑</span></td>
-              <td style="color:#333">全局规则</td>
-              <td style="color:#666;font-size:12px">上分每日次数：5 → 3；上分每日累计上限：100000 → 50000</td>
+              <td style="color:#333;font-size:12px">全局规则</td>
+              <td style="color:#666;font-size:12px;line-height:1.8">
+                <div>上分每日次数：5 → 3</div>
+                <div>上分每日累计上限：100,000 → 50,000</div>
+              </td>
             </tr>
             <tr data-page="账号管理" data-action="删除" data-date="2026-06-19">
-              <td style="padding-left:14px;color:#666;font-size:12px">2026-06-19 17:30</td>
+              <td style="padding-left:14px;color:#666;font-size:12px;white-space:nowrap">2026-06-19 17:30</td>
               <td style="color:#333">admin</td>
               <td><span class="badge badge-normal">账号管理</span></td>
               <td><span class="badge badge-block">删除</span></td>
-              <td style="color:#333">testuser01</td>
-              <td style="color:#666;font-size:12px">删除账号 testuser01（测试账号）</td>
+              <td style="color:#333;font-size:12px">testuser01</td>
+              <td style="color:#666;font-size:12px;line-height:1.8">
+                <div>账号：testuser01</div>
+                <div>名称：测试账号</div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -1597,8 +1637,8 @@ function showPage(id, navEl) {
 // 以后新增功能，只要在 SITE_FEATURES 数组里加一项即可，每个类别的表格都会自动多一列。
 // 以后新增类别或站点，只要改 SITE_CATEGORIES（定义在下方）即可，这里不用改。
 const SITE_FEATURES = [
-  { key: 'deposit',  label: '上分（充值）' },
-  { key: 'withdraw', label: '下分（提现）' },
+  { key: 'deposit',  label: '上分' },
+  { key: 'withdraw', label: '下分' },
 ];
 
 // 权限数据：siteId -> { featureKey: boolean }（实际应来自后端）
@@ -2084,32 +2124,38 @@ function openRoleModal(roleKey) {
   document.getElementById('role-name-input').disabled = !!(role && role.builtin);
   document.getElementById('role-desc-input').value = role ? role.desc : '';
 
-  // 渲染分组结构：分组标题可折叠 → 菜单行 → 功能细项
+  // 渲染树状结构：分组可折叠 → 菜单勾选 → 细项缩进
   var list = document.getElementById('role-perm-list');
   var html = '';
   MENU_GROUPS.forEach(function(g, gi) {
-    var groupId = 'rg-' + gi;
-    html += '<div style="margin-bottom:4px;border:1px solid #EBEEF5;border-radius:4px;overflow:hidden">';
-    // 分组标题（可点击折叠）
-    html += '<div onclick="toggleRoleGroup(this)" style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:#F5F7FA;cursor:pointer;user-select:none">' +
-      '<span style="font-size:11px;font-weight:600;color:#606266;letter-spacing:0.5px;text-transform:uppercase">' + g.group + '</span>' +
-      '<span style="font-size:10px;color:#C0C4CC;transition:transform 0.2s" class="rg-arrow">▼</span>' +
-      '</div>';
+    var allMenuKeys = g.menus.map(function(m){ return m.key; });
+    var groupChecked = role ? allMenuKeys.every(function(k){ return role.menus.has(k); }) : false;
+    // 分组行：折叠箭头 + 勾选框 + 名称
+    html += '<div style="margin-bottom:2px">';
+    html += '<div style="display:flex;align-items:center;padding:4px 0;cursor:pointer;user-select:none" onclick="toggleRoleGroup(this)">';
+    html += '<span class="rg-arrow" style="font-size:10px;color:#999;width:16px;flex-shrink:0;transition:transform 0.15s">▼</span>';
+    html += '<input type="checkbox" class="rg-group-cb" data-group="' + gi + '" style="margin-right:6px;cursor:pointer"' + (groupChecked ? ' checked' : '') + ' onclick="event.stopPropagation();onRoleGroupChange(this)">';
+    html += '<span style="font-size:13px;font-weight:600;color:#333">' + g.group + '</span>';
+    html += '</div>';
     // 分组内容
-    html += '<div class="rg-body" style="padding:6px 10px 8px">';
+    html += '<div class="rg-body" style="padding-left:16px">';
     g.menus.forEach(function(m) {
       var menuChecked = role ? role.menus.has(m.key) : false;
-      html += '<div style="margin-bottom:4px">';
-      html += '<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#333;font-weight:500;cursor:pointer;padding:3px 0">' +
-        '<input type="checkbox" class="role-menu-cb" data-menu="' + m.key + '"' + (menuChecked ? ' checked' : '') + ' onchange="onRoleMenuChange(this)"> ' +
-        m.label + '</label>';
-      html += '<div style="padding-left:22px;display:flex;gap:14px;flex-wrap:wrap">';
-      m.actions.forEach(function(a) {
-        html += '<label style="display:flex;align-items:center;gap:5px;font-size:12px;color:#666;cursor:pointer">' +
-          '<input type="checkbox" class="role-action-cb" data-menu="' + m.key + '" data-action="' + a.key + '"' +
-          (menuChecked ? ' checked' : '') + (menuChecked ? '' : ' disabled') + '> ' + a.label + '</label>';
-      });
-      html += '</div></div>';
+      html += '<div style="padding:2px 0">';
+      html += '<label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#444;cursor:pointer">';
+      html += '<input type="checkbox" class="role-menu-cb" data-menu="' + m.key + '" data-group="' + gi + '"' + (menuChecked ? ' checked' : '') + ' onchange="onRoleMenuChange(this)">';
+      html += m.label + '</label>';
+      if (m.actions && m.actions.length) {
+        html += '<div style="padding-left:22px;display:flex;flex-wrap:wrap;gap:12px;margin-top:2px">';
+        m.actions.forEach(function(a) {
+          html += '<label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#666;cursor:pointer">';
+          html += '<input type="checkbox" class="role-action-cb" data-menu="' + m.key + '" data-action="' + a.key + '"' +
+            (menuChecked ? ' checked' : '') + (menuChecked ? '' : ' disabled') + '>';
+          html += a.label + '</label>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
     });
     html += '</div></div>';
   });
@@ -2127,12 +2173,46 @@ function onRoleMenuChange(cb) {
     ac.checked = checked;
     ac.disabled = !checked;
   });
+  // 更新分组勾选框状态
+  var groupIdx = cb.dataset.group;
+  updateGroupCb(groupIdx);
+}
+
+// 分组勾选时联动所有菜单
+function onRoleGroupChange(cb) {
+  var groupIdx = cb.dataset.group;
+  var checked = cb.checked;
+  var container = cb.closest('div').nextElementSibling; // rg-body
+  if (!container) return;
+  container.querySelectorAll('.role-menu-cb').forEach(function(mc) {
+    mc.checked = checked;
+    onRoleMenuChange(mc);
+  });
+}
+
+// 全选 / 全不选
+function rolePermSelectAll(checked) {
+  document.querySelectorAll('#role-perm-list .role-menu-cb').forEach(function(mc) {
+    mc.checked = checked;
+    onRoleMenuChange(mc);
+  });
+  document.querySelectorAll('#role-perm-list .rg-group-cb').forEach(function(gc) {
+    gc.checked = checked;
+  });
+}
+
+// 更新分组 checkbox 状态（全选则打勾，否则取消）
+function updateGroupCb(groupIdx) {
+  var menus = document.querySelectorAll('#role-perm-list .role-menu-cb[data-group="' + groupIdx + '"]');
+  var allChecked = Array.from(menus).every(function(m){ return m.checked; });
+  var gc = document.querySelector('#role-perm-list .rg-group-cb[data-group="' + groupIdx + '"]');
+  if (gc) gc.checked = allChecked;
 }
 
 function toggleRoleGroup(header) {
   var body = header.nextElementSibling;
   var arrow = header.querySelector('.rg-arrow');
-  if (!body) return;
+  if (!body || !body.classList.contains('rg-body')) return;
   var collapsed = body.style.display === 'none';
   body.style.display = collapsed ? '' : 'none';
   if (arrow) arrow.style.transform = collapsed ? '' : 'rotate(-90deg)';
@@ -2194,8 +2274,8 @@ var _editingUserRow = null;
 function openBatchAddModal() {
   document.getElementById('batch-add-input').value = '';
   document.getElementById('batch-add-result').style.display = 'none';
+  document.getElementById('batch-add-status').value = 'blocked';
   document.querySelector('input[name="batch-type"][value="normal"]').checked = true;
-  document.querySelector('input[name="batch-status"][value="blocked"]').checked = true;
   document.getElementById('batch-add-modal').style.display = 'block';
 }
 
@@ -2206,7 +2286,7 @@ function closeBatchAddModal() {
 function confirmBatchAdd() {
   var raw = document.getElementById('batch-add-input').value;
   var typeVal = document.querySelector('input[name="batch-type"]:checked').value;
-  var statusVal = document.querySelector('input[name="batch-status"]:checked').value;
+  var statusVal = document.getElementById('batch-add-status').value;
   var lines = raw.split('\n').map(function(l){ return l.trim(); }).filter(function(l){ return l.length > 0; });
   if (!lines.length) { alert('请至少输入一个 TG 用户名'); return; }
 
@@ -2223,7 +2303,7 @@ function confirmBatchAdd() {
   var added = 0;
   lines.forEach(function(username) {
     var tgid = username.startsWith('@') ? username : '@' + username;
-    var uid = Math.floor(Math.random() * 900000 + 100000); // 示例：后端应返回真实 ID
+    var uid = Math.floor(Math.random() * 900000 + 100000);
     var tr = document.createElement('tr');
     tr.dataset.date = dateStr;
     tr.innerHTML =
@@ -2231,9 +2311,9 @@ function confirmBatchAdd() {
       '<td style="color:#666;font-size:12px;font-family:monospace">' + uid + '</td>' +
       '<td style="color:#333">' + tgid + '</td>' +
       '<td style="color:#666"></td>' +
-      '<td style="color:#666;font-size:12px"></td>' +
-      '<td style="color:#666;font-size:12px"></td>' +
       '<td><span class="badge ' + typeCls + '" style="' + typeBg + '">' + typeLabel + '</span></td>' +
+      '<td style="color:#666;font-size:12px"></td>' +
+      '<td style="color:#666;font-size:12px"></td>' +
       '<td style="color:#666;font-size:12px">' + dateStr + '</td>' +
       '<td><span class="badge ' + statusCls + '" data-status="' + statusVal + '">' + statusLabel + '</span></td>' +
       '<td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openUserEditModal(this)">&#9998; 编辑</span></td>';
@@ -2242,8 +2322,7 @@ function confirmBatchAdd() {
   });
 
   var result = document.getElementById('batch-add-result');
-  var statusText = statusVal === 'normal' ? '启用' : '禁用';
-  result.textContent = '已成功添加 ' + added + ' 名用户，状态已设置为“' + statusText + '”。';
+  result.textContent = '已成功添加 ' + added + ' 名用户。';
   result.style.display = 'block';
   setTimeout(closeBatchAddModal, 1200);
 }
@@ -2252,13 +2331,13 @@ function openUserEditModal(btn) {
   var row = btn.closest('tr');
   _editingUserRow = row;
   var cells = row.cells;
-  // 列顺序：0=checkbox, 1=用户ID, 2=TG用户名, 3=名称, 4=邮箱, 5=手机号, 6=账号类型, 7=加入时间, 8=状态, 9=操作
+  // 列顺序：0=checkbox, 1=用户ID, 2=TG用户名, 3=名称, 4=账号类型, 5=邮箱, 6=手机号, 7=加入时间, 8=状态, 9=操作
   document.getElementById('ue-uid').value = cells[1].textContent.trim();
   document.getElementById('ue-username').value = cells[2].textContent.trim();
   document.getElementById('ue-displayname').value = cells[3].textContent.trim();
-  document.getElementById('ue-email').value = row.dataset.email || cells[4].textContent.trim() || '';
-  document.getElementById('ue-phone').value = row.dataset.phone || cells[5].textContent.trim() || '';
-  var typeBadge = cells[6].querySelector('.badge');
+  document.getElementById('ue-email').value = cells[5].textContent.trim();
+  document.getElementById('ue-phone').value = cells[6].textContent.trim();
+  var typeBadge = cells[4].querySelector('.badge');
   var typeVal = typeBadge && typeBadge.textContent.trim() === '测试' ? 'test' : 'normal';
   document.querySelectorAll('input[name="ue-type"]').forEach(function(r) { r.checked = r.value === typeVal; });
   var statusBadge = cells[8].querySelector('[data-status]');
@@ -2281,16 +2360,14 @@ function confirmUserEditModal() {
 
   if (_editingUserRow) {
     var cells = _editingUserRow.cells;
-    // 列顺序：0=checkbox, 1=用户ID, 2=TG用户名, 3=名称, 4=邮箱, 5=手机号, 6=账号类型, 7=加入时间, 8=状态, 9=操作
+    // 列顺序：0=checkbox, 1=产品, 2=站点, 3=用户ID, 4=TG用户名, 5=名称, 6=账号类型, 7=加入时间, 8=状态, 9=操作
     cells[3].textContent = displayname;
-    cells[4].textContent = email;
-    cells[5].textContent = phone;
-    _editingUserRow.dataset.email = email;
-    _editingUserRow.dataset.phone = phone;
+    cells[5].textContent = email;
+    cells[6].textContent = phone;
     var typeLabel = typeVal === 'test' ? '测试' : '一般';
     var typeBg = typeVal === 'test' ? 'background:#FFF3E0;color:#E6A23C' : '';
     var typeCls = typeVal === 'test' ? '' : 'badge-normal';
-    cells[6].innerHTML = '<span class="badge ' + typeCls + '" style="' + typeBg + '">' + typeLabel + '</span>';
+    cells[4].innerHTML = '<span class="badge ' + typeCls + '" style="' + typeBg + '">' + typeLabel + '</span>';
     var statusLabel = statusVal === 'normal' ? '启用' : '禁用';
     var statusCls = statusVal === 'normal' ? 'badge-active' : 'badge-block';
     cells[8].innerHTML = '<span class="badge ' + statusCls + '" data-status="' + statusVal + '">' + statusLabel + '</span>';
@@ -2330,7 +2407,7 @@ function openOrderDetail(d) {
     row('手续费', d.fee) +
     row('申请时间', d.applyTime) +
     row('完成时间', d.finishTime) +
-    row('状态', d.status, statusColor) +
+    row('传送状态', d.status, statusColor) +
     (d.fail ? row('失败原因', d.fail, '#F56C6C') : '') +
     '<div style="margin-top:12px;padding-top:12px;border-top:2px solid #F0F2F5;font-size:12px;color:#909399;font-weight:600;margin-bottom:4px">账户变动</div>' +
     row('账变金额', d.amount ? (d.type === 'deposit' ? '+' : '-') + d.amount + ' ' + d.currency : '', d.type === 'deposit' ? '#55C92A' : '#F56C6C') +
@@ -2347,6 +2424,108 @@ function openOrderDetail(d) {
 
 function closeOrderDetail() {
   document.getElementById('order-detail-modal').style.display = 'none';
+}
+
+// ── 站点功能设置 ──
+var SITE_NUMS = { '交易所': 4, '股票': 2, '充电宝': 40 };
+var _editingSiteRow = null;
+
+function openSiteSettingModal(row) {
+  _editingSiteRow = row || null;
+  var isEdit = !!row;
+  document.getElementById('site-setting-modal-title').textContent = isEdit ? '编辑站点' : '添加站点';
+
+  if (isEdit) {
+    var cells = row.cells;
+    var product = cells[0].textContent.trim();
+    var siteName = cells[1].textContent.trim();
+    var url = cells[2].textContent.trim();
+    document.getElementById('ss-product').value = product;
+    onSsProductChange();
+    document.getElementById('ss-site-name').value = siteName;
+    document.getElementById('ss-url').value = url;
+    document.getElementById('ss-toggle-deposit').classList.toggle('on', cells[3].querySelector('.toggle-switch.on') !== null);
+    document.getElementById('ss-toggle-withdraw').classList.toggle('on', cells[4].querySelector('.toggle-switch.on') !== null);
+  } else {
+    document.getElementById('ss-product').value = '';
+    document.getElementById('ss-site-num').innerHTML = '<option value="">请先选择产品</option>';
+    document.getElementById('ss-site-name').value = '';
+    document.getElementById('ss-url').value = '';
+    document.getElementById('ss-toggle-deposit').classList.add('on');
+    document.getElementById('ss-toggle-withdraw').classList.add('on');
+  }
+  document.getElementById('site-setting-modal').style.display = 'block';
+}
+
+function closeSiteSettingModal() {
+  document.getElementById('site-setting-modal').style.display = 'none';
+  _editingSiteRow = null;
+}
+
+function onSsProductChange() {
+  var product = document.getElementById('ss-product').value;
+  var sel = document.getElementById('ss-site-num');
+  var count = SITE_NUMS[product] || 0;
+  sel.innerHTML = count
+    ? Array.from({length: count}, function(_, i) {
+        var n = String(i + 1).padStart(2, '0');
+        return '<option value="' + n + '">' + n + '</option>';
+      }).join('')
+    : '<option value="">请先选择产品</option>';
+  onSsSiteNumChange();
+}
+
+function onSsSiteNumChange() {
+  var product = document.getElementById('ss-product').value;
+  var num = document.getElementById('ss-site-num').value;
+  if (product && num) {
+    document.getElementById('ss-site-name').value = product + '-' + num;
+  }
+}
+
+function confirmSiteSettingModal() {
+  var product = document.getElementById('ss-product').value;
+  var siteName = document.getElementById('ss-site-name').value.trim();
+  var url = document.getElementById('ss-url').value.trim();
+  if (!product) { alert('请选择产品别'); return; }
+  if (!siteName) { alert('请填写站点名称'); return; }
+  if (!url) { alert('请填写 URL'); return; }
+
+  var depositOn = document.getElementById('ss-toggle-deposit').classList.contains('on');
+  var withdrawOn = document.getElementById('ss-toggle-withdraw').classList.contains('on');
+
+  var depToggle = '<div class="toggle-switch' + (depositOn ? ' on' : '') + '" onclick="this.classList.toggle(\'on\')"></div>';
+  var witToggle = '<div class="toggle-switch' + (withdrawOn ? ' on' : '') + '" onclick="this.classList.toggle(\'on\')"></div>';
+
+  if (_editingSiteRow) {
+    var cells = _editingSiteRow.cells;
+    cells[0].innerHTML = '<span class="site-tag">' + product + '</span>';
+    cells[1].textContent = siteName;
+    cells[2].textContent = url;
+    cells[3].innerHTML = depToggle;
+    cells[4].innerHTML = witToggle;
+  } else {
+    var tbody = document.getElementById('site-setting-body');
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td style="padding-left:14px"><span class="site-tag">' + product + '</span></td>' +
+      '<td style="color:#333;font-weight:500">' + siteName + '</td>' +
+      '<td style="color:#666;font-size:12px;font-family:monospace">' + url + '</td>' +
+      '<td>' + depToggle + '</td>' +
+      '<td>' + witToggle + '</td>' +
+      '<td>' +
+        '<span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openSiteSettingModal(this.closest(\'tr\'))">&#9998; 编辑</span>' +
+        '<span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteSiteSetting(this)">&#9998; 删除</span>' +
+      '</td>';
+    tbody.appendChild(tr);
+  }
+  closeSiteSettingModal();
+}
+
+function deleteSiteSetting(btn) {
+  var row = btn.closest('tr');
+  var name = row.cells[1].textContent.trim();
+  openConfirmModal('确定删除站点「' + name + '」？', function() { row.remove(); });
 }
 
 function openConfirmModal(text, onConfirm) {
@@ -2760,7 +2939,7 @@ function batchToggleStatus() {
   if (!selected.length) { alert('请先勾选用户'); return; }
   selected.forEach(function(cb) {
     var row = cb.closest('tr');
-    // 列顺序：0=checkbox,1=用户ID,2=TG用户名,3=名称,4=邮箱,5=手机号,6=账号类型,7=加入时间,8=状态,9=操作
+    // 列顺序：0=checkbox,1=用户ID,2=TG用户名,3=名称,4=账号类型,5=邮箱,6=手机号,7=加入时间,8=状态,9=操作
     var statusTd = row.cells[8];
     if (!statusTd) return;
     var badge = statusTd.querySelector('[data-status]');
@@ -2995,8 +3174,18 @@ document.addEventListener('DOMContentLoaded', () => {
         <input id="role-desc-input" class="fi" style="width:100%" placeholder="简单描述该角色的职责">
       </div>
       <div>
-        <label style="font-size:13px;color:#606266;display:block;margin-bottom:8px"><span style="color:#F56C6C;margin-right:2px">*</span>可访问菜单</label>
-        <div id="role-perm-list" style="display:flex;flex-direction:column;gap:4px;max-height:280px;overflow-y:auto;padding:2px 1px"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <label style="font-size:13px;color:#606266"><span style="color:#F56C6C;margin-right:2px">*</span>可访问菜单</label>
+          <div style="display:flex;gap:10px">
+            <span onclick="rolePermSelectAll(true)" style="display:flex;align-items:center;gap:4px;font-size:12px;color:#409EFF;cursor:pointer">
+              <span style="width:14px;height:14px;border-radius:3px;background:#409EFF;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:10px">✓</span> 全选
+            </span>
+            <span onclick="rolePermSelectAll(false)" style="display:flex;align-items:center;gap:4px;font-size:12px;color:#F56C6C;cursor:pointer">
+              <span style="width:14px;height:14px;border-radius:3px;background:#F56C6C;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:10px">✕</span> 全不选
+            </span>
+          </div>
+        </div>
+        <div id="role-perm-list" style="display:flex;flex-direction:column;gap:2px;max-height:300px;overflow-y:auto;border:1px solid #EBEEF5;border-radius:4px;padding:6px 8px"></div>
       </div>
     </div>
     <div style="padding:8px 18px 16px;display:flex;justify-content:flex-end;gap:8px">
@@ -3123,16 +3312,6 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 
 <!-- ── 订单详情弹窗 ── -->
-<div id="order-detail-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;">
-  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:6px;width:520px;max-height:85vh;overflow-y:auto;box-shadow:0 4px 24px rgba(0,0,0,0.18)">
-    <div style="padding:14px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;z-index:1">
-      <span style="font-size:14px;font-weight:600;color:#333">订单详情</span>
-      <span onclick="closeOrderDetail()" style="cursor:pointer;color:#999;font-size:20px;line-height:1">&times;</span>
-    </div>
-    <div id="order-detail-body" style="padding:18px;display:flex;flex-direction:column;gap:0"></div>
-  </div>
-</div>
-
 <!-- ── 批量添加用户弹窗 ── -->
 <div id="batch-add-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;">
   <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:6px;width:460px;box-shadow:0 4px 24px rgba(0,0,0,0.18);overflow:hidden">
@@ -3160,21 +3339,66 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
       <div>
-        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">状态</label>
-        <div style="display:flex;gap:20px;padding-top:4px">
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
-            <input type="radio" name="batch-status" value="blocked" checked> 禁用
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
-            <input type="radio" name="batch-status" value="normal"> 启用
-          </label>
-        </div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px"><span style="color:#F56C6C;margin-right:2px">*</span>状态</label>
+        <select id="batch-add-status" class="fi" style="width:100%">
+          <option value="blocked">禁用</option>
+          <option value="normal">启用</option>
+        </select>
       </div>
       <div id="batch-add-result" style="display:none;font-size:12px;color:#67C23A;background:#F0FFF0;border-radius:4px;padding:8px 12px"></div>
     </div>
     <div style="padding:8px 18px 16px;display:flex;justify-content:flex-end;gap:8px">
       <button class="btn" onclick="closeBatchAddModal()">取消</button>
       <button class="btn btn-green" onclick="confirmBatchAdd()">批量导入</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 添加/编辑站点弹窗 ── -->
+<div id="site-setting-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:6px;width:420px;box-shadow:0 4px 24px rgba(0,0,0,0.18);overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center">
+      <span id="site-setting-modal-title" style="font-size:14px;font-weight:600;color:#333">添加站点</span>
+      <span onclick="closeSiteSettingModal()" style="cursor:pointer;color:#999;font-size:20px;line-height:1">&times;</span>
+    </div>
+    <div style="padding:18px;display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px"><span style="color:#F56C6C;margin-right:2px">*</span>产品别</label>
+        <select id="ss-product" class="fi" style="width:100%" onchange="onSsProductChange()">
+          <option value="">请选择产品</option>
+          <option value="交易所">交易所</option>
+          <option value="股票">股票</option>
+          <option value="充电宝">充电宝</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px"><span style="color:#F56C6C;margin-right:2px">*</span>站点</label>
+        <select id="ss-site-num" class="fi" style="width:100%;margin-bottom:6px" onchange="onSsSiteNumChange()">
+          <option value="">请先选择产品</option>
+        </select>
+        <input id="ss-site-name" class="fi" style="width:100%" placeholder="站点名称（可修改，如「交易所-01」）">
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px"><span style="color:#F56C6C;margin-right:2px">*</span>URL</label>
+        <input id="ss-url" class="fi" style="width:100%" placeholder="https://example.com/api">
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:8px">功能开关</label>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label style="display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#333">
+            <span>上分</span>
+            <div id="ss-toggle-deposit" class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+          </label>
+          <label style="display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#333">
+            <span>下分</span>
+            <div id="ss-toggle-withdraw" class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div style="padding:8px 18px 16px;display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn" onclick="closeSiteSettingModal()">取消</button>
+      <button class="btn btn-green" onclick="confirmSiteSettingModal()">保存</button>
     </div>
   </div>
 </div>
