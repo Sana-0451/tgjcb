@@ -52,7 +52,9 @@
   .sidebar-logo {
     padding: 14px 14px 12px;
     border-bottom: 1px solid rgba(255,255,255,0.06);
+    transition: background 0.15s;
   }
+  .sidebar-logo:hover { background: rgba(255,255,255,0.05); }
 
   .logo-row { display: flex; align-items: center; gap: 9px; }
 
@@ -71,9 +73,20 @@
 
   .nav-section {
     font-size: 10px; font-weight: 600;
-    letter-spacing: 0.6px; color: rgba(255,255,255,0.22);
-    text-transform: uppercase; padding: 12px 14px 3px;
+    letter-spacing: 0.6px; color: rgba(255,255,255,0.3);
+    text-transform: uppercase; padding: 14px 14px 4px;
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; user-select: none;
+    transition: color 0.12s;
   }
+  .nav-section:hover { color: rgba(255,255,255,0.55); }
+  .nav-section .nav-section-arrow {
+    font-size: 9px; transition: transform 0.2s;
+    color: rgba(255,255,255,0.25);
+  }
+  .nav-section.collapsed .nav-section-arrow { transform: rotate(-90deg); }
+  .nav-section-items { overflow: hidden; transition: max-height 0.22s ease; }
+  .nav-section-items.collapsed { max-height: 0 !important; }
 
   .nav-item {
     display: flex; align-items: center; gap: 8px;
@@ -420,22 +433,45 @@
   }
 
   /* 带文字标签的开关（账号管理状态列用） */
+  /* 帐号管理状态开关：文字嵌在开关内部 */
   .labeled-toggle {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    background: #C0C4CC;
+    border-radius: 8px;
+    padding: 1px 1px;
     cursor: pointer;
     user-select: none;
+    transition: background 0.2s;
+    min-width: 38px;
   }
+
+  .labeled-toggle.on { background: #409EFF; }
 
   .labeled-toggle .toggle-label {
-    font-size: 12px;
-    color: #409EFF;
+    font-size: 9px;
+    color: #fff;
     font-weight: 500;
-    min-width: 24px;
+    padding: 0 3px 0 4px;
+    line-height: 12px;
+    flex: 1;
+    text-align: center;
   }
 
-  .labeled-toggle.off .toggle-label { color: #909399; }
+  .labeled-toggle .toggle-knob {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  }
+
+  .labeled-toggle.off {
+    background: #C0C4CC;
+    flex-direction: row-reverse;
+  }
+
+  .labeled-toggle.off .toggle-label { color: #fff; }
 
   .col-toggle-link {
     font-size: 11px; font-weight: 400;
@@ -589,7 +625,7 @@
 
 <!-- ── Sidebar ── -->
 <aside class="sidebar">
-  <div class="sidebar-logo">
+  <div class="sidebar-logo" onclick="showPage('overview', null)" style="cursor:pointer">
     <div class="logo-row">
       <div class="logo-icon"><i class="ti ti-robot"></i></div>
       <div>
@@ -603,34 +639,50 @@
     <div class="nav-item" onclick="showPage('overview', this)">
       <i class="ti ti-layout-dashboard"></i> 首页
     </div>
-    <div class="nav-item" onclick="showPage('roles', this)">
-      <i class="ti ti-shield"></i> 角色管理
+
+    <div class="nav-section" onclick="toggleNavSection(this)">
+      <span>权限管理</span><span class="nav-section-arrow">▼</span>
     </div>
-    <div class="nav-item" onclick="showPage('admin', this)">
-      <i class="ti ti-user-circle"></i> 账号管理
+    <div class="nav-section-items" style="max-height:200px">
+      <div class="nav-item" onclick="showPage('roles', this)">
+        <i class="ti ti-shield"></i> 角色管理
+      </div>
+      <div class="nav-item" onclick="showPage('admin', this)">
+        <i class="ti ti-user-circle"></i> 账号管理
+      </div>
     </div>
-    <div class="nav-item" onclick="showPage('users', this)">
-      <i class="ti ti-users"></i> 用户列表
+
+    <div class="nav-section" onclick="toggleNavSection(this)">
+      <span>用户管理</span><span class="nav-section-arrow">▼</span>
     </div>
-    <div class="nav-item" onclick="showPage('deposit-order', this)">
-      <i class="ti ti-send"></i> 上分订单
+    <div class="nav-section-items" style="max-height:200px">
+      <div class="nav-item" onclick="showPage('users', this)">
+        <i class="ti ti-users"></i> 用户列表
+      </div>
     </div>
-    <div class="nav-item" onclick="showPage('withdraw-order', this)">
-      <i class="ti ti-arrow-down"></i> 下分订单
+
+    <div class="nav-section" onclick="toggleNavSection(this)">
+      <span>订单管理</span><span class="nav-section-arrow">▼</span>
     </div>
-    <!-- 指令说明：暂时隐藏，需要恢复时取消注释即可
-    <div class="nav-item" onclick="showPage('commands', this)">
-      <i class="ti ti-terminal-2"></i> 指令说明
+    <div class="nav-section-items" style="max-height:200px">
+      <div class="nav-item" onclick="showPage('deposit-order', this)">
+        <i class="ti ti-send"></i> 上分订单
+      </div>
+      <div class="nav-item" onclick="showPage('withdraw-order', this)">
+        <i class="ti ti-arrow-down"></i> 下分订单
+      </div>
     </div>
-    -->
-    <div class="nav-item" onclick="showPage('limits', this)">
-      <i class="ti ti-adjustments"></i> 限制设置
+
+    <div class="nav-section" onclick="toggleNavSection(this)">
+      <span>系统设置</span><span class="nav-section-arrow">▼</span>
     </div>
-    <div class="nav-item" onclick="showPage('settings', this)">
-      <i class="ti ti-settings"></i> 站点功能权限
-    </div>
-    <div class="nav-item" onclick="showPage('oplog', this)">
-      <i class="ti ti-clipboard-list"></i> 操作日志
+    <div class="nav-section-items" style="max-height:200px">
+      <div class="nav-item" onclick="showPage('settings', this)">
+        <i class="ti ti-settings"></i> 站点功能设置
+      </div>
+      <div class="nav-item" onclick="showPage('oplog', this)">
+        <i class="ti ti-clipboard-list"></i> 操作日志
+      </div>
     </div>
   </nav>
 </aside>
@@ -678,11 +730,12 @@
   <div class="content">
 
     <!-- ══ 概览 ══ -->
-    <div class="page" id="page-overview">
+    <div class="page active" id="page-overview">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
         <span style="font-size:13px;color:#606266">站点：</span>
         <div class="multi-site-selector" id="overview-site-selector" style="display:inline-block"></div>
-        <span style="color:var(--text-muted);font-size:12px;margin-left:6px">今日数据：上分总额 / 下分总额 / 订单数</span>
+        <span style="flex:1"></span>
+        <span style="color:#F56C6C;font-size:12px;font-weight:500">每5分钟自动更新</span>
       </div>
       <div class="metrics">
         <div class="metric-card">
@@ -716,15 +769,11 @@
       </div>
     </div>
 
-    <!-- ══ TG 用户列表 ══ -->
-    <div class="page active" id="page-users">
+    <!-- ══ 用户列表 ══ -->
+    <div class="page" id="page-users">
 
       <!-- Filter panel -->
       <div class="filter-panel">
-        <div class="filter-row" style="margin-bottom:10px">
-          <span style="font-size:13px;color:#606266;margin-right:6px;flex-shrink:0">站点：</span>
-          <div class="multi-site-selector" id="users-site-selector"></div>
-        </div>
         <div class="filter-row">
           <input class="fi" style="width:200px" id="search-tgid" placeholder="请输入 Telegram ID...">
           <span style="font-size:13px;color:#606266">加入时间：</span>
@@ -739,6 +788,7 @@
       <!-- Action buttons -->
       <div class="action-bar">
         <button class="btn" onclick="batchToggleStatus()">批量启用(禁用)</button>
+        <button class="btn" style="background:#fff" onclick="openBatchAddModal()"><i class="ti ti-plus"></i> 批量添加</button>
       </div>
 
       <!-- Table -->
@@ -747,11 +797,11 @@
           <thead>
             <tr>
               <th style="width:36px;padding-left:12px"><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)"></th>
-              <th>产品</th>
-              <th>站点</th>
               <th>用户ID</th>
               <th>TG用户名</th>
               <th>名称</th>
+              <th>邮箱</th>
+              <th>手机号</th>
               <th>账号类型</th>
               <th>加入时间</th>
               <th>状态</th>
@@ -759,49 +809,49 @@
             </tr>
           </thead>
           <tbody id="user-table-body">
-            <tr data-site="EX01" data-date="2026-01-15">
+            <tr data-date="2026-01-15">
               <td style="padding-left:12px"><input type="checkbox" class="user-checkbox" value="104821"></td>
-              <td><span class="site-tag">交易所</span></td>
-              <td style="color:#666;font-size:12px">01</td>
               <td style="color:#666;font-size:12px;font-family:monospace">104821</td>
               <td style="color:#333">@sunny_trader</td>
               <td style="color:#666">Sunny</td>
+              <td style="color:#666;font-size:12px">—</td>
+              <td style="color:#666;font-size:12px">—</td>
               <td><span class="badge badge-normal">一般</span></td>
               <td style="color:#666;font-size:12px">2026-01-15</td>
               <td><span class="badge badge-block" data-status="blocked">禁用</span></td>
               <td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openUserEditModal(this)">&#9998; 编辑</span></td>
             </tr>
-            <tr data-site="ST01" data-date="2026-02-08">
+            <tr data-date="2026-02-08">
               <td style="padding-left:12px"><input type="checkbox" class="user-checkbox" value="208374"></td>
-              <td><span class="site-tag">股票</span></td>
-              <td style="color:#666;font-size:12px">01</td>
               <td style="color:#666;font-size:12px;font-family:monospace">208374</td>
               <td style="color:#333">@ace024</td>
               <td style="color:#666">Ace</td>
+              <td style="color:#666;font-size:12px">—</td>
+              <td style="color:#666;font-size:12px">—</td>
               <td><span class="badge badge-normal">一般</span></td>
               <td style="color:#666;font-size:12px">2026-02-08</td>
               <td><span class="badge badge-block" data-status="blocked">禁用</span></td>
               <td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openUserEditModal(this)">&#9998; 编辑</span></td>
             </tr>
-            <tr data-site="PB01" data-date="2025-12-20">
+            <tr data-date="2025-12-20">
               <td style="padding-left:12px"><input type="checkbox" class="user-checkbox" value="301928"></td>
-              <td><span class="site-tag">充电宝</span></td>
-              <td style="color:#666;font-size:12px">01</td>
               <td style="color:#666;font-size:12px;font-family:monospace">301928</td>
               <td style="color:#333">@powerbank_li</td>
               <td style="color:#666">Power Li</td>
+              <td style="color:#666;font-size:12px">—</td>
+              <td style="color:#666;font-size:12px">—</td>
               <td><span class="badge" style="background:#FFF3E0;color:#E6A23C">测试</span></td>
               <td style="color:#666;font-size:12px">2025-12-20</td>
               <td><span class="badge badge-block" data-status="blocked">禁用</span></td>
               <td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openUserEditModal(this)">&#9998; 编辑</span></td>
             </tr>
-            <tr data-site="PB02" data-date="2026-03-11">
+            <tr data-date="2026-03-11">
               <td style="padding-left:12px"><input type="checkbox" class="user-checkbox" value="418203"></td>
-              <td><span class="site-tag">充电宝</span></td>
-              <td style="color:#666;font-size:12px">02</td>
               <td style="color:#666;font-size:12px;font-family:monospace">418203</td>
               <td style="color:#333">@stock_chen</td>
               <td style="color:#666">Stock Chen</td>
+              <td style="color:#666;font-size:12px">—</td>
+              <td style="color:#666;font-size:12px">—</td>
               <td><span class="badge badge-normal">一般</span></td>
               <td style="color:#666;font-size:12px">2026-03-11</td>
               <td><span class="badge badge-block" data-status="blocked">禁用</span></td>
@@ -1212,11 +1262,11 @@
       </div>
     </div>
 
-    <!-- ══ 站点功能权限 ══ -->
+    <!-- ══ 站点功能设置 ══ -->
     <div class="page" id="page-settings">
       <div class="card">
         <div class="card-header">
-          <span class="card-title">站点功能权限</span>
+          <span class="card-title">站点功能设置</span>
           <span style="font-size:12px;color:#999">设定各站点可使用的机器人功能，未开放会收到"功能未开放"的提示</span>
         </div>
         <div id="site-perm-tabs" style="margin-bottom:12px"></div>
@@ -1243,7 +1293,7 @@
             <option value="账号管理">账号管理</option>
             <option value="TG用户列表">TG用户列表</option>
             <option value="限制设置">限制设置</option>
-            <option value="站点功能权限">站点功能权限</option>
+            <option value="站点功能设置">站点功能设置</option>
           </select>
           <select class="fi" style="width:120px" id="oplog-filter-action">
             <option value="">全部操作</option>
@@ -1297,10 +1347,10 @@
               <td style="color:#333">104821 (@sunny_trader)</td>
               <td style="color:#666;font-size:12px">修改账号类型：一般 → 测试；状态：禁用 → 启用</td>
             </tr>
-            <tr data-page="站点功能权限" data-action="编辑" data-date="2026-06-21">
+            <tr data-page="站点功能设置" data-action="编辑" data-date="2026-06-21">
               <td style="padding-left:14px;color:#666;font-size:12px">2026-06-21 14:20</td>
               <td style="color:#333">admin</td>
-              <td><span class="badge badge-normal">站点功能权限</span></td>
+              <td><span class="badge badge-normal">站点功能设置</span></td>
               <td><span class="badge badge-vip">编辑</span></td>
               <td style="color:#333">充电宝-01 ～ 充电宝-05</td>
               <td style="color:#666;font-size:12px">批量关闭下分（提现）功能</td>
@@ -1369,10 +1419,7 @@
               <td style="color:#666;font-size:12px">2026-01-01 00:00</td>
               <td style="color:#666;font-size:12px">—</td>
               <td>
-                <div class="labeled-toggle on" onclick="toggleAdminStatus(this)">
-                  <span class="toggle-label">启用</span>
-                  <div class="toggle-switch on"></div>
-                </div>
+                <div class="labeled-toggle on" onclick="toggleAdminStatus(this)"><span class="toggle-label">启用</span><div class="toggle-knob"></div></div>
               </td>
               <td>
                 <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openEditAccountModal(this)">&#9998; 修改</span>
@@ -1388,10 +1435,7 @@
               <td style="color:#666;font-size:12px">2026-03-15 10:30</td>
               <td style="color:#666;font-size:12px">admin</td>
               <td>
-                <div class="labeled-toggle on" onclick="toggleAdminStatus(this)">
-                  <span class="toggle-label">启用</span>
-                  <div class="toggle-switch on"></div>
-                </div>
+                <div class="labeled-toggle on" onclick="toggleAdminStatus(this)"><span class="toggle-label">启用</span><div class="toggle-knob"></div></div>
               </td>
               <td>
                 <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openEditAccountModal(this)">&#9998; 修改</span>
@@ -1478,6 +1522,8 @@ const ICONS = {
   'chevron-down':'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
   'adjustments':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="9" cy="6" r="2" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="2" fill="currentColor" stroke="none"/></svg>',
   'shield':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.6 9.5-8 11-4.4-1.5-8-6-8-11V6l8-4z"/></svg>',
+  'history':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-5"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>',
+  'clipboard-list':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M5 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>',
 };
 
 function renderIcons() {
@@ -1500,12 +1546,12 @@ const pageMeta = {
   overview:        ['首页', '概览'],
   roles:           ['首页', '角色管理'],
   admin:           ['首页', '账号管理'],
-  users:           ['首页', 'TG 用户列表'],
+  users:           ['首页', '用户列表'],
   'deposit-order': ['首页', '上分订单'],
   'withdraw-order':['首页', '下分订单'],
   commands:        ['首页', '指令说明'],
   limits:          ['首页', '限制设置'],
-  settings:        ['首页', '站点功能权限'],
+  settings:        ['首页', '站点功能设置'],
   oplog:           ['首页', '操作日志'],
 };
 
@@ -1521,6 +1567,19 @@ document.addEventListener('click', function(e) {
   }
 });
 
+function toggleNavSection(header) {
+  var items = header.nextElementSibling;
+  if (!items || !items.classList.contains('nav-section-items')) return;
+  var collapsed = items.classList.contains('collapsed');
+  if (collapsed) {
+    items.classList.remove('collapsed');
+    header.classList.remove('collapsed');
+  } else {
+    items.classList.add('collapsed');
+    header.classList.add('collapsed');
+  }
+}
+
 function showPage(id, navEl) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -1533,7 +1592,7 @@ function showPage(id, navEl) {
   ).join('');
 }
 
-// ── 站点功能权限：数据驱动配置 ──
+// ── 站点功能设置：数据驱动配置 ──
 // 站点数量可能很多（如充电宝类别下有 40 个），所以按类别分页展示，避免表格过长。
 // 以后新增功能，只要在 SITE_FEATURES 数组里加一项即可，每个类别的表格都会自动多一列。
 // 以后新增类别或站点，只要改 SITE_CATEGORIES（定义在下方）即可，这里不用改。
@@ -1946,29 +2005,54 @@ document.addEventListener('click', function(e) {
 
 // ── 角色管理 ──
 // 所有菜单项定义，key 对应 showPage 的 id，label 显示在弹窗里
-const ALL_MENUS = [
-  { key: 'overview',        label: '首页' },
-  { key: 'admin',           label: '管理员' },
-  { key: 'roles',           label: '角色管理' },
-  { key: 'users',           label: '用户管理' },
-  { key: 'deposit-order',   label: '上分订单' },
-  { key: 'withdraw-order',  label: '下分订单' },
-  { key: 'limits',          label: '限制设置' },
-  { key: 'settings',        label: '站点功能权限' },
-  { key: 'oplog',           label: '操作日志' },
+// ── 权限菜单定义：分组 → 菜单 → 功能细项 ──
+// 现在每个菜单下先只开放「查询」功能；后续新增「新增/编辑/删除」等细项时，
+// 只需在对应菜单的 actions 数组里加一项，弹窗会自动展示。
+const MENU_GROUPS = [
+  {
+    group: '权限管理',
+    menus: [
+      { key: 'roles',  label: '角色管理', actions: [{ key: 'query', label: '查询' }] },
+      { key: 'admin',  label: '账号管理', actions: [{ key: 'query', label: '查询' }] },
+    ]
+  },
+  {
+    group: '用户管理',
+    menus: [
+      { key: 'users',  label: '用户列表', actions: [{ key: 'query', label: '查询' }] },
+    ]
+  },
+  {
+    group: '订单管理',
+    menus: [
+      { key: 'deposit-order',  label: '上分订单', actions: [{ key: 'query', label: '查询' }] },
+      { key: 'withdraw-order', label: '下分订单', actions: [{ key: 'query', label: '查询' }] },
+    ]
+  },
+  {
+    group: '系统设置',
+    menus: [
+      { key: 'settings', label: '站点功能设置', actions: [{ key: 'query', label: '查询' }] },
+      { key: 'oplog',    label: '操作日志',     actions: [{ key: 'query', label: '查询' }] },
+    ]
+  },
 ];
 
-// 角色数据：key → { name, desc, menus: Set of allowed menu keys }
+// 扁平化，供 applyRoleToNav 使用
+const ALL_MENUS = MENU_GROUPS.flatMap(function(g) { return g.menus; });
+
+// 角色数据：menus 存 Set of "menuKey" or "menuKey:actionKey"
+// 目前只有 query，所以 menus 存 menuKey 即代表「可查询」，兼容旧逻辑
 const ROLES = {
   super: {
     name: '超级管理员',
-    desc: '拥有所有菜单的完整访问权限，不可编辑',
-    menus: new Set(ALL_MENUS.map(m => m.key)),
+    desc: '全部权限，不可编辑',
+    menus: new Set(ALL_MENUS.map(function(m) { return m.key; })),
     builtin: true,
   },
   general: {
     name: '一般管理员',
-    desc: '可访问：用户管理、上分订单、下分订单',
+    desc: '用户管理、上下分订单',
     menus: new Set(['users', 'deposit-order', 'withdraw-order']),
     builtin: false,
   },
@@ -1997,18 +2081,61 @@ function openRoleModal(roleKey) {
 
   document.getElementById('role-modal-title').textContent = role ? '编辑角色权限' : '新增角色';
   document.getElementById('role-name-input').value = role ? role.name : '';
-  document.getElementById('role-name-input').disabled = role && role.builtin;
+  document.getElementById('role-name-input').disabled = !!(role && role.builtin);
   document.getElementById('role-desc-input').value = role ? role.desc : '';
 
+  // 渲染分组结构：分组标题可折叠 → 菜单行 → 功能细项
   var list = document.getElementById('role-perm-list');
-  list.innerHTML = ALL_MENUS.map(function(m) {
-    var checked = role ? role.menus.has(m.key) : false;
-    return '<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#333;cursor:pointer">' +
-      '<input type="checkbox" value="' + m.key + '"' + (checked ? ' checked' : '') + '> ' + m.label +
-      '</label>';
-  }).join('');
+  var html = '';
+  MENU_GROUPS.forEach(function(g, gi) {
+    var groupId = 'rg-' + gi;
+    html += '<div style="margin-bottom:4px;border:1px solid #EBEEF5;border-radius:4px;overflow:hidden">';
+    // 分组标题（可点击折叠）
+    html += '<div onclick="toggleRoleGroup(this)" style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:#F5F7FA;cursor:pointer;user-select:none">' +
+      '<span style="font-size:11px;font-weight:600;color:#606266;letter-spacing:0.5px;text-transform:uppercase">' + g.group + '</span>' +
+      '<span style="font-size:10px;color:#C0C4CC;transition:transform 0.2s" class="rg-arrow">▼</span>' +
+      '</div>';
+    // 分组内容
+    html += '<div class="rg-body" style="padding:6px 10px 8px">';
+    g.menus.forEach(function(m) {
+      var menuChecked = role ? role.menus.has(m.key) : false;
+      html += '<div style="margin-bottom:4px">';
+      html += '<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#333;font-weight:500;cursor:pointer;padding:3px 0">' +
+        '<input type="checkbox" class="role-menu-cb" data-menu="' + m.key + '"' + (menuChecked ? ' checked' : '') + ' onchange="onRoleMenuChange(this)"> ' +
+        m.label + '</label>';
+      html += '<div style="padding-left:22px;display:flex;gap:14px;flex-wrap:wrap">';
+      m.actions.forEach(function(a) {
+        html += '<label style="display:flex;align-items:center;gap:5px;font-size:12px;color:#666;cursor:pointer">' +
+          '<input type="checkbox" class="role-action-cb" data-menu="' + m.key + '" data-action="' + a.key + '"' +
+          (menuChecked ? ' checked' : '') + (menuChecked ? '' : ' disabled') + '> ' + a.label + '</label>';
+      });
+      html += '</div></div>';
+    });
+    html += '</div></div>';
+  });
+  list.innerHTML = html;
 
   document.getElementById('role-modal').style.display = 'block';
+}
+
+// 菜单勾选/取消时，联动下方细项的 checked 和 disabled 状态
+function onRoleMenuChange(cb) {
+  var menuKey = cb.dataset.menu;
+  var checked = cb.checked;
+  var container = cb.closest('div');
+  container.querySelectorAll('.role-action-cb[data-menu="' + menuKey + '"]').forEach(function(ac) {
+    ac.checked = checked;
+    ac.disabled = !checked;
+  });
+}
+
+function toggleRoleGroup(header) {
+  var body = header.nextElementSibling;
+  var arrow = header.querySelector('.rg-arrow');
+  if (!body) return;
+  var collapsed = body.style.display === 'none';
+  body.style.display = collapsed ? '' : 'none';
+  if (arrow) arrow.style.transform = collapsed ? '' : 'rotate(-90deg)';
 }
 
 function closeRoleModal() {
@@ -2022,8 +2149,8 @@ function confirmRoleModal() {
   if (!name) { alert('请输入角色名称'); return; }
 
   var menus = new Set();
-  document.querySelectorAll('#role-perm-list input[type=checkbox]:checked').forEach(function(cb) {
-    menus.add(cb.value);
+  document.querySelectorAll('#role-perm-list .role-menu-cb:checked').forEach(function(cb) {
+    menus.add(cb.dataset.menu);
   });
   if (!menus.size) { alert('请至少选择一个可访问菜单'); return; }
 
@@ -2064,21 +2191,76 @@ function confirmRoleModal() {
 
 var _editingUserRow = null;
 
+function openBatchAddModal() {
+  document.getElementById('batch-add-input').value = '';
+  document.getElementById('batch-add-result').style.display = 'none';
+  document.querySelector('input[name="batch-type"][value="normal"]').checked = true;
+  document.querySelector('input[name="batch-status"][value="blocked"]').checked = true;
+  document.getElementById('batch-add-modal').style.display = 'block';
+}
+
+function closeBatchAddModal() {
+  document.getElementById('batch-add-modal').style.display = 'none';
+}
+
+function confirmBatchAdd() {
+  var raw = document.getElementById('batch-add-input').value;
+  var typeVal = document.querySelector('input[name="batch-type"]:checked').value;
+  var statusVal = document.querySelector('input[name="batch-status"]:checked').value;
+  var lines = raw.split('\n').map(function(l){ return l.trim(); }).filter(function(l){ return l.length > 0; });
+  if (!lines.length) { alert('请至少输入一个 TG 用户名'); return; }
+
+  var today = new Date();
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  var dateStr = today.getFullYear() + '-' + pad(today.getMonth()+1) + '-' + pad(today.getDate());
+  var typeLabel = typeVal === 'test' ? '测试' : '一般';
+  var typeBg = typeVal === 'test' ? 'background:#FFF3E0;color:#E6A23C' : '';
+  var typeCls = typeVal === 'test' ? '' : 'badge-normal';
+  var statusLabel = statusVal === 'normal' ? '启用' : '禁用';
+  var statusCls = statusVal === 'normal' ? 'badge-active' : 'badge-block';
+
+  var tbody = document.getElementById('user-table-body');
+  var added = 0;
+  lines.forEach(function(username) {
+    var tgid = username.startsWith('@') ? username : '@' + username;
+    var uid = Math.floor(Math.random() * 900000 + 100000); // 示例：后端应返回真实 ID
+    var tr = document.createElement('tr');
+    tr.dataset.date = dateStr;
+    tr.innerHTML =
+      '<td style="padding-left:12px"><input type="checkbox" class="user-checkbox" value="' + uid + '"></td>' +
+      '<td style="color:#666;font-size:12px;font-family:monospace">' + uid + '</td>' +
+      '<td style="color:#333">' + tgid + '</td>' +
+      '<td style="color:#666"></td>' +
+      '<td style="color:#666;font-size:12px"></td>' +
+      '<td style="color:#666;font-size:12px"></td>' +
+      '<td><span class="badge ' + typeCls + '" style="' + typeBg + '">' + typeLabel + '</span></td>' +
+      '<td style="color:#666;font-size:12px">' + dateStr + '</td>' +
+      '<td><span class="badge ' + statusCls + '" data-status="' + statusVal + '">' + statusLabel + '</span></td>' +
+      '<td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openUserEditModal(this)">&#9998; 编辑</span></td>';
+    tbody.appendChild(tr);
+    added++;
+  });
+
+  var result = document.getElementById('batch-add-result');
+  var statusText = statusVal === 'normal' ? '启用' : '禁用';
+  result.textContent = '已成功添加 ' + added + ' 名用户，状态已设置为“' + statusText + '”。';
+  result.style.display = 'block';
+  setTimeout(closeBatchAddModal, 1200);
+}
+
 function openUserEditModal(btn) {
   var row = btn.closest('tr');
   _editingUserRow = row;
   var cells = row.cells;
-  // 列顺序：0=checkbox, 1=产品, 2=站点, 3=用户ID, 4=TG用户名, 5=名称, 6=账号类型, 7=加入时间, 8=状态, 9=操作
-  document.getElementById('ue-uid').value = cells[3].textContent.trim();
-  document.getElementById('ue-username').value = cells[4].textContent.trim();
-  document.getElementById('ue-displayname').value = cells[5].textContent.trim();
-  document.getElementById('ue-email').value = row.dataset.email || '';
-  document.getElementById('ue-phone').value = row.dataset.phone || '';
-  // account type from badge
+  // 列顺序：0=checkbox, 1=用户ID, 2=TG用户名, 3=名称, 4=邮箱, 5=手机号, 6=账号类型, 7=加入时间, 8=状态, 9=操作
+  document.getElementById('ue-uid').value = cells[1].textContent.trim();
+  document.getElementById('ue-username').value = cells[2].textContent.trim();
+  document.getElementById('ue-displayname').value = cells[3].textContent.trim();
+  document.getElementById('ue-email').value = row.dataset.email || cells[4].textContent.trim() || '';
+  document.getElementById('ue-phone').value = row.dataset.phone || cells[5].textContent.trim() || '';
   var typeBadge = cells[6].querySelector('.badge');
   var typeVal = typeBadge && typeBadge.textContent.trim() === '测试' ? 'test' : 'normal';
   document.querySelectorAll('input[name="ue-type"]').forEach(function(r) { r.checked = r.value === typeVal; });
-  // status
   var statusBadge = cells[8].querySelector('[data-status]');
   var statusVal = statusBadge ? statusBadge.getAttribute('data-status') : 'blocked';
   document.getElementById('ue-status').value = statusVal;
@@ -2099,8 +2281,10 @@ function confirmUserEditModal() {
 
   if (_editingUserRow) {
     var cells = _editingUserRow.cells;
-    // 列顺序：0=checkbox, 1=产品, 2=站点, 3=用户ID, 4=TG用户名, 5=名称, 6=账号类型, 7=加入时间, 8=状态, 9=操作
-    cells[5].textContent = displayname;
+    // 列顺序：0=checkbox, 1=用户ID, 2=TG用户名, 3=名称, 4=邮箱, 5=手机号, 6=账号类型, 7=加入时间, 8=状态, 9=操作
+    cells[3].textContent = displayname;
+    cells[4].textContent = email;
+    cells[5].textContent = phone;
     _editingUserRow.dataset.email = email;
     _editingUserRow.dataset.phone = phone;
     var typeLabel = typeVal === 'test' ? '测试' : '一般';
@@ -2203,16 +2387,15 @@ function changeAdminStatus(btn){
 
 function toggleAdminStatus(wrapper) {
   var isOn = wrapper.classList.contains('on');
-  wrapper.classList.toggle('on', !isOn);
-  wrapper.classList.toggle('off', isOn);
   var label = wrapper.querySelector('.toggle-label');
-  var sw = wrapper.querySelector('.toggle-switch');
   if (isOn) {
+    wrapper.classList.remove('on');
+    wrapper.classList.add('off');
     label.textContent = '禁用';
-    sw.classList.remove('on');
   } else {
+    wrapper.classList.remove('off');
+    wrapper.classList.add('on');
     label.textContent = '启用';
-    sw.classList.add('on');
   }
 }
 
@@ -2296,7 +2479,7 @@ function confirmAccountModal() {
       '<td style="color:#666;font-size:12px">—</td>' +
       '<td style="color:#666;font-size:12px">' + nowStr + '</td>' +
       '<td style="color:#666;font-size:12px">admin</td>' +
-      '<td><div class="labeled-toggle on" onclick="toggleAdminStatus(this)"><span class="toggle-label">启用</span><div class="toggle-switch on"></div></div></td>' +
+      '<td><div class="labeled-toggle on" onclick="toggleAdminStatus(this)"><span class="toggle-label">启用</span><div class="toggle-knob"></div></div></td>' +
       '<td>' +
         '<span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openEditAccountModal(this)">&#9998; 修改</span>' +
         '<span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openPwdModal(\'' + account + '\')">&#9998; 密码重制</span>' +
@@ -2577,7 +2760,7 @@ function batchToggleStatus() {
   if (!selected.length) { alert('请先勾选用户'); return; }
   selected.forEach(function(cb) {
     var row = cb.closest('tr');
-    // 列顺序：0=checkbox,1=产品,2=站点,3=用户ID,4=TG用户名,5=名称,6=账号类型,7=加入时间,8=状态,9=操作
+    // 列顺序：0=checkbox,1=用户ID,2=TG用户名,3=名称,4=邮箱,5=手机号,6=账号类型,7=加入时间,8=状态,9=操作
     var statusTd = row.cells[8];
     if (!statusTd) return;
     var badge = statusTd.querySelector('[data-status]');
@@ -2813,7 +2996,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <div>
         <label style="font-size:13px;color:#606266;display:block;margin-bottom:8px"><span style="color:#F56C6C;margin-right:2px">*</span>可访问菜单</label>
-        <div id="role-perm-list" style="display:flex;flex-direction:column;gap:8px;padding:10px 12px;background:#F9FAFB;border-radius:4px;border:1px solid var(--border)"></div>
+        <div id="role-perm-list" style="display:flex;flex-direction:column;gap:4px;max-height:280px;overflow-y:auto;padding:2px 1px"></div>
       </div>
     </div>
     <div style="padding:8px 18px 16px;display:flex;justify-content:flex-end;gap:8px">
@@ -2947,6 +3130,52 @@ document.addEventListener('DOMContentLoaded', () => {
       <span onclick="closeOrderDetail()" style="cursor:pointer;color:#999;font-size:20px;line-height:1">&times;</span>
     </div>
     <div id="order-detail-body" style="padding:18px;display:flex;flex-direction:column;gap:0"></div>
+  </div>
+</div>
+
+<!-- ── 批量添加用户弹窗 ── -->
+<div id="batch-add-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:6px;width:460px;box-shadow:0 4px 24px rgba(0,0,0,0.18);overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:14px;font-weight:600;color:#333">批量添加用户</span>
+      <span onclick="closeBatchAddModal()" style="cursor:pointer;color:#999;font-size:20px;line-height:1">&times;</span>
+    </div>
+    <div style="padding:18px;display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">
+          <span style="color:#F56C6C;margin-right:2px">*</span>TG 用户名
+          <span style="color:#999;font-weight:400;margin-left:6px">每行一个，如 @username</span>
+        </label>
+        <textarea id="batch-add-input" class="fi" style="width:100%;height:160px;resize:vertical;font-family:monospace;font-size:12px;line-height:1.8" placeholder="@sunny_trader&#10;@ace024&#10;@powerbank_li"></textarea>
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">账号类型</label>
+        <div style="display:flex;gap:20px;padding-top:4px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+            <input type="radio" name="batch-type" value="normal" checked> 一般
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+            <input type="radio" name="batch-type" value="test"> 测试
+          </label>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">状态</label>
+        <div style="display:flex;gap:20px;padding-top:4px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+            <input type="radio" name="batch-status" value="blocked" checked> 禁用
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+            <input type="radio" name="batch-status" value="normal"> 启用
+          </label>
+        </div>
+      </div>
+      <div id="batch-add-result" style="display:none;font-size:12px;color:#67C23A;background:#F0FFF0;border-radius:4px;padding:8px 12px"></div>
+    </div>
+    <div style="padding:8px 18px 16px;display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn" onclick="closeBatchAddModal()">取消</button>
+      <button class="btn btn-green" onclick="confirmBatchAdd()">批量导入</button>
+    </div>
   </div>
 </div>
 
