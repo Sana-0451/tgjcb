@@ -1,0 +1,3449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TG 机器人后台</title>
+<style>
+  .icon { display:inline-block; vertical-align:middle; flex-shrink:0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F0F2F5;
+    --surface: #FFFFFF;
+    --sidebar-bg: #1C2333;
+    --primary: #1E90FF;
+    --primary-light: #E6F2FF;
+    --text: #222222;
+    --text-muted: #666666;
+    --text-faint: #999999;
+    --border: #E4E7ED;
+    --green: #52C41A;
+    --green-bg: #F6FFED;
+    --red: #FF4D4F;
+    --red-bg: #FFF1F0;
+    --amber: #FAAD14;
+    --amber-bg: #FFFBE6;
+    --radius: 4px;
+    --shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 200px;
+    background: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+
+  .sidebar-logo {
+    padding: 14px 14px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    transition: background 0.15s;
+  }
+  .sidebar-logo:hover { background: rgba(255,255,255,0.05); }
+
+  .logo-row { display: flex; align-items: center; gap: 9px; }
+
+  .logo-icon {
+    width: 30px; height: 30px;
+    border-radius: var(--radius);
+    background: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; flex-shrink: 0;
+  }
+
+  .logo-name { font-size: 13px; font-weight: 600; color: #fff; }
+  .logo-handle { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 1px; }
+
+  .nav { padding: 6px 0; flex: 1; }
+
+  .nav-section {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.6px; color: rgba(255,255,255,0.3);
+    text-transform: uppercase; padding: 14px 14px 4px;
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; user-select: none;
+    transition: color 0.12s;
+  }
+  .nav-section:hover { color: rgba(255,255,255,0.55); }
+  .nav-section .nav-section-arrow {
+    font-size: 9px; transition: transform 0.2s;
+    color: rgba(255,255,255,0.25);
+  }
+  .nav-section.collapsed .nav-section-arrow { transform: rotate(-90deg); }
+  .nav-section-items { overflow: hidden; transition: max-height 0.22s ease; }
+  .nav-section-items.collapsed { max-height: 0 !important; }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px; font-size: 12px;
+    color: rgba(255,255,255,0.55);
+    cursor: pointer; transition: all 0.12s;
+  }
+
+  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
+
+  .nav-item.active { color: #fff; background: var(--primary); }
+
+  .nav-badge {
+    margin-left: auto; font-size: 10px;
+    background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.75);
+    padding: 1px 5px; border-radius: 10px;
+  }
+
+  /* ── Collapsible nav group ── */
+  .nav-group { margin-top: 4px; }
+
+  .nav-group-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px; font-size: 12px;
+    color: rgba(255,255,255,0.55);
+    cursor: pointer; transition: all 0.12s;
+  }
+
+  .nav-group-header:hover { color: #fff; background: rgba(255,255,255,0.05); }
+
+  .nav-group-header span { flex: 1; }
+
+  .nav-group-arrow {
+    transition: transform 0.15s;
+    font-size: 11px;
+  }
+
+  .nav-group.collapsed .nav-group-arrow { transform: rotate(-90deg); }
+
+  .nav-group-body {
+    overflow: hidden;
+    max-height: 400px;
+    transition: max-height 0.2s ease;
+  }
+
+  .nav-group.collapsed .nav-group-body { max-height: 0; }
+
+  .nav-item.nav-sub { padding-left: 30px; }
+
+  .sidebar-footer {
+    padding: 8px 0 12px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* ── Main ── */
+  .main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; min-width: 0; }
+
+  /* ── Topbar ── */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 18px; height: 48px;
+    display: flex; align-items: center; gap: 10px;
+    flex-shrink: 0; position: sticky; top: 0; z-index: 10;
+  }
+
+  .topbar-hamburger { font-size: 17px; color: var(--text-muted); cursor: pointer; margin-right: 4px; }
+
+  .breadcrumb { display: flex; align-items: center; gap: 5px; font-size: 12px; flex: 1; }
+  .breadcrumb-item { color: var(--text-muted); }
+  .breadcrumb-item:last-child { color: var(--text); font-weight: 500; }
+  .breadcrumb-sep { color: #ccc; }
+
+  .topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+  .topbar-setting { display: flex; align-items: center; gap: 3px; font-size: 12px; color: var(--text-muted); cursor: pointer; }
+
+  .topbar-server { font-size: 12px; color: #1E90FF; font-weight: 500; }
+
+  .topbar-icon-btn {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-muted); transition: background 0.12s;
+  }
+
+  .topbar-icon-btn:hover { background: #f0f0f0; color: var(--text); }
+
+  .topbar-avatar {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #4A90D9; display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 11px; font-weight: 600; cursor: pointer;
+  }
+
+  .avatar-menu { position: relative; }
+
+  .avatar-dropdown {
+    display: none;
+    position: absolute;
+    top: 36px; right: 0;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    min-width: 140px;
+    padding: 6px 0;
+    z-index: 100;
+  }
+
+  .avatar-dropdown.open { display: block; }
+
+  .avatar-dropdown-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px; font-size: 12px;
+    color: #333; cursor: pointer; white-space: nowrap;
+  }
+
+  .avatar-dropdown-item:hover { background: #f5f5f5; }
+
+  .avatar-dropdown-danger { color: #F56C6C; }
+  .avatar-dropdown-danger:hover { background: #FFF1F0; }
+
+  .avatar-dropdown-divider {
+    height: 1px; background: var(--border); margin: 4px 0;
+  }
+
+  /* ── Tab bar ── */
+  .tab-bar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 18px; display: flex; align-items: center;
+    flex-shrink: 0; overflow-x: auto;
+  }
+
+  .tab-item {
+    display: flex; align-items: center; gap: 5px;
+    padding: 8px 12px; font-size: 12px;
+    color: var(--text-muted); cursor: pointer;
+    border-bottom: 2px solid transparent; white-space: nowrap;
+    transition: all 0.12s;
+  }
+
+  .tab-item:hover { color: var(--text); }
+
+  .tab-item.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+  .tab-close { font-size: 10px; color: var(--text-faint); padding: 1px 2px; border-radius: 2px; }
+  .tab-close:hover { background: #eee; color: var(--text); }
+
+  .tab-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); flex-shrink: 0; }
+
+  /* ── Content ── */
+  .content { padding: 14px 18px; flex: 1; }
+
+  /* ── Stat cards ── */
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 16px;
+    box-shadow: var(--shadow); text-align: center;
+  }
+
+  .stat-label { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+  .stat-value { font-size: 26px; font-weight: 700; color: var(--text); }
+
+  /* ── Filter panel ── */
+  .filter-panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px 14px;
+    margin-bottom: 10px; box-shadow: var(--shadow);
+  }
+
+  .filter-row {
+    display: flex; gap: 7px; align-items: center;
+    flex-wrap: wrap; margin-bottom: 7px;
+  }
+
+  .filter-row:last-child { margin-bottom: 0; }
+
+  .fi {
+    height: 32px; padding: 0 11px;
+    border: 1px solid #DCDFE6; border-radius: 3px;
+    font-size: 13px; font-family: inherit; background: #fff;
+    color: #333; outline: none;
+  }
+
+  .fi:focus { border-color: #409EFF; box-shadow: 0 0 0 2px rgba(64,158,255,0.1); }
+  .fi::placeholder { color: #C0C4CC; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 0 15px; height: 32px; font-size: 13px;
+    border-radius: 3px; cursor: pointer;
+    border: 1px solid #d9d9d9; background: #fff;
+    color: #333; font-weight: 400;
+    transition: all 0.12s; white-space: nowrap;
+    font-family: inherit; line-height: 1;
+  }
+
+  .btn:hover { background: #f5f5f5; border-color: #aaa; }
+  .btn-green  { background: #55C92A; color:#fff; border-color:#55C92A; font-weight:400; }
+  .btn-green:hover  { background:#45a81f!important; border-color:#45a81f!important; }
+  .btn-blue   { background: #3AAFE8; color:#fff; border-color:#3AAFE8; font-weight:400; }
+  .btn-blue:hover   { background:#2490c9!important; border-color:#2490c9!important; }
+  .btn-teal   { background: #3AAFE8; color:#fff; border-color:#3AAFE8; font-weight:400; }
+  .btn-teal:hover   { background:#2490c9!important; border-color:#2490c9!important; }
+  .btn-red    { background: #F56C6C; color:#fff; border-color:#F56C6C; font-weight:400; }
+  .btn-red:hover    { background:#d94f4f!important; border-color:#d94f4f!important; }
+  .btn-outline-red { background:#fff; color:#F56C6C; border-color:#F56C6C; font-weight:400; }
+  .btn-outline-red:hover { background:#fff5f5!important; }
+  .btn-dark   { background: #606266; color:#fff; border-color:#606266; font-weight:400; }
+  .btn-dark:hover { background:#4e5053!important; }
+  .btn-purple { background: #5b6ee1; color:#fff; border-color:#5b6ee1; }
+  .btn-gray   { background: #909399; color:#fff; border-color:#909399; }
+  .btn-sm { padding: 0 9px; height: 26px; font-size: 12px; border-radius: 3px; }
+
+  /* ── Action / batch bars ── */
+  .action-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .batch-bar  { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+
+  /* ── Table card ── */
+  .table-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden;
+  }
+
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+
+  .data-table th {
+    text-align: left; font-size: 11px; font-weight: 500;
+    color: var(--text-muted); padding: 9px 10px;
+    border-bottom: 1px solid var(--border);
+    background: #FAFAFA; white-space: nowrap;
+  }
+
+  .data-table td {
+    padding: 7px 10px; border-bottom: 1px solid #f2f2f2;
+    color: var(--text); vertical-align: middle;
+  }
+
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: #f9fafc; }
+
+  /* ── Table action links ── */
+  .tbl-actions { display: flex; flex-direction: column; gap: 3px; }
+  .tbl-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+  .tl { font-size: 11px; cursor: pointer; white-space: nowrap; }
+  .tl-blue { color: #1E90FF; }
+  .tl-blue:hover { text-decoration: underline; }
+  .tl-red { color: #FF4D4F; }
+  .tl-red:hover { text-decoration: underline; }
+  .tl-gray { color: var(--text-muted); }
+  .tl-gray:hover { text-decoration: underline; }
+
+  .tbl-info {
+    background: #EBF5FF; color: #1E90FF;
+    font-size: 11px; padding: 1px 8px; border-radius: 2px;
+    cursor: pointer; white-space: nowrap; display: inline-block; margin-bottom: 3px;
+  }
+
+  .tbl-bal {
+    background: #F6FFED; color: var(--green);
+    font-size: 11px; padding: 1px 8px; border-radius: 2px;
+    white-space: nowrap; display: inline-block;
+  }
+
+  /* ── Badges ── */
+  .badge {
+    display: inline-block; font-size: 11px;
+    padding: 1px 7px; border-radius: var(--radius);
+    font-weight: 500; white-space: nowrap;
+  }
+
+  .badge-active { background: var(--green-bg); color: var(--green); }
+  .badge-block  { background: var(--red-bg);   color: var(--red); }
+  .badge-vip    { background: var(--amber-bg);  color: var(--amber); }
+  .badge-normal { background: #f0f0f0; color: #555; }
+
+  /* ── Pages ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #d0d0d0; border-radius: 2px; }
+
+  /* ── Overview ── */
+  .metrics { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 14px; }
+
+  .metric-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow);
+  }
+
+  .metric-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .metric-label { font-size: 12px; color: var(--text-muted); }
+
+  .metric-icon {
+    width: 26px; height: 26px; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .metric-value { font-size: 20px; font-weight: 700; color: var(--text); }
+
+  /* ── Settings ── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow);
+  }
+
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+
+  /* ── Toggle switch ── */
+  .toggle-switch {
+    display: inline-block;
+    width: 38px; height: 20px;
+    background: #DCDFE6;
+    border-radius: 10px;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.15s;
+    vertical-align: middle;
+  }
+
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 16px; height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    transition: left 0.15s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  }
+
+  .toggle-switch.on {
+    background: #52C41A;
+  }
+
+  .toggle-switch.on::after {
+    left: 20px;
+  }
+
+  /* 带文字标签的开关（账号管理状态列用） */
+  /* 帐号管理状态开关：文字嵌在开关内部 */
+  .labeled-toggle {
+    display: inline-flex;
+    align-items: center;
+    background: #C0C4CC;
+    border-radius: 8px;
+    padding: 1px 1px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+    min-width: 38px;
+  }
+
+  .labeled-toggle.on { background: #409EFF; }
+
+  .labeled-toggle .toggle-label {
+    font-size: 9px;
+    color: #fff;
+    font-weight: 500;
+    padding: 0 3px 0 4px;
+    line-height: 12px;
+    flex: 1;
+    text-align: center;
+  }
+
+  .labeled-toggle .toggle-knob {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  }
+
+  .labeled-toggle.off {
+    background: #C0C4CC;
+    flex-direction: row-reverse;
+  }
+
+  .labeled-toggle.off .toggle-label { color: #fff; }
+
+  .col-toggle-link {
+    font-size: 11px; font-weight: 400;
+    color: #409EFF; cursor: pointer;
+  }
+  .col-toggle-link:hover { text-decoration: underline; }
+
+  .site-tag {
+    display: inline-block;
+    font-size: 11px;
+    color: #409EFF;
+    background: #EBF5FF;
+    padding: 1px 7px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  /* ── Multi-site selector (dropdown with checkboxes) ── */
+  .multi-site-selector { position: relative; display: inline-block; }
+
+  .multi-site-trigger {
+    height: 32px; padding: 0 11px;
+    border: 1px solid #DCDFE6; border-radius: 3px;
+    font-size: 13px; color: #333; background: #fff;
+    display: flex; align-items: center; gap: 6px;
+    cursor: pointer; min-width: 140px; justify-content: space-between;
+  }
+
+  .multi-site-trigger:hover { border-color: #409EFF; }
+
+  .multi-site-panel {
+    display: none;
+    position: absolute;
+    top: 36px; left: 0;
+    width: 320px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    z-index: 100;
+    overflow: hidden;
+  }
+
+  .multi-site-panel.open { display: block; }
+
+  .multi-site-panes {
+    display: flex;
+    height: 280px;
+  }
+
+  .multi-site-cat-pane {
+    width: 110px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    background: #FAFAFA;
+    overflow-y: auto;
+    padding: 6px 0;
+  }
+
+  .multi-site-cat-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; font-size: 12px; color: #333;
+    cursor: pointer;
+  }
+
+  .multi-site-cat-item:hover { background: #f0f0f0; }
+
+  .multi-site-cat-item.active {
+    background: #fff;
+    color: #409EFF;
+    font-weight: 600;
+    box-shadow: inset 2px 0 0 #409EFF;
+  }
+
+  .multi-site-cat-badge {
+    font-size: 10px;
+    background: #409EFF;
+    color: #fff;
+    padding: 0 5px;
+    border-radius: 8px;
+    min-width: 14px;
+    text-align: center;
+    line-height: 16px;
+  }
+
+  .multi-site-site-pane {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 0;
+  }
+
+  .multi-site-option {
+    display: flex; align-items: center; gap: 7px;
+    padding: 5px 12px; font-size: 12px; color: #333;
+    cursor: pointer;
+  }
+
+  .multi-site-option:hover { background: #f5f5f5; }
+
+  .multi-site-footer {
+    border-top: 1px solid var(--border);
+    padding: 6px 12px;
+    display: flex; justify-content: space-between;
+    gap: 6px;
+  }
+
+  .multi-site-footer span {
+    font-size: 12px; color: #409EFF; cursor: pointer;
+  }
+
+  .card-title { font-size: 13px; font-weight: 600; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* ── Pagination ── */
+  .pagination {
+    padding: 9px 14px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+
+  .page-info { font-size: 12px; color: var(--text-muted); }
+  .page-btns { display: flex; gap: 4px; }
+
+  .page-btn {
+    min-width: 26px; height: 26px; padding: 0 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; border: 1px solid var(--border); border-radius: var(--radius);
+    cursor: pointer; background: #fff; color: var(--text); font-family: inherit;
+  }
+
+  .page-btn:hover { background: #f5f5f5; }
+  .page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+  @media (max-width: 900px) {
+    .stat-row, .metrics { grid-template-columns: repeat(2,1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+  /* ── Avatar ── */
+  .avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; flex-shrink: 0;
+  }
+  .av-blue   { background: #DBEAFE; color: #1D4ED8; }
+  .av-teal   { background: #CCFBF1; color: #0F766E; }
+  .av-pink   { background: #FCE7F3; color: #BE185D; }
+  .av-purple { background: #EDE9FE; color: #7C3AED; }
+  .av-amber  { background: #FEF3C7; color: #92400E; }
+</style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo" onclick="showPage('overview', null)" style="cursor:pointer">
+    <div class="logo-row">
+      <div class="logo-icon"><i class="ti ti-robot"></i></div>
+      <div>
+        <div class="logo-name">TG 机器人</div>
+        <div class="logo-handle">@mybot_official</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-item" onclick="showPage('overview', this)">
+      <i class="ti ti-layout-dashboard"></i> 首页
+    </div>
+
+    <div class="nav-section" onclick="toggleNavSection(this)">
+      <span>权限管理</span><span class="nav-section-arrow">▼</span>
+    </div>
+    <div class="nav-section-items" style="max-height:200px">
+      <div class="nav-item" onclick="showPage('roles', this)">
+        <i class="ti ti-shield"></i> 角色管理
+      </div>
+      <div class="nav-item" onclick="showPage('admin', this)">
+        <i class="ti ti-user-circle"></i> 账号管理
+      </div>
+    </div>
+
+    <div class="nav-section" onclick="toggleNavSection(this)">
+      <span>用户管理</span><span class="nav-section-arrow">▼</span>
+    </div>
+    <div class="nav-section-items" style="max-height:200px">
+      <div class="nav-item" onclick="showPage('users', this)">
+        <i class="ti ti-users"></i> 用户列表
+      </div>
+    </div>
+
+    <div class="nav-section" onclick="toggleNavSection(this)">
+      <span>订单管理</span><span class="nav-section-arrow">▼</span>
+    </div>
+    <div class="nav-section-items" style="max-height:200px">
+      <div class="nav-item" onclick="showPage('deposit-order', this)">
+        <i class="ti ti-send"></i> 上分订单
+      </div>
+      <div class="nav-item" onclick="showPage('withdraw-order', this)">
+        <i class="ti ti-arrow-down"></i> 下分订单
+      </div>
+    </div>
+
+    <div class="nav-section" onclick="toggleNavSection(this)">
+      <span>系统设置</span><span class="nav-section-arrow">▼</span>
+    </div>
+    <div class="nav-section-items" style="max-height:200px">
+      <div class="nav-item" onclick="showPage('settings', this)">
+        <i class="ti ti-settings"></i> 站点功能设置
+      </div>
+      <div class="nav-item" onclick="showPage('oplog', this)">
+        <i class="ti ti-clipboard-list"></i> 操作日志
+      </div>
+    </div>
+  </nav>
+</aside>
+
+<!-- ── Main ── -->
+<div class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <span class="topbar-hamburger">&#9776;</span>
+    <div class="breadcrumb" id="topbar-breadcrumb">
+      <span class="breadcrumb-item">首页</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-item">用户管理</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-item">用户列表</span>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-setting"><i class="ti ti-settings" style="font-size:12px"></i>&nbsp;提示设置</div>
+      <div class="topbar-server" id="topbar-clock">服务器：2026-06-18 09:19:23 (Z)</div>
+      <div class="topbar-icon-btn"><i class="ti ti-search" style="font-size:13px"></i></div>
+      <div class="avatar-menu" id="avatar-menu">
+        <div class="topbar-avatar" onclick="toggleAvatarMenu(event)">A</div>
+        <div class="avatar-dropdown" id="avatar-dropdown">
+          <div class="avatar-dropdown-item">
+            <i class="ti ti-user-circle"></i> 管理员
+          </div>
+          <div class="avatar-dropdown-divider"></div>
+          <div class="avatar-dropdown-item avatar-dropdown-danger">
+            <i class="ti ti-logout"></i> 退出登录
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab bar -->
+  <div class="tab-bar">
+    <div class="tab-item" onclick="showPage('overview',null)">首页</div>
+    <div class="tab-item" onclick="showPage('users',null)">用户管理 <span class="tab-close">×</span></div>
+    <div class="tab-item" onclick="showPage('commands',null)">角色管理 <span class="tab-close">×</span></div>
+    <div class="tab-item active" onclick="showPage('users',null)"><span class="tab-dot"></span> 用户列表 <span class="tab-close">×</span></div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ 概览 ══ -->
+    <div class="page active" id="page-overview">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <span style="font-size:13px;color:#606266">站点：</span>
+        <div class="multi-site-selector" id="overview-site-selector" style="display:inline-block"></div>
+        <span style="flex:1"></span>
+        <span style="color:#F56C6C;font-size:12px;font-weight:500">每5分钟自动更新</span>
+      </div>
+      <div class="metrics">
+        <div class="metric-card">
+          <div class="metric-top">
+            <span class="metric-label">今日上分总额</span>
+            <div class="metric-icon" style="background:#EFF6FF;color:#2563EB"><i class="ti ti-send"></i></div>
+          </div>
+          <div class="metric-value" id="site-up-amount">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-top">
+            <span class="metric-label">今日下分总额</span>
+            <div class="metric-icon" style="background:#FEF2F2;color:#DC2626"><i class="ti ti-ban"></i></div>
+          </div>
+          <div class="metric-value" id="site-down-amount">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-top">
+            <span class="metric-label">上分订单数（今日）</span>
+            <div class="metric-icon" style="background:#FFFBEB;color:#D97706"><i class="ti ti-plus"></i></div>
+          </div>
+          <div class="metric-value" id="site-up-orders">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-top">
+            <span class="metric-label">下分订单数（今日）</span>
+            <div class="metric-icon" style="background:#F5F3FF;color:#7C3AED"><i class="ti ti-message"></i></div>
+          </div>
+          <div class="metric-value" id="site-down-orders">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 用户列表 ══ -->
+    <div class="page" id="page-users">
+
+      <!-- Filter panel -->
+      <div class="filter-panel">
+        <div class="filter-row">
+          <input class="fi" style="width:200px" id="search-tgid" placeholder="请输入 Telegram ID...">
+          <span style="font-size:13px;color:#606266">加入时间：</span>
+          <input class="fi" type="date" style="width:150px" id="search-date-start">
+          <span style="color:#999">至</span>
+          <input class="fi" type="date" style="width:150px" id="search-date-end">
+          <button class="btn btn-green" onclick="searchUsers()"><i class="ti ti-search"></i> 搜索</button>
+          <button class="btn btn-teal" onclick="resetSearch()"><i class="ti ti-rotate-clockwise"></i> 重置</button>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="action-bar">
+        <button class="btn" onclick="batchToggleStatus()">批量启用(禁用)</button>
+        <button class="btn" style="background:#fff" onclick="openBatchAddModal()"><i class="ti ti-plus"></i> 批量添加</button>
+      </div>
+
+      <!-- Table -->
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:36px;padding-left:12px"><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)"></th>
+              <th>用户ID</th>
+              <th>TG用户名</th>
+              <th>名称</th>
+              <th>账号类型</th>
+              <th>邮箱</th>
+              <th>手机号</th>
+              <th>加入时间</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="user-table-body">
+            <tr data-date="2026-01-15">
+              <td style="padding-left:12px"><input type="checkbox" class="user-checkbox" value="104821"></td>
+              <td style="color:#666;font-size:12px;font-family:monospace">104821</td>
+              <td style="color:#333">@sunny_trader</td>
+              <td style="color:#666">Sunny</td>
+              <td><span class="badge badge-normal">一般</span></td>
+              <td style="color:#666;font-size:12px"></td>
+              <td style="color:#666;font-size:12px"></td>
+              <td style="color:#666;font-size:12px">2026-01-15</td>
+              <td><span class="badge badge-block" data-status="blocked">禁用</span></td>
+              <td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openUserEditModal(this)">&#9998; 编辑</span></td>
+            </tr>
+            <tr data-date="2026-02-08">
+              <td style="padding-left:12px"><input type="checkbox" class="user-checkbox" value="208374"></td>
+              <td style="color:#666;font-size:12px;font-family:monospace">208374</td>
+              <td style="color:#333">@ace024</td>
+              <td style="color:#666">Ace</td>
+              <td><span class="badge badge-normal">一般</span></td>
+              <td style="color:#666;font-size:12px"></td>
+              <td style="color:#666;font-size:12px"></td>
+              <td style="color:#666;font-size:12px">2026-02-08</td>
+              <td><span class="badge badge-block" data-status="blocked">禁用</span></td>
+              <td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openUserEditModal(this)">&#9998; 编辑</span></td>
+            </tr>
+            <tr data-date="2025-12-20">
+              <td style="padding-left:12px"><input type="checkbox" class="user-checkbox" value="301928"></td>
+              <td style="color:#666;font-size:12px;font-family:monospace">301928</td>
+              <td style="color:#333">@powerbank_li</td>
+              <td style="color:#666">Power Li</td>
+              <td><span class="badge" style="background:#FFF3E0;color:#E6A23C">测试</span></td>
+              <td style="color:#666;font-size:12px"></td>
+              <td style="color:#666;font-size:12px"></td>
+              <td style="color:#666;font-size:12px">2025-12-20</td>
+              <td><span class="badge badge-block" data-status="blocked">禁用</span></td>
+              <td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openUserEditModal(this)">&#9998; 编辑</span></td>
+            </tr>
+            <tr data-date="2026-03-11">
+              <td style="padding-left:12px"><input type="checkbox" class="user-checkbox" value="418203"></td>
+              <td style="color:#666;font-size:12px;font-family:monospace">418203</td>
+              <td style="color:#333">@stock_chen</td>
+              <td style="color:#666">Stock Chen</td>
+              <td><span class="badge badge-normal">一般</span></td>
+              <td style="color:#666;font-size:12px"></td>
+              <td style="color:#666;font-size:12px"></td>
+              <td style="color:#666;font-size:12px">2026-03-11</td>
+              <td><span class="badge badge-block" data-status="blocked">禁用</span></td>
+              <td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openUserEditModal(this)">&#9998; 编辑</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span class="page-info">共 12,847 名用户</span>
+          <div class="page-btns">
+            <button class="page-btn">上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">下一页</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 上分订单 ══ -->
+    <div class="page" id="page-deposit-order">
+      <div class="filter-panel">
+        <div class="filter-row" style="margin-bottom:10px">
+          <span style="font-size:13px;color:#606266;margin-right:6px;flex-shrink:0">站点：</span>
+          <div class="multi-site-selector" id="dep-site-selector" style="display:inline-block"></div>
+        </div>
+        <div class="filter-row">
+          <input class="fi" style="width:180px" id="dep-search-order" placeholder="请输入订单号...">
+          <input class="fi" style="width:150px" id="dep-search-uid" placeholder="请输入用户ID...">
+          <span style="font-size:13px;color:#606266">申请时间：</span>
+          <input class="fi" type="date" style="width:150px" id="dep-date-start">
+          <span style="color:#999">至</span>
+          <input class="fi" type="date" style="width:150px" id="dep-date-end">
+          <button class="btn btn-green" onclick="searchDepositOrders()"><i class="ti ti-search"></i> 搜索</button>
+          <button class="btn btn-teal" onclick="resetDepositOrders()"><i class="ti ti-rotate-clockwise"></i> 重置</button>
+        </div>
+      </div>
+      <div class="action-bar">
+        <button class="btn btn-gray"><i class="ti ti-download"></i> 导出</button>
+      </div>
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>产品</th>
+              <th>站点</th>
+              <th>订单号</th>
+              <th>申请人（TG账号）</th>
+              <th>用户ID</th>
+              <th>金额</th>
+              <th>申请时间</th>
+              <th>完成时间</th>
+              <th>传送状态</th>
+              <th>备注</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-site="EX01" data-date="2026-06-18">
+              <td><span class="site-tag">交易所</span></td>
+              <td style="color:#666;font-size:12px">01</td>
+              <td style="font-family:monospace;font-size:12px;color:#333">ORD20260618001</td>
+              <td style="color:#666;font-size:12px">@sunny_trader</td>
+              <td style="color:#666">104821</td>
+              <td style="color:#55C92A;font-weight:500">¥500</td>
+              <td style="color:#666;font-size:12px">2026-06-18 14:30</td>
+              <td style="color:#666;font-size:12px">2026-06-18 14:32</td>
+              <td><span class="badge badge-active">传送成功</span></td>
+              <td style="color:#ccc;font-size:12px">—</td>
+            </tr>
+            <tr data-site="ST01" data-date="2026-06-18">
+              <td><span class="site-tag">股票</span></td>
+              <td style="color:#666;font-size:12px">01</td>
+              <td style="font-family:monospace;font-size:12px;color:#333">ORD20260618002</td>
+              <td style="color:#666;font-size:12px">@ace024</td>
+              <td style="color:#666">208374</td>
+              <td style="color:#55C92A;font-weight:500">¥1000</td>
+              <td style="color:#666;font-size:12px">2026-06-18 13:45</td>
+              <td style="color:#666;font-size:12px">2026-06-18 13:47</td>
+              <td><span class="badge badge-active">传送成功</span></td>
+              <td style="color:#ccc;font-size:12px">—</td>
+            </tr>
+            <tr data-site="PB01" data-date="2026-06-18">
+              <td><span class="site-tag">充电宝</span></td>
+              <td style="color:#666;font-size:12px">01</td>
+              <td style="font-family:monospace;font-size:12px;color:#333">ORD20260618003</td>
+              <td style="color:#666;font-size:12px">@powerbank_li</td>
+              <td style="color:#666">418203</td>
+              <td style="color:#55C92A;font-weight:500">¥200</td>
+              <td style="color:#666;font-size:12px">2026-06-18 12:15</td>
+              <td style="color:#ccc;font-size:12px">—</td>
+              <td><span class="badge badge-active">传送成功</span></td>
+              <td style="color:#ccc;font-size:12px">—</td>
+            </tr>
+            <tr data-site="EX02" data-date="2026-06-18">
+              <td><span class="site-tag">交易所</span></td>
+              <td style="color:#666;font-size:12px">02</td>
+              <td style="font-family:monospace;font-size:12px;color:#333">ORD20260618004</td>
+              <td style="color:#666;font-size:12px">@sunyan_88</td>
+              <td style="color:#666">519042</td>
+              <td style="color:#55C92A;font-weight:500">¥800</td>
+              <td style="color:#666;font-size:12px">2026-06-18 10:05</td>
+              <td style="color:#666;font-size:12px">2026-06-18 10:07</td>
+              <td><span class="badge badge-block">传送失败</span></td>
+              <td style="color:#F56C6C;font-size:12px">服务器无回应（连接超时）</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span class="page-info">共 4 条记录</span>
+          <div class="page-btns">
+            <button class="page-btn">上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">下一页</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 下分订单 ══ -->
+    <div class="page" id="page-withdraw-order">
+      <div class="filter-panel">
+        <div class="filter-row" style="margin-bottom:10px">
+          <span style="font-size:13px;color:#606266;margin-right:6px;flex-shrink:0">站点：</span>
+          <div class="multi-site-selector" id="wit-site-selector" style="display:inline-block"></div>
+        </div>
+        <div class="filter-row">
+          <input class="fi" style="width:180px" id="wit-search-order" placeholder="请输入订单号...">
+          <input class="fi" style="width:150px" id="wit-search-uid" placeholder="请输入用户ID...">
+          <span style="font-size:13px;color:#606266">申请时间：</span>
+          <input class="fi" type="date" style="width:150px" id="wit-date-start">
+          <span style="color:#999">至</span>
+          <input class="fi" type="date" style="width:150px" id="wit-date-end">
+          <button class="btn btn-green" onclick="searchWithdrawOrders()"><i class="ti ti-search"></i> 搜索</button>
+          <button class="btn btn-teal" onclick="resetWithdrawOrders()"><i class="ti ti-rotate-clockwise"></i> 重置</button>
+        </div>
+      </div>
+      <div class="action-bar">
+        <button class="btn btn-gray"><i class="ti ti-download"></i> 导出</button>
+      </div>
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>产品</th>
+              <th>站点</th>
+              <th>订单号</th>
+              <th>申请人（TG账号）</th>
+              <th>用户ID</th>
+              <th>金额</th>
+              <th>申请时间</th>
+              <th>完成时间</th>
+              <th>传送状态</th>
+              <th>备注</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-site="EX01" data-date="2026-06-18">
+              <td><span class="site-tag">交易所</span></td>
+              <td style="color:#666;font-size:12px">01</td>
+              <td style="font-family:monospace;font-size:12px;color:#333">WTH20260618001</td>
+              <td style="color:#666;font-size:12px">@sunny_trader</td>
+              <td style="color:#666">104821</td>
+              <td style="color:#F56C6C;font-weight:500">¥300</td>
+              <td style="color:#666;font-size:12px">2026-06-18 14:20</td>
+              <td style="color:#666;font-size:12px">2026-06-18 14:25</td>
+              <td><span class="badge badge-active">传送成功</span></td>
+              <td style="color:#ccc;font-size:12px">—</td>
+            </tr>
+            <tr data-site="ST02" data-date="2026-06-18">
+              <td><span class="site-tag">股票</span></td>
+              <td style="color:#666;font-size:12px">02</td>
+              <td style="font-family:monospace;font-size:12px;color:#333">WTH20260618004</td>
+              <td style="color:#666;font-size:12px">@stock_chen</td>
+              <td style="color:#666">631928</td>
+              <td style="color:#F56C6C;font-weight:500">¥600</td>
+              <td style="color:#666;font-size:12px">2026-06-18 09:40</td>
+              <td style="color:#666;font-size:12px">2026-06-18 09:43</td>
+              <td><span class="badge badge-block">传送失败</span></td>
+              <td style="color:#F56C6C;font-size:12px">HTTP 502 Bad Gateway</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span class="page-info">共 4 条记录</span>
+          <div class="page-btns">
+            <button class="page-btn">上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">下一页</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 指令说明 ══ -->
+    <div class="page" id="page-commands">
+      <div class="table-card" style="margin-bottom:14px">
+        <table class="data-table">
+          <thead>
+            <tr><th style="padding-left:14px">指令</th><th>说明</th><th>权限</th><th>状态</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding-left:14px;font-family:monospace;color:var(--primary)">/start</td>
+              <td style="color:#666">启动机器人，发送欢迎消息</td>
+              <td><span class="badge badge-active">所有人</span></td>
+              <td><span class="badge badge-active">启用</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left:14px;font-family:monospace;color:var(--primary)">/help</td>
+              <td style="color:#666">查看帮助说明与可用指令列表</td>
+              <td><span class="badge badge-active">所有人</span></td>
+              <td><span class="badge badge-active">启用</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left:14px;font-family:monospace;color:var(--primary)">/admin</td>
+              <td style="color:#666">打开管理员操作面板</td>
+              <td><span class="badge badge-vip">仅管理员</span></td>
+              <td><span class="badge badge-active">启用</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left:14px;font-family:monospace;color:var(--primary)">/balance</td>
+              <td style="color:#666">查询当前账户余额</td>
+              <td><span class="badge badge-active">所有人</span></td>
+              <td><span class="badge badge-active">启用</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left:14px;font-family:monospace;color:var(--primary)">/deposit</td>
+              <td style="color:#666">发起上分（充值）申请</td>
+              <td><span class="badge badge-active">所有人</span></td>
+              <td><span class="badge badge-active">启用</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left:14px;font-family:monospace;color:var(--primary)">/withdraw</td>
+              <td style="color:#666">发起下分（提现）申请</td>
+              <td><span class="badge badge-active">所有人</span></td>
+              <td><span class="badge badge-active">启用</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">使用说明</span></div>
+        <div style="color:#666;font-size:13px;line-height:1.9">
+          <p>1. 所有指令均需以「/」开头，在与机器人的私聊或已授权群组中发送。</p>
+          <p>2. 「仅管理员」权限的指令仅限后台设置的管理员账号使用，其他用户发送将被忽略。</p>
+          <p>3. 指令的启用状态由后台统一控制，禁用后用户发送该指令将收到提示消息。</p>
+          <p>4. 如需调整指令文案或新增自定义指令，请联系技术人员协助配置。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 限制设置（全局） ══ -->
+    <div class="page" id="page-limits">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">上下分限制 — 全局设定</span>
+          <span style="font-size:12px;color:#999">当前对所有站点统一生效</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="card" style="box-shadow:none;border:1px solid var(--border)">
+            <div class="card-header"><span class="card-title">&#9650; 上分限制</span></div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px">每日最多上分次数</label>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <input class="fi" type="number" id="limit-deposit-count" value="5" style="width:100px">
+                  <span style="font-size:12px;color:#999">次 / 天</span>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px">单笔金额范围</label>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <input class="fi" type="number" id="limit-deposit-min" value="50" style="width:100px">
+                  <span style="font-size:12px;color:#999">至</span>
+                  <input class="fi" type="number" id="limit-deposit-max" value="50000" style="width:100px">
+                  <span style="font-size:12px;color:#999">元</span>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px">每日累计上限</label>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <input class="fi" type="number" id="limit-deposit-daily" value="100000" style="width:160px">
+                  <span style="font-size:12px;color:#999">元 / 天</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="box-shadow:none;border:1px solid var(--border)">
+            <div class="card-header"><span class="card-title">&#9660; 下分限制</span></div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px">每日最多下分次数</label>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <input class="fi" type="number" id="limit-withdraw-count" value="3" style="width:100px">
+                  <span style="font-size:12px;color:#999">次 / 天</span>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px">单笔金额范围</label>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <input class="fi" type="number" id="limit-withdraw-min" value="100" style="width:100px">
+                  <span style="font-size:12px;color:#999">至</span>
+                  <input class="fi" type="number" id="limit-withdraw-max" value="20000" style="width:100px">
+                  <span style="font-size:12px;color:#999">元</span>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px">每日累计上限</label>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <input class="fi" type="number" id="limit-withdraw-daily" value="50000" style="width:160px">
+                  <span style="font-size:12px;color:#999">元 / 天</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;display:flex;justify-content:flex-end">
+          <button class="btn btn-green" onclick="saveGlobalLimits()">保存设置</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ IP白名单 ══ -->
+    <div class="page" id="page-blacklist">
+      <div class="filter-panel">
+        <div class="filter-row">
+          <input class="fi" style="width:200px" placeholder="请输入 IP 地址...">
+          <button class="btn btn-green"><i class="ti ti-search"></i> 搜索</button>
+          <button class="btn btn-teal"><i class="ti ti-rotate-clockwise"></i> 重置</button>
+        </div>
+      </div>
+      <div class="action-bar">
+        <button class="btn" style="background:#fff"><i class="ti ti-plus"></i> 添加IP</button>
+      </div>
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:36px;padding-left:12px"><input type="checkbox"></th>
+              <th>IP 地址</th>
+              <th>说明</th>
+              <th>添加时间</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding-left:12px"><input type="checkbox"></td>
+              <td style="font-family:monospace;font-size:12px;color:#333">192.168.1.100</td>
+              <td style="color:#666">主服务器</td>
+              <td style="color:#666;font-size:12px">2026-01-15</td>
+              <td><span class="badge badge-active">启用</span></td>
+              <td>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px">&#9998; 编辑</span>
+                <span style="color:#F56C6C;font-size:12px;cursor:pointer">&#9998; 删除</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding-left:12px"><input type="checkbox"></td>
+              <td style="font-family:monospace;font-size:12px;color:#333">10.0.0.50</td>
+              <td style="color:#666">备用服务器</td>
+              <td style="color:#666;font-size:12px">2026-02-08</td>
+              <td><span class="badge badge-active">启用</span></td>
+              <td>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px">&#9998; 编辑</span>
+                <span style="color:#F56C6C;font-size:12px;cursor:pointer">&#9998; 删除</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span class="page-info">共 2 条记录</span>
+          <div class="page-btns">
+            <button class="page-btn">上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">下一页</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 站点功能设置 ══ -->
+    <div class="page" id="page-settings">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">站点功能设置</span>
+          <span style="font-size:12px;color:#999">设定各站点可使用的机器人功能，未开放会收到"功能未开放"的提示</span>
+        </div>
+        <div class="action-bar" style="margin-bottom:12px">
+          <button class="btn" style="background:#fff" onclick="openSiteSettingModal()"><i class="ti ti-plus"></i> 添加站点</button>
+        </div>
+        <div class="table-card" style="box-shadow:none;border:1px solid var(--border)">
+          <table class="data-table" id="site-setting-table">
+            <thead>
+              <tr>
+                <th style="padding-left:14px">产品</th>
+                <th>站点</th>
+                <th>URL</th>
+                <th>上分（充值）</th>
+                <th>下分（提现）</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="site-setting-body">
+              <tr>
+                <td style="padding-left:14px"><span class="site-tag">交易所</span></td>
+                <td style="color:#333;font-weight:500">交易所-01</td>
+                <td style="color:#666;font-size:12px;font-family:monospace">https://ex01.example.com/api</td>
+                <td><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></td>
+                <td><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></td>
+                <td>
+                  <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openSiteSettingModal(this.closest('tr'))">&#9998; 编辑</span>
+                  <span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteSiteSetting(this)">&#9998; 删除</span>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding-left:14px"><span class="site-tag">股票</span></td>
+                <td style="color:#333;font-weight:500">股票-01</td>
+                <td style="color:#666;font-size:12px;font-family:monospace">https://st01.example.com/api</td>
+                <td><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></td>
+                <td><div class="toggle-switch" onclick="this.classList.toggle('on')"></div></td>
+                <td>
+                  <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openSiteSettingModal(this.closest('tr'))">&#9998; 编辑</span>
+                  <span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteSiteSetting(this)">&#9998; 删除</span>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding-left:14px"><span class="site-tag">充电宝</span></td>
+                <td style="color:#333;font-weight:500">充电宝-01</td>
+                <td style="color:#666;font-size:12px;font-family:monospace">https://pb01.example.com/api</td>
+                <td><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></td>
+                <td><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></td>
+                <td>
+                  <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openSiteSettingModal(this.closest('tr'))">&#9998; 编辑</span>
+                  <span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteSiteSetting(this)">&#9998; 删除</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 操作日志 ══ -->
+    <div class="page" id="page-oplog">
+      <div class="filter-panel">
+        <div class="filter-row">
+          <select class="fi" style="width:140px" id="oplog-filter-page">
+            <option value="">全部页面</option>
+            <option value="角色管理">角色管理</option>
+            <option value="账号管理">账号管理</option>
+            <option value="TG用户列表">TG用户列表</option>
+            <option value="限制设置">限制设置</option>
+            <option value="站点功能设置">站点功能设置</option>
+          </select>
+          <select class="fi" style="width:120px" id="oplog-filter-action">
+            <option value="">全部操作</option>
+            <option value="新增">新增</option>
+            <option value="编辑">编辑</option>
+            <option value="删除">删除</option>
+          </select>
+          <input class="fi" style="width:160px" id="oplog-filter-operator" placeholder="操作人...">
+          <span style="font-size:13px;color:#606266">时间：</span>
+          <input class="fi" type="date" style="width:150px" id="oplog-date-start">
+          <span style="color:#999">至</span>
+          <input class="fi" type="date" style="width:150px" id="oplog-date-end">
+          <button class="btn btn-green" onclick="searchOplog()"><i class="ti ti-search"></i> 搜索</button>
+          <button class="btn btn-teal" onclick="resetOplog()"><i class="ti ti-rotate-clockwise"></i> 重置</button>
+        </div>
+      </div>
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="padding-left:14px">操作时间</th>
+              <th>操作人</th>
+              <th>页面</th>
+              <th>操作类型</th>
+              <th>操作对象</th>
+              <th>修改内容</th>
+            </tr>
+          </thead>
+          <tbody id="oplog-table-body">
+            <tr data-page="账号管理" data-action="新增" data-date="2026-06-22">
+              <td style="padding-left:14px;color:#666;font-size:12px;white-space:nowrap">2026-06-22 09:15</td>
+              <td style="color:#333">admin</td>
+              <td><span class="badge badge-normal">账号管理</span></td>
+              <td><span class="badge badge-active">新增</span></td>
+              <td style="color:#333;font-size:12px">operator01</td>
+              <td style="color:#666;font-size:12px;line-height:1.8">
+                <div>账号：operator01</div>
+                <div>名称：客服小李</div>
+                <div>角色：客服</div>
+              </td>
+            </tr>
+            <tr data-page="角色管理" data-action="编辑" data-date="2026-06-22">
+              <td style="padding-left:14px;color:#666;font-size:12px;white-space:nowrap">2026-06-22 08:30</td>
+              <td style="color:#333">admin</td>
+              <td><span class="badge badge-normal">角色管理</span></td>
+              <td><span class="badge badge-vip">编辑</span></td>
+              <td style="color:#333;font-size:12px">一般管理员</td>
+              <td style="color:#666;font-size:12px;line-height:1.8">
+                <div>可访问菜单：新增「限制设置」</div>
+              </td>
+            </tr>
+            <tr data-page="TG用户列表" data-action="编辑" data-date="2026-06-21">
+              <td style="padding-left:14px;color:#666;font-size:12px;white-space:nowrap">2026-06-21 16:44</td>
+              <td style="color:#333">operator01</td>
+              <td><span class="badge badge-normal">用户列表</span></td>
+              <td><span class="badge badge-vip">编辑</span></td>
+              <td style="color:#333;font-size:12px">104821 (@sunny_trader)</td>
+              <td style="color:#666;font-size:12px;line-height:1.8">
+                <div>账号类型：一般 → 测试</div>
+                <div>状态：禁用 → 启用</div>
+              </td>
+            </tr>
+            <tr data-page="站点功能设置" data-action="编辑" data-date="2026-06-21">
+              <td style="padding-left:14px;color:#666;font-size:12px;white-space:nowrap">2026-06-21 14:20</td>
+              <td style="color:#333">admin</td>
+              <td><span class="badge badge-normal">站点功能设置</span></td>
+              <td><span class="badge badge-vip">编辑</span></td>
+              <td style="color:#333;font-size:12px;line-height:1.8">
+                <div>充电宝-01</div>
+                <div>充电宝-02</div>
+                <div>充电宝-03</div>
+                <div>充电宝-04</div>
+                <div>充电宝-05</div>
+              </td>
+              <td style="color:#666;font-size:12px;line-height:1.8">
+                <div>下分（提现）：开启 → 关闭</div>
+              </td>
+            </tr>
+            <tr data-page="限制设置" data-action="编辑" data-date="2026-06-20">
+              <td style="padding-left:14px;color:#666;font-size:12px;white-space:nowrap">2026-06-20 11:05</td>
+              <td style="color:#333">admin</td>
+              <td><span class="badge badge-normal">限制设置</span></td>
+              <td><span class="badge badge-vip">编辑</span></td>
+              <td style="color:#333;font-size:12px">全局规则</td>
+              <td style="color:#666;font-size:12px;line-height:1.8">
+                <div>上分每日次数：5 → 3</div>
+                <div>上分每日累计上限：100,000 → 50,000</div>
+              </td>
+            </tr>
+            <tr data-page="账号管理" data-action="删除" data-date="2026-06-19">
+              <td style="padding-left:14px;color:#666;font-size:12px;white-space:nowrap">2026-06-19 17:30</td>
+              <td style="color:#333">admin</td>
+              <td><span class="badge badge-normal">账号管理</span></td>
+              <td><span class="badge badge-block">删除</span></td>
+              <td style="color:#333;font-size:12px">testuser01</td>
+              <td style="color:#666;font-size:12px;line-height:1.8">
+                <div>账号：testuser01</div>
+                <div>名称：测试账号</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span class="page-info">共 6 条记录</span>
+          <div class="page-btns">
+            <button class="page-btn">上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">下一页</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 账号管理 ══ -->
+    <div class="page" id="page-admin">
+      <div class="filter-panel">
+        <div class="filter-row">
+          <input class="fi" style="width:200px" id="admin-search-account" placeholder="请输入账号...">
+          <button class="btn btn-green" onclick="searchAdmins()"><i class="ti ti-search"></i> 搜索</button>
+          <button class="btn btn-teal" onclick="resetAdminSearch()"><i class="ti ti-rotate-clockwise"></i> 重置</button>
+        </div>
+      </div>
+      <div class="action-bar">
+        <button class="btn" style="background:#fff" onclick="openAddAccountModal()"><i class="ti ti-plus"></i> 添加账号</button>
+      </div>
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="padding-left:14px">账号</th>
+              <th>名称</th>
+              <th>角色</th>
+              <th>最后登录</th>
+              <th>创建时间</th>
+              <th>操作人</th>
+              <th>启用状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="admin-table-body">
+            <tr>
+              <td style="padding-left:14px;font-family:monospace;font-size:12px;color:#333">admin</td>
+              <td style="color:#333">超级管理员</td>
+              <td><span class="badge badge-vip">超级管理员</span></td>
+              <td style="color:#666;font-size:12px">2026-06-19 09:12</td>
+              <td style="color:#666;font-size:12px">2026-01-01 00:00</td>
+              <td style="color:#666;font-size:12px">—</td>
+              <td>
+                <div class="labeled-toggle on" onclick="toggleAdminStatus(this)"><span class="toggle-label">启用</span><div class="toggle-knob"></div></div>
+              </td>
+              <td>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openEditAccountModal(this)">&#9998; 修改</span>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openPwdModal('admin')">&#9998; 密码重制</span>
+                <span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteAccount(this)">&#9998; 删除</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding-left:14px;font-family:monospace;font-size:12px;color:#333">operator01</td>
+              <td style="color:#333">客服小李</td>
+              <td><span class="badge badge-normal">客服</span></td>
+              <td style="color:#666;font-size:12px">2026-06-18 22:40</td>
+              <td style="color:#666;font-size:12px">2026-03-15 10:30</td>
+              <td style="color:#666;font-size:12px">admin</td>
+              <td>
+                <div class="labeled-toggle on" onclick="toggleAdminStatus(this)"><span class="toggle-label">启用</span><div class="toggle-knob"></div></div>
+              </td>
+              <td>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openEditAccountModal(this)">&#9998; 修改</span>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openPwdModal('operator01')">&#9998; 密码重制</span>
+                <span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteAccount(this)">&#9998; 删除</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ 角色管理 ══ -->
+    <div class="page" id="page-roles">
+      <div class="filter-panel">
+        <div class="filter-row">
+          <input class="fi" style="width:200px" id="role-search" placeholder="请输入角色名称...">
+          <button class="btn btn-green" onclick="searchRoles()"><i class="ti ti-search"></i> 搜索</button>
+          <button class="btn btn-teal" onclick="resetRoleSearch()"><i class="ti ti-rotate-clockwise"></i> 重置</button>
+        </div>
+      </div>
+      <div class="action-bar">
+        <button class="btn" style="background:#fff" onclick="openRoleModal()"><i class="ti ti-plus"></i> 新增角色</button>
+      </div>
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="padding-left:14px">角色名称</th>
+              <th>备注</th>
+              <th>操作人</th>
+              <th>更新时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="role-table-body">
+            <tr data-role-id="super">
+              <td style="padding-left:14px;font-weight:500;color:#333">超级管理员</td>
+              <td style="color:#666;font-size:12px">全部权限，不可编辑</td>
+              <td style="color:#666;font-size:12px">—</td>
+              <td style="color:#666;font-size:12px">—</td>
+              <td><span style="color:#999;font-size:12px">系统内置，不可修改</span></td>
+            </tr>
+            <tr data-role-id="general">
+              <td style="padding-left:14px;font-weight:500;color:#333">一般管理员</td>
+              <td style="color:#666;font-size:12px">用户管理、上下分订单</td>
+              <td style="color:#666;font-size:12px">admin</td>
+              <td style="color:#666;font-size:12px">2026-06-22 08:00</td>
+              <td>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openRoleModal('general')">&#9998; 编辑</span>
+                <span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteRole('general', this)">&#9998; 删除</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+const ICONS = {
+  'layout-dashboard':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>',
+  'users':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg>',
+  'terminal-2':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7l5 5-5 5"/><line x1="12" y1="17" x2="19" y2="17"/></svg>',
+  'shield-x':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 4.4-3.4 8.5-8 10-4.6-1.5-8-5.6-8-10V7l8-4z"/><line x1="9.5" y1="9.5" x2="14.5" y2="14.5"/><line x1="14.5" y1="9.5" x2="9.5" y2="14.5"/></svg>',
+  'settings':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72 1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>',
+  'robot':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="9" cy="16" r="1" fill="currentColor"/><circle cx="15" cy="16" r="1" fill="currentColor"/><path d="M12 11V7"/><path d="M8 7h8a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1z"/><line x1="5" y1="15" x2="3" y2="15"/><line x1="21" y1="15" x2="19" y2="15"/></svg>',
+  'search':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+  'send':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
+  'ban':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>',
+  'plus':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  'message':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6l-4 4V6a2 2 0 0 1 2-2z"/></svg>',
+  'filter':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>',
+  'download':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  'file-text':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+  'rotate-clockwise':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/></svg>',
+  'edit':'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+  'eye':'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+  'arrow-down':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>',
+  'user-circle':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="8" r="3"/><path d="M6 20a6 6 0 0 1 12 0"/></svg>',
+  'logout':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>',
+  'chevron-down':'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
+  'adjustments':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="9" cy="6" r="2" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="2" fill="currentColor" stroke="none"/></svg>',
+  'shield':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.6 9.5-8 11-4.4-1.5-8-6-8-11V6l8-4z"/></svg>',
+  'history':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-5"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>',
+  'clipboard-list':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M5 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>',
+};
+
+function renderIcons() {
+  document.querySelectorAll('i[class]').forEach(el => {
+    const match = el.className.match(/ti-([a-z0-9-]+)/);
+    if (!match) return;
+    const svg = ICONS[match[1]];
+    if (!svg) return;
+    const w = document.createElement('span');
+    w.className = 'icon';
+    w.style.cssText = el.style.cssText;
+    w.innerHTML = svg;
+    el.replaceWith(w);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', renderIcons);
+
+const pageMeta = {
+  overview:        ['首页', '概览'],
+  roles:           ['首页', '角色管理'],
+  admin:           ['首页', '账号管理'],
+  users:           ['首页', '用户列表'],
+  'deposit-order': ['首页', '上分订单'],
+  'withdraw-order':['首页', '下分订单'],
+  commands:        ['首页', '指令说明'],
+  limits:          ['首页', '限制设置'],
+  settings:        ['首页', '站点功能设置'],
+  oplog:           ['首页', '操作日志'],
+};
+
+function toggleAvatarMenu(e) {
+  e.stopPropagation();
+  document.getElementById('avatar-dropdown').classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+  const dropdown = document.getElementById('avatar-dropdown');
+  if (dropdown && !e.target.closest('.avatar-menu')) {
+    dropdown.classList.remove('open');
+  }
+});
+
+function toggleNavSection(header) {
+  var items = header.nextElementSibling;
+  if (!items || !items.classList.contains('nav-section-items')) return;
+  var collapsed = items.classList.contains('collapsed');
+  if (collapsed) {
+    items.classList.remove('collapsed');
+    header.classList.remove('collapsed');
+  } else {
+    items.classList.add('collapsed');
+    header.classList.add('collapsed');
+  }
+}
+
+function showPage(id, navEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pg = document.getElementById('page-' + id);
+  if (pg) pg.classList.add('active');
+  if (navEl) navEl.classList.add('active');
+  const crumbs = pageMeta[id] || ['首页'];
+  document.getElementById('topbar-breadcrumb').innerHTML = crumbs.map((c,i) =>
+    `<span class="breadcrumb-item">${c}</span>${i<crumbs.length-1?'<span class="breadcrumb-sep">/</span>':''}`
+  ).join('');
+}
+
+// ── 站点功能设置：数据驱动配置 ──
+// 站点数量可能很多（如充电宝类别下有 40 个），所以按类别分页展示，避免表格过长。
+// 以后新增功能，只要在 SITE_FEATURES 数组里加一项即可，每个类别的表格都会自动多一列。
+// 以后新增类别或站点，只要改 SITE_CATEGORIES（定义在下方）即可，这里不用改。
+const SITE_FEATURES = [
+  { key: 'deposit',  label: '上分（充值）' },
+  { key: 'withdraw', label: '下分（提现）' },
+];
+
+// 权限数据：siteId -> { featureKey: boolean }（实际应来自后端）
+const sitePermData = {};
+
+let activePermCategoryId = null;
+
+function renderSitePermTabs() {
+  const tabBar = document.getElementById('site-perm-tabs');
+  if (!tabBar) return;
+  if (!activePermCategoryId) activePermCategoryId = SITE_CATEGORIES[0].id;
+
+  let html = '';
+  SITE_CATEGORIES.forEach(function(cat) {
+    const active = cat.id === activePermCategoryId;
+    html += '<button class="btn' + (active ? ' btn-green' : '') + '" style="margin-right:6px" onclick="switchPermCategory(\'' + cat.id + '\')">' +
+      cat.name + ' <span style="opacity:0.7">(' + cat.sites.length + ')</span></button>';
+  });
+  tabBar.innerHTML = html;
+  renderSitePermTable();
+}
+
+function switchPermCategory(catId) {
+  activePermCategoryId = catId;
+  renderSitePermTabs();
+}
+
+function renderSitePermTable() {
+  const thead = document.getElementById('site-perm-thead');
+  const tbody = document.getElementById('site-perm-body');
+  if (!thead || !tbody) return;
+  const cat = getCategoryById(activePermCategoryId);
+  if (!cat) return;
+
+  // 初始化该类别下站点的权限数据（首次渲染时默认全部开启，实际应来自后端）
+  cat.sites.forEach(function(site) {
+    if (!sitePermData[site.id]) {
+      sitePermData[site.id] = {};
+      SITE_FEATURES.forEach(function(f) { sitePermData[site.id][f.key] = true; });
+    }
+  });
+
+  // 表头：每个功能列附带"全开/全关"快捷按钮，方便整类一键切换
+  let headHtml = '<tr><th style="width:34px;padding-left:12px"><input type="checkbox" onchange="toggleSelectAllSites(this)"></th><th style="padding-left:4px">站点</th>';
+  SITE_FEATURES.forEach(function(f) {
+    headHtml += '<th style="text-align:center">' +
+      '<div style="display:flex;flex-direction:column;align-items:center;gap:4px">' +
+      '<span>' + f.label + '</span>' +
+      '<span>' +
+        '<span class="col-toggle-link" onclick="setCategoryFeature(\'' + f.key + '\', true)">全开</span>' +
+        '<span style="color:#ddd;margin:0 3px">|</span>' +
+        '<span class="col-toggle-link" onclick="setCategoryFeature(\'' + f.key + '\', false)">全关</span>' +
+      '</span>' +
+      '</div></th>';
+  });
+  headHtml += '</tr>';
+  thead.innerHTML = headHtml;
+
+  // 表身
+  let bodyHtml = '';
+  cat.sites.forEach(function(site) {
+    bodyHtml += '<tr data-site="' + site.id + '">';
+    bodyHtml += '<td style="padding-left:12px"><input type="checkbox" class="site-perm-checkbox" value="' + site.id + '"></td>';
+    bodyHtml += '<td style="padding-left:4px;font-weight:500;color:#333">' + site.name + '</td>';
+    SITE_FEATURES.forEach(function(f) {
+      const on = sitePermData[site.id] && sitePermData[site.id][f.key];
+      bodyHtml += '<td style="text-align:center"><div class="toggle-switch' + (on ? ' on' : '') +
+        '" onclick="toggleSitePerm(this)" data-site="' + site.id + '" data-feature="' + f.key + '"></div></td>';
+    });
+    bodyHtml += '</tr>';
+  });
+  tbody.innerHTML = bodyHtml;
+
+  renderSitePermBatchBar();
+}
+
+function renderSitePermBatchBar() {
+  const bar = document.getElementById('site-perm-batch-bar');
+  if (!bar) return;
+  let html = '<span style="font-size:12px;color:#909399;display:flex;align-items:center;margin-right:4px">勾选站点后批量设置：</span>';
+  SITE_FEATURES.forEach(function(f) {
+    html += '<button class="btn" onclick="batchSetFeature(\'' + f.key + '\', true)">开启 ' + f.label + '</button>';
+    html += '<button class="btn" onclick="batchSetFeature(\'' + f.key + '\', false)">关闭 ' + f.label + '</button>';
+  });
+  bar.innerHTML = html;
+}
+
+function toggleSelectAllSites(cb) {
+  document.querySelectorAll('.site-perm-checkbox').forEach(function(c) { c.checked = cb.checked; });
+}
+
+// 整个类别下，某功能"全开/全关"
+function setCategoryFeature(featureKey, value) {
+  const cat = getCategoryById(activePermCategoryId);
+  if (!cat) return;
+  cat.sites.forEach(function(site) {
+    if (!sitePermData[site.id]) sitePermData[site.id] = {};
+    sitePermData[site.id][featureKey] = value;
+  });
+  renderSitePermTable();
+}
+
+// 勾选的站点，批量设置某功能开/关
+function batchSetFeature(featureKey, value) {
+  const selected = Array.from(document.querySelectorAll('.site-perm-checkbox:checked')).map(function(c) { return c.value; });
+  if (!selected.length) { alert('请先勾选站点'); return; }
+  selected.forEach(function(siteId) {
+    if (!sitePermData[siteId]) sitePermData[siteId] = {};
+    sitePermData[siteId][featureKey] = value;
+  });
+  renderSitePermTable();
+}
+
+function toggleSitePerm(el) {
+  el.classList.toggle('on');
+  const site = el.dataset.site;
+  const feature = el.dataset.feature;
+  if (!sitePermData[site]) sitePermData[site] = {};
+  sitePermData[site][feature] = el.classList.contains('on');
+}
+
+function saveSitePerms() {
+  const cat = getCategoryById(activePermCategoryId);
+  if (!cat) return;
+  const lines = cat.sites.map(function(site) {
+    const perms = sitePermData[site.id] || {};
+    const parts = SITE_FEATURES.map(function(f) {
+      return f.label + '=' + (perms[f.key] ? '开' : '关');
+    });
+    return site.name + ': ' + parts.join(', ');
+  });
+  alert('已保存「' + cat.name + '」类别设置\n\n' + lines.join('\n'));
+}
+
+function updateClock() {
+  const el = document.getElementById('topbar-clock');
+  if (!el) return;
+  const n = new Date(), p = v => String(v).padStart(2,'0');
+  el.textContent = `服务器：${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())} ${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())} (Z)`;
+}
+setInterval(updateClock, 1000);
+
+// ── 全局站点数据：类别 → 站点 ──
+// 业务上"站点"之上还有一层类别（充电宝/交易所/股票），数量差异很大（40 / 4 / 2）
+// 以后新增类别或站点，只需要改这里的数据，不用动任何 HTML/UI 逻辑
+const SITE_CATEGORIES = [
+  {
+    id: 'powerbank',
+    name: '充电宝',
+    sites: Array.from({length: 40}, (_, i) => {
+      const n = i + 1;
+      return { id: 'PB' + String(n).padStart(2, '0'), name: '充电宝-' + String(n).padStart(2, '0') };
+    })
+  },
+  {
+    id: 'exchange',
+    name: '交易所',
+    sites: [
+      { id: 'EX01', name: '交易所-01' },
+      { id: 'EX02', name: '交易所-02' },
+      { id: 'EX03', name: '交易所-03' },
+      { id: 'EX04', name: '交易所-04' },
+    ]
+  },
+  {
+    id: 'stock',
+    name: '股票',
+    sites: [
+      { id: 'ST01', name: '股票-01' },
+      { id: 'ST02', name: '股票-02' },
+    ]
+  },
+];
+
+function getCategoryById(catId) {
+  return SITE_CATEGORIES.find(c => c.id === catId);
+}
+
+function getSiteById(siteId) {
+  for (const cat of SITE_CATEGORIES) {
+    const site = cat.sites.find(s => s.id === siteId);
+    if (site) return site;
+  }
+  return null;
+}
+
+// 渲染一个"类别 + 站点"两级下拉选择器到指定容器
+// onSiteChange(siteId) 会在站点选择改变时触发，siteId 为 'all' 表示全部站点（仅当 opts.allowAll 为 true 时可选）
+// （旧的 renderSiteSelector / populateSiteOptions 两级 <select> 实现已废弃，
+//  统一改用上方的 renderSitePicker 通用组件，所有页面共用一套逻辑。）
+// 示例数据：实际数据应来自后端，按站点ID查询
+const SITE_METRICS = {}; // siteId -> {upAmount, downAmount, upOrders, downOrders}
+(function seedSiteMetrics() {
+  SITE_CATEGORIES.forEach(cat => {
+    cat.sites.forEach(site => {
+      SITE_METRICS[site.id] = {
+        upAmount:  (Math.random() * 20000).toFixed(0),
+        downAmount:(Math.random() * 8000).toFixed(0),
+        upOrders:  Math.floor(Math.random() * 150),
+        downOrders:Math.floor(Math.random() * 50),
+      };
+    });
+  });
+})();
+
+function selectSiteForOverview(siteIds) {
+  // siteIds 为空数组代表"全部站点"；多个站点时聚合求和
+  const ids = (siteIds && siteIds.length) ? siteIds : Object.keys(SITE_METRICS);
+  let upAmount = 0, downAmount = 0, upOrders = 0, downOrders = 0;
+  ids.forEach(function(id) {
+    const s = SITE_METRICS[id];
+    if (!s) return;
+    upAmount += Number(s.upAmount) || 0;
+    downAmount += Number(s.downAmount) || 0;
+    upOrders += Number(s.upOrders) || 0;
+    downOrders += Number(s.downOrders) || 0;
+  });
+  document.getElementById('site-up-amount').textContent = upAmount;
+  document.getElementById('site-down-amount').textContent = downAmount;
+  document.getElementById('site-up-orders').textContent = upOrders;
+  document.getElementById('site-down-orders').textContent = downOrders;
+}
+
+function toggleSelectAll(cb){document.querySelectorAll('.user-checkbox').forEach(c=>c.checked=cb.checked);}
+
+// ── 通用站点选择器组件（两栏：左侧类别 / 右侧该类别站点） ──
+// 任何页面要选站点都调用 renderSitePicker，不用各自重写一遍。
+// 支持 mode: 'multi'（默认，可多选，含"全部站点"）或 'single'（单选，选完立即触发回调并收起面板）
+//
+// 用法：
+//   renderSitePicker('containerId', {
+//     mode: 'multi',                 // 'multi' | 'single'
+//     onApply: function(selectedIds) {...}   // multi 模式：点"确定"后触发，selectedIds 为数组（空数组=全部站点）
+//     onChange: function(siteId) {...}       // single 模式：选中站点后立即触发
+//   });
+//
+// 每个实例的状态（已选站点、当前查看的类别）保存在 _pickerRegistry[containerId] 中，互不干扰。
+const _pickerRegistry = {};
+
+function renderSitePicker(containerId, options) {
+  options = options || {};
+  const mode = options.mode || 'multi';
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  _pickerRegistry[containerId] = {
+    mode: mode,
+    selected: new Set(),
+    activeCat: SITE_CATEGORIES[0].id,
+    onApply: options.onApply || null,
+    onChange: options.onChange || null,
+  };
+
+  const triggerLabel = mode === 'single' ? (getCategoryById(SITE_CATEGORIES[0].id).sites[0] ? SITE_CATEGORIES[0].name : '请选择') : '全部站点';
+
+  container.innerHTML =
+    '<div class="multi-site-trigger" onclick="toggleSitePickerPanel(\'' + containerId + '\')">' +
+      '<span id="' + containerId + '-label">' + (mode === 'single' ? SITE_CATEGORIES[0].sites[0].name : '全部站点') + '</span>' +
+      '<i class="ti ti-chevron-down" style="font-size:11px"></i>' +
+    '</div>' +
+    '<div class="multi-site-panel" id="' + containerId + '-panel"></div>';
+
+  // single 模式默认选中第一个类别第一个站点，并立即触发一次回调，方便页面初始化展示数据
+  if (mode === 'single') {
+    const firstSite = SITE_CATEGORIES[0].sites[0];
+    _pickerRegistry[containerId].selected.add(firstSite.id);
+    if (options.onChange) options.onChange(firstSite.id);
+  } else if (mode === 'multi' && options.onApply) {
+    // multi 模式初始为"全部站点"（空数组），立即触发一次回调展示汇总数据
+    options.onApply([]);
+  }
+}
+
+function renderSitePickerPanel(containerId) {
+  const state = _pickerRegistry[containerId];
+  const panel = document.getElementById(containerId + '-panel');
+  if (!state || !panel) return;
+
+  let catListHtml = '';
+  SITE_CATEGORIES.forEach(function(cat) {
+    const active = cat.id === state.activeCat;
+    const selectedInCat = cat.sites.filter(function(s) { return state.selected.has(s.id); }).length;
+    catListHtml += '<div class="multi-site-cat-item' + (active ? ' active' : '') + '" onclick="switchSitePickerCat(\'' + containerId + '\', \'' + cat.id + '\')">' +
+      '<span>' + cat.name + '</span>' +
+      (selectedInCat > 0 ? '<span class="multi-site-cat-badge">' + selectedInCat + '</span>' : '') +
+      '</div>';
+  });
+
+  const activeCat = getCategoryById(state.activeCat);
+  let siteListHtml = '';
+  if (activeCat) {
+    activeCat.sites.forEach(function(site) {
+      const checked = state.selected.has(site.id);
+      const inputType = state.mode === 'single' ? 'radio' : 'checkbox';
+      siteListHtml += '<div class="multi-site-option" onclick="onSitePickerOptionClick(\'' + containerId + '\', \'' + site.id + '\', this)">' +
+        '<input type="' + inputType + '" ' + (checked ? 'checked' : '') + ' style="pointer-events:none">' +
+        '<span>' + site.name + '</span></div>';
+    });
+  }
+
+  let footerHtml = '';
+  if (state.mode === 'multi') {
+    footerHtml = '<div class="multi-site-footer"><span onclick="clearSitePickerSelection(\'' + containerId + '\')">清空</span><span onclick="applySitePickerSelection(\'' + containerId + '\')">确定</span></div>';
+  }
+
+  panel.innerHTML =
+    '<div class="multi-site-panes">' +
+      '<div class="multi-site-cat-pane">' + catListHtml + '</div>' +
+      '<div class="multi-site-site-pane">' + siteListHtml + '</div>' +
+    '</div>' + footerHtml;
+}
+
+function switchSitePickerCat(containerId, catId) {
+  const state = _pickerRegistry[containerId];
+  if (!state) return;
+  state.activeCat = catId;
+  renderSitePickerPanel(containerId);
+}
+
+function toggleSitePickerPanel(containerId) {
+  const panel = document.getElementById(containerId + '-panel');
+  if (!panel) return;
+  const isOpen = panel.classList.contains('open');
+  document.querySelectorAll('.multi-site-panel').forEach(function(p) { p.classList.remove('open'); });
+  if (!isOpen) {
+    renderSitePickerPanel(containerId);
+    panel.classList.add('open');
+  }
+}
+
+function onSitePickerOptionClick(containerId, siteId, el) {
+  const state = _pickerRegistry[containerId];
+  if (!state) return;
+
+  if (state.mode === 'single') {
+    state.selected.clear();
+    state.selected.add(siteId);
+    const site = getSiteById(siteId);
+    document.getElementById(containerId + '-label').textContent = site ? site.name : siteId;
+    document.getElementById(containerId + '-panel').classList.remove('open');
+    if (state.onChange) state.onChange(siteId);
+    return;
+  }
+
+  // multi 模式
+  if (state.selected.has(siteId)) {
+    state.selected.delete(siteId);
+  } else {
+    state.selected.add(siteId);
+  }
+  const cb = el.querySelector('input');
+  if (cb) cb.checked = state.selected.has(siteId);
+
+  // 局部更新当前类别的角标计数，避免整个面板重渲染导致滚动位置跳动
+  const cat = getCategoryById(state.activeCat);
+  if (cat) {
+    const selectedInCat = cat.sites.filter(function(s) { return state.selected.has(s.id); }).length;
+    const catItems = document.querySelectorAll('#' + containerId + '-panel .multi-site-cat-item');
+    const idx = SITE_CATEGORIES.findIndex(function(c) { return c.id === state.activeCat; });
+    if (catItems[idx]) {
+      let badge = catItems[idx].querySelector('.multi-site-cat-badge');
+      if (selectedInCat > 0) {
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'multi-site-cat-badge';
+          catItems[idx].appendChild(badge);
+        }
+        badge.textContent = selectedInCat;
+      } else if (badge) {
+        badge.remove();
+      }
+    }
+  }
+}
+
+function clearSitePickerSelection(containerId) {
+  const state = _pickerRegistry[containerId];
+  if (!state) return;
+  state.selected.clear();
+  renderSitePickerPanel(containerId);
+}
+
+function applySitePickerSelection(containerId) {
+  const state = _pickerRegistry[containerId];
+  if (!state) return;
+  const label = document.getElementById(containerId + '-label');
+  if (state.selected.size === 0) {
+    label.textContent = '全部站点';
+  } else if (state.selected.size === 1) {
+    const site = getSiteById([...state.selected][0]);
+    label.textContent = site ? site.name : '已选 1 个站点';
+  } else {
+    label.textContent = '已选 ' + state.selected.size + ' 个站点';
+  }
+  document.getElementById(containerId + '-panel').classList.remove('open');
+  if (state.onApply) state.onApply([...state.selected]);
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.multi-site-selector')) {
+    document.querySelectorAll('.multi-site-panel').forEach(function(p) { p.classList.remove('open'); });
+  }
+});
+
+// ── 角色管理 ──
+// 所有菜单项定义，key 对应 showPage 的 id，label 显示在弹窗里
+// ── 权限菜单定义：分组 → 菜单 → 功能细项 ──
+// 现在每个菜单下先只开放「查询」功能；后续新增「新增/编辑/删除」等细项时，
+// 只需在对应菜单的 actions 数组里加一项，弹窗会自动展示。
+const MENU_GROUPS = [
+  {
+    group: '权限管理',
+    menus: [
+      { key: 'roles',  label: '角色管理', actions: [{ key: 'query', label: '查询' }] },
+      { key: 'admin',  label: '账号管理', actions: [{ key: 'query', label: '查询' }] },
+    ]
+  },
+  {
+    group: '用户管理',
+    menus: [
+      { key: 'users',  label: '用户列表', actions: [{ key: 'query', label: '查询' }] },
+    ]
+  },
+  {
+    group: '订单管理',
+    menus: [
+      { key: 'deposit-order',  label: '上分订单', actions: [{ key: 'query', label: '查询' }] },
+      { key: 'withdraw-order', label: '下分订单', actions: [{ key: 'query', label: '查询' }] },
+    ]
+  },
+  {
+    group: '系统设置',
+    menus: [
+      { key: 'settings', label: '站点功能设置', actions: [{ key: 'query', label: '查询' }] },
+      { key: 'oplog',    label: '操作日志',     actions: [{ key: 'query', label: '查询' }] },
+    ]
+  },
+];
+
+// 扁平化，供 applyRoleToNav 使用
+const ALL_MENUS = MENU_GROUPS.flatMap(function(g) { return g.menus; });
+
+// 角色数据：menus 存 Set of "menuKey" or "menuKey:actionKey"
+// 目前只有 query，所以 menus 存 menuKey 即代表「可查询」，兼容旧逻辑
+const ROLES = {
+  super: {
+    name: '超级管理员',
+    desc: '全部权限，不可编辑',
+    menus: new Set(ALL_MENUS.map(function(m) { return m.key; })),
+    builtin: true,
+  },
+  general: {
+    name: '一般管理员',
+    desc: '用户管理、上下分订单',
+    menus: new Set(['users', 'deposit-order', 'withdraw-order']),
+    builtin: false,
+  },
+};
+
+// 当前登录角色（原型演示用，实际由登录系统注入）
+var currentRoleKey = 'super';
+
+// 根据当前角色控制菜单可见性
+function applyRoleToNav() {
+  const role = ROLES[currentRoleKey];
+  if (!role) return;
+  document.querySelectorAll('.nav-item[onclick]').forEach(function(item) {
+    var match = item.getAttribute('onclick').match(/showPage\('([^']+)'/);
+    if (!match) return;
+    var pageKey = match[1];
+    item.style.display = (role.menus.has(pageKey) || role.builtin) ? '' : 'none';
+  });
+}
+
+var _editingRoleKey = null;
+
+function openRoleModal(roleKey) {
+  _editingRoleKey = roleKey || null;
+  var role = roleKey ? ROLES[roleKey] : null;
+
+  document.getElementById('role-modal-title').textContent = role ? '编辑角色权限' : '新增角色';
+  document.getElementById('role-name-input').value = role ? role.name : '';
+  document.getElementById('role-name-input').disabled = !!(role && role.builtin);
+  document.getElementById('role-desc-input').value = role ? role.desc : '';
+
+  // 渲染树状结构：分组可折叠 → 菜单勾选 → 细项缩进
+  var list = document.getElementById('role-perm-list');
+  var html = '';
+  MENU_GROUPS.forEach(function(g, gi) {
+    var allMenuKeys = g.menus.map(function(m){ return m.key; });
+    var groupChecked = role ? allMenuKeys.every(function(k){ return role.menus.has(k); }) : false;
+    // 分组行：折叠箭头 + 勾选框 + 名称
+    html += '<div style="margin-bottom:2px">';
+    html += '<div style="display:flex;align-items:center;padding:4px 0;cursor:pointer;user-select:none" onclick="toggleRoleGroup(this)">';
+    html += '<span class="rg-arrow" style="font-size:10px;color:#999;width:16px;flex-shrink:0;transition:transform 0.15s">▼</span>';
+    html += '<input type="checkbox" class="rg-group-cb" data-group="' + gi + '" style="margin-right:6px;cursor:pointer"' + (groupChecked ? ' checked' : '') + ' onclick="event.stopPropagation();onRoleGroupChange(this)">';
+    html += '<span style="font-size:13px;font-weight:600;color:#333">' + g.group + '</span>';
+    html += '</div>';
+    // 分组内容
+    html += '<div class="rg-body" style="padding-left:16px">';
+    g.menus.forEach(function(m) {
+      var menuChecked = role ? role.menus.has(m.key) : false;
+      html += '<div style="padding:2px 0">';
+      html += '<label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#444;cursor:pointer">';
+      html += '<input type="checkbox" class="role-menu-cb" data-menu="' + m.key + '" data-group="' + gi + '"' + (menuChecked ? ' checked' : '') + ' onchange="onRoleMenuChange(this)">';
+      html += m.label + '</label>';
+      if (m.actions && m.actions.length) {
+        html += '<div style="padding-left:22px;display:flex;flex-wrap:wrap;gap:12px;margin-top:2px">';
+        m.actions.forEach(function(a) {
+          html += '<label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#666;cursor:pointer">';
+          html += '<input type="checkbox" class="role-action-cb" data-menu="' + m.key + '" data-action="' + a.key + '"' +
+            (menuChecked ? ' checked' : '') + (menuChecked ? '' : ' disabled') + '>';
+          html += a.label + '</label>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div></div>';
+  });
+  list.innerHTML = html;
+
+  document.getElementById('role-modal').style.display = 'block';
+}
+
+// 菜单勾选/取消时，联动下方细项的 checked 和 disabled 状态
+function onRoleMenuChange(cb) {
+  var menuKey = cb.dataset.menu;
+  var checked = cb.checked;
+  var container = cb.closest('div');
+  container.querySelectorAll('.role-action-cb[data-menu="' + menuKey + '"]').forEach(function(ac) {
+    ac.checked = checked;
+    ac.disabled = !checked;
+  });
+  // 更新分组勾选框状态
+  var groupIdx = cb.dataset.group;
+  updateGroupCb(groupIdx);
+}
+
+// 分组勾选时联动所有菜单
+function onRoleGroupChange(cb) {
+  var groupIdx = cb.dataset.group;
+  var checked = cb.checked;
+  var container = cb.closest('div').nextElementSibling; // rg-body
+  if (!container) return;
+  container.querySelectorAll('.role-menu-cb').forEach(function(mc) {
+    mc.checked = checked;
+    onRoleMenuChange(mc);
+  });
+}
+
+// 全选 / 全不选
+function rolePermSelectAll(checked) {
+  document.querySelectorAll('#role-perm-list .role-menu-cb').forEach(function(mc) {
+    mc.checked = checked;
+    onRoleMenuChange(mc);
+  });
+  document.querySelectorAll('#role-perm-list .rg-group-cb').forEach(function(gc) {
+    gc.checked = checked;
+  });
+}
+
+// 更新分组 checkbox 状态（全选则打勾，否则取消）
+function updateGroupCb(groupIdx) {
+  var menus = document.querySelectorAll('#role-perm-list .role-menu-cb[data-group="' + groupIdx + '"]');
+  var allChecked = Array.from(menus).every(function(m){ return m.checked; });
+  var gc = document.querySelector('#role-perm-list .rg-group-cb[data-group="' + groupIdx + '"]');
+  if (gc) gc.checked = allChecked;
+}
+
+function toggleRoleGroup(header) {
+  var body = header.nextElementSibling;
+  var arrow = header.querySelector('.rg-arrow');
+  if (!body || !body.classList.contains('rg-body')) return;
+  var collapsed = body.style.display === 'none';
+  body.style.display = collapsed ? '' : 'none';
+  if (arrow) arrow.style.transform = collapsed ? '' : 'rotate(-90deg)';
+}
+
+function closeRoleModal() {
+  document.getElementById('role-modal').style.display = 'none';
+  _editingRoleKey = null;
+}
+
+function confirmRoleModal() {
+  var name = document.getElementById('role-name-input').value.trim();
+  var desc = document.getElementById('role-desc-input').value.trim();
+  if (!name) { alert('请输入角色名称'); return; }
+
+  var menus = new Set();
+  document.querySelectorAll('#role-perm-list .role-menu-cb:checked').forEach(function(cb) {
+    menus.add(cb.dataset.menu);
+  });
+  if (!menus.size) { alert('请至少选择一个可访问菜单'); return; }
+
+  var roleKey = _editingRoleKey || ('role_' + Date.now());
+  var isNew = !_editingRoleKey;
+
+  ROLES[roleKey] = { name: name, desc: desc, menus: menus, builtin: false };
+
+  // Update table
+  var tbody = document.getElementById('role-table-body');
+  var existing = tbody.querySelector('tr[data-role-id="' + roleKey + '"]');
+  var menuLabels = ALL_MENUS.filter(function(m){ return menus.has(m.key); }).map(function(m){ return m.label; }).join('、');
+  var now = new Date();
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  var nowStr = now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate()) + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+  var rowHtml =
+    '<td style="padding-left:14px;font-weight:500;color:#333">' + name + '</td>' +
+    '<td style="color:#666;font-size:12px">' + menuLabels + '</td>' +
+    '<td style="color:#666;font-size:12px">admin</td>' +
+    '<td style="color:#666;font-size:12px">' + nowStr + '</td>' +
+    '<td>' +
+      '<span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openRoleModal(\'' + roleKey + '\')">&#9998; 编辑</span>' +
+      '<span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteRole(\'' + roleKey + '\', this)">&#9998; 删除</span>' +
+    '</td>';
+
+  if (existing) {
+    existing.innerHTML = rowHtml;
+  } else {
+    var tr = document.createElement('tr');
+    tr.setAttribute('data-role-id', roleKey);
+    tr.innerHTML = rowHtml;
+    tbody.appendChild(tr);
+  }
+
+  closeRoleModal();
+  applyRoleToNav();
+}
+
+var _editingUserRow = null;
+
+function openBatchAddModal() {
+  document.getElementById('batch-add-input').value = '';
+  document.getElementById('batch-add-result').style.display = 'none';
+  document.getElementById('batch-add-status').value = 'blocked';
+  document.querySelector('input[name="batch-type"][value="normal"]').checked = true;
+  document.getElementById('batch-add-modal').style.display = 'block';
+}
+
+function closeBatchAddModal() {
+  document.getElementById('batch-add-modal').style.display = 'none';
+}
+
+function confirmBatchAdd() {
+  var raw = document.getElementById('batch-add-input').value;
+  var typeVal = document.querySelector('input[name="batch-type"]:checked').value;
+  var statusVal = document.getElementById('batch-add-status').value;
+  var lines = raw.split('\n').map(function(l){ return l.trim(); }).filter(function(l){ return l.length > 0; });
+  if (!lines.length) { alert('请至少输入一个 TG 用户名'); return; }
+
+  var today = new Date();
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  var dateStr = today.getFullYear() + '-' + pad(today.getMonth()+1) + '-' + pad(today.getDate());
+  var typeLabel = typeVal === 'test' ? '测试' : '一般';
+  var typeBg = typeVal === 'test' ? 'background:#FFF3E0;color:#E6A23C' : '';
+  var typeCls = typeVal === 'test' ? '' : 'badge-normal';
+  var statusLabel = statusVal === 'normal' ? '启用' : '禁用';
+  var statusCls = statusVal === 'normal' ? 'badge-active' : 'badge-block';
+
+  var tbody = document.getElementById('user-table-body');
+  var added = 0;
+  lines.forEach(function(username) {
+    var tgid = username.startsWith('@') ? username : '@' + username;
+    var uid = Math.floor(Math.random() * 900000 + 100000);
+    var tr = document.createElement('tr');
+    tr.dataset.date = dateStr;
+    tr.innerHTML =
+      '<td style="padding-left:12px"><input type="checkbox" class="user-checkbox" value="' + uid + '"></td>' +
+      '<td style="color:#666;font-size:12px;font-family:monospace">' + uid + '</td>' +
+      '<td style="color:#333">' + tgid + '</td>' +
+      '<td style="color:#666"></td>' +
+      '<td><span class="badge ' + typeCls + '" style="' + typeBg + '">' + typeLabel + '</span></td>' +
+      '<td style="color:#666;font-size:12px"></td>' +
+      '<td style="color:#666;font-size:12px"></td>' +
+      '<td style="color:#666;font-size:12px">' + dateStr + '</td>' +
+      '<td><span class="badge ' + statusCls + '" data-status="' + statusVal + '">' + statusLabel + '</span></td>' +
+      '<td><span style="color:#409EFF;font-size:12px;cursor:pointer" onclick="openUserEditModal(this)">&#9998; 编辑</span></td>';
+    tbody.appendChild(tr);
+    added++;
+  });
+
+  var result = document.getElementById('batch-add-result');
+  result.textContent = '已成功添加 ' + added + ' 名用户。';
+  result.style.display = 'block';
+  setTimeout(closeBatchAddModal, 1200);
+}
+
+function openUserEditModal(btn) {
+  var row = btn.closest('tr');
+  _editingUserRow = row;
+  var cells = row.cells;
+  // 列顺序：0=checkbox, 1=用户ID, 2=TG用户名, 3=名称, 4=账号类型, 5=邮箱, 6=手机号, 7=加入时间, 8=状态, 9=操作
+  document.getElementById('ue-uid').value = cells[1].textContent.trim();
+  document.getElementById('ue-username').value = cells[2].textContent.trim();
+  document.getElementById('ue-displayname').value = cells[3].textContent.trim();
+  document.getElementById('ue-email').value = cells[5].textContent.trim();
+  document.getElementById('ue-phone').value = cells[6].textContent.trim();
+  var typeBadge = cells[4].querySelector('.badge');
+  var typeVal = typeBadge && typeBadge.textContent.trim() === '测试' ? 'test' : 'normal';
+  document.querySelectorAll('input[name="ue-type"]').forEach(function(r) { r.checked = r.value === typeVal; });
+  var statusBadge = cells[8].querySelector('[data-status]');
+  var statusVal = statusBadge ? statusBadge.getAttribute('data-status') : 'blocked';
+  document.getElementById('ue-status').value = statusVal;
+  document.getElementById('user-edit-modal').style.display = 'block';
+}
+
+function closeUserEditModal() {
+  document.getElementById('user-edit-modal').style.display = 'none';
+  _editingUserRow = null;
+}
+
+function confirmUserEditModal() {
+  var displayname = document.getElementById('ue-displayname').value.trim();
+  var email = document.getElementById('ue-email').value.trim();
+  var phone = document.getElementById('ue-phone').value.trim();
+  var typeVal = document.querySelector('input[name="ue-type"]:checked').value;
+  var statusVal = document.getElementById('ue-status').value;
+
+  if (_editingUserRow) {
+    var cells = _editingUserRow.cells;
+    // 列顺序：0=checkbox, 1=产品, 2=站点, 3=用户ID, 4=TG用户名, 5=名称, 6=账号类型, 7=加入时间, 8=状态, 9=操作
+    cells[3].textContent = displayname;
+    cells[5].textContent = email;
+    cells[6].textContent = phone;
+    var typeLabel = typeVal === 'test' ? '测试' : '一般';
+    var typeBg = typeVal === 'test' ? 'background:#FFF3E0;color:#E6A23C' : '';
+    var typeCls = typeVal === 'test' ? '' : 'badge-normal';
+    cells[4].innerHTML = '<span class="badge ' + typeCls + '" style="' + typeBg + '">' + typeLabel + '</span>';
+    var statusLabel = statusVal === 'normal' ? '启用' : '禁用';
+    var statusCls = statusVal === 'normal' ? 'badge-active' : 'badge-block';
+    cells[8].innerHTML = '<span class="badge ' + statusCls + '" data-status="' + statusVal + '">' + statusLabel + '</span>';
+  }
+  closeUserEditModal();
+}
+
+function openAddModal() { /* placeholder - TG users are synced from group, no manual add */ }
+function batchGoogleAuth() {
+  var selected = document.querySelectorAll('.user-checkbox:checked');
+  if (!selected.length) { alert('请先勾选用户'); return; }
+  alert('批量启用谷歌验证：' + selected.length + ' 名用户');
+}
+
+function openOrderDetail(d) {
+  var typeLabel = d.type === 'deposit' ? '上分' : '下分';
+  var statusColor = d.status === '成功' ? '#55C92A' : d.status === '失败' ? '#F56C6C' : '#E6A23C';
+
+  function row(label, value, valueColor) {
+    var color = valueColor || '#333';
+    var val = (value === '' || value === undefined || value === null) ? '<span style="color:#ccc">—</span>' : '<span style="color:' + color + '">' + value + '</span>';
+    return '<div style="display:flex;align-items:baseline;padding:9px 0;border-bottom:1px solid #F5F5F5">' +
+      '<span style="min-width:140px;font-size:12px;color:#909399;flex-shrink:0">' + label + '</span>' +
+      '<span style="font-size:13px;word-break:break-all">' + val + '</span>' +
+      '</div>';
+  }
+
+  var html =
+    row('订单号', d.no, '#1C2333') +
+    row('类型', typeLabel) +
+    row('产品 / 站点', d.product + ' / ' + d.site) +
+    row('申请人（TG账号）', d.applicant) +
+    row('用户ID', d.uid) +
+    row('交易币种', d.currency) +
+    row('交易类型', d.tradeType) +
+    row('交易金额', d.amount ? d.amount + ' ' + d.currency : '') +
+    row('手续费', d.fee) +
+    row('申请时间', d.applyTime) +
+    row('完成时间', d.finishTime) +
+    row('传送状态', d.status, statusColor) +
+    (d.fail ? row('失败原因', d.fail, '#F56C6C') : '') +
+    '<div style="margin-top:12px;padding-top:12px;border-top:2px solid #F0F2F5;font-size:12px;color:#909399;font-weight:600;margin-bottom:4px">账户变动</div>' +
+    row('账变金额', d.amount ? (d.type === 'deposit' ? '+' : '-') + d.amount + ' ' + d.currency : '', d.type === 'deposit' ? '#55C92A' : '#F56C6C') +
+    row('交易前账户余额', d.accountAmountBefore) +
+    row('交易后账户余额', d.accountAmountAfter) +
+    row('奖励金额', d.bonusBefore === '' ? '' : d.bonusBefore) +
+    row('交易后奖励金余额', d.bonusAfter) +
+    row('交易前锁仓额度', d.lockBefore) +
+    row('交易后锁仓额度', d.lockAfter);
+
+  document.getElementById('order-detail-body').innerHTML = html;
+  document.getElementById('order-detail-modal').style.display = 'block';
+}
+
+function closeOrderDetail() {
+  document.getElementById('order-detail-modal').style.display = 'none';
+}
+
+function testSiteUrl() {
+  var url = document.getElementById('ss-url').value.trim();
+  var resultEl = document.getElementById('ss-url-result');
+  if (!url) { alert('请先填写 URL'); return; }
+
+  // 显示测试中状态
+  resultEl.style.display = 'block';
+  resultEl.style.background = '#F4F4F5';
+  resultEl.style.color = '#909399';
+  resultEl.textContent = '⏳ 测试中...';
+
+  // 实际开发时由后端代理发起请求，原型用 fetch 模拟（会因跨域失败，以此展示失败态）
+  var timer = setTimeout(function() {
+    // 模拟超时失败
+    resultEl.style.background = '#FEF0F0';
+    resultEl.style.color = '#F56C6C';
+    resultEl.textContent = '✕ 连接失败：服务器无回应（连接超时）';
+  }, 5000);
+
+  fetch(url, { method: 'HEAD', mode: 'no-cors', signal: AbortSignal.timeout(5000) })
+    .then(function() {
+      clearTimeout(timer);
+      resultEl.style.background = '#F0FFF4';
+      resultEl.style.color = '#55C92A';
+      resultEl.textContent = '✓ 连接成功';
+    })
+    .catch(function(err) {
+      clearTimeout(timer);
+      var msg = err.name === 'TimeoutError' ? '连接超时' :
+                err.name === 'TypeError' ? '网络错误或跨域限制（后端代理测试时应可正常连通）' :
+                err.message;
+      resultEl.style.background = '#FEF0F0';
+      resultEl.style.color = '#F56C6C';
+      resultEl.textContent = '✕ 连接失败：' + msg;
+    });
+}
+
+// ── 站点功能设置 ──
+var SITE_NUMS = { '交易所': 4, '股票': 2, '充电宝': 40 };
+var _editingSiteRow = null;
+
+function openSiteSettingModal(row) {
+  _editingSiteRow = row || null;
+  var isEdit = !!row;
+  document.getElementById('site-setting-modal-title').textContent = isEdit ? '编辑站点' : '添加站点';
+
+  if (isEdit) {
+    var cells = row.cells;
+    var product = cells[0].textContent.trim();
+    var siteName = cells[1].textContent.trim();
+    var url = cells[2].textContent.trim();
+    document.getElementById('ss-product').value = product;
+    onSsProductChange();
+    document.getElementById('ss-site-name').value = siteName;
+    document.getElementById('ss-url').value = url;
+    document.getElementById('ss-toggle-deposit').classList.toggle('on', cells[3].querySelector('.toggle-switch.on') !== null);
+    document.getElementById('ss-toggle-withdraw').classList.toggle('on', cells[4].querySelector('.toggle-switch.on') !== null);
+  } else {
+    document.getElementById('ss-product').value = '';
+    document.getElementById('ss-site-num').innerHTML = '<option value="">请先选择产品</option>';
+    document.getElementById('ss-site-name').value = '';
+    document.getElementById('ss-url').value = '';
+    document.getElementById('ss-toggle-deposit').classList.add('on');
+    document.getElementById('ss-toggle-withdraw').classList.add('on');
+  }
+  document.getElementById('ss-url-result').style.display = 'none';
+  document.getElementById('site-setting-modal').style.display = 'block';
+}
+
+function closeSiteSettingModal() {
+  document.getElementById('site-setting-modal').style.display = 'none';
+  _editingSiteRow = null;
+}
+
+function onSsProductChange() {
+  var product = document.getElementById('ss-product').value;
+  var sel = document.getElementById('ss-site-num');
+  var count = SITE_NUMS[product] || 0;
+  sel.innerHTML = count
+    ? Array.from({length: count}, function(_, i) {
+        var n = String(i + 1).padStart(2, '0');
+        return '<option value="' + n + '">' + n + '</option>';
+      }).join('')
+    : '<option value="">请先选择产品</option>';
+  onSsSiteNumChange();
+}
+
+function onSsSiteNumChange() {
+  var product = document.getElementById('ss-product').value;
+  var num = document.getElementById('ss-site-num').value;
+  if (product && num) {
+    document.getElementById('ss-site-name').value = product + '-' + num;
+  }
+}
+
+function confirmSiteSettingModal() {
+  var product = document.getElementById('ss-product').value;
+  var siteName = document.getElementById('ss-site-name').value.trim();
+  var url = document.getElementById('ss-url').value.trim();
+  if (!product) { alert('请选择产品别'); return; }
+  if (!siteName) { alert('请填写站点名称'); return; }
+  if (!url) { alert('请填写 URL'); return; }
+
+  var depositOn = document.getElementById('ss-toggle-deposit').classList.contains('on');
+  var withdrawOn = document.getElementById('ss-toggle-withdraw').classList.contains('on');
+
+  var depToggle = '<div class="toggle-switch' + (depositOn ? ' on' : '') + '" onclick="this.classList.toggle(\'on\')"></div>';
+  var witToggle = '<div class="toggle-switch' + (withdrawOn ? ' on' : '') + '" onclick="this.classList.toggle(\'on\')"></div>';
+
+  if (_editingSiteRow) {
+    var cells = _editingSiteRow.cells;
+    cells[0].innerHTML = '<span class="site-tag">' + product + '</span>';
+    cells[1].textContent = siteName;
+    cells[2].textContent = url;
+    cells[3].innerHTML = depToggle;
+    cells[4].innerHTML = witToggle;
+  } else {
+    var tbody = document.getElementById('site-setting-body');
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td style="padding-left:14px"><span class="site-tag">' + product + '</span></td>' +
+      '<td style="color:#333;font-weight:500">' + siteName + '</td>' +
+      '<td style="color:#666;font-size:12px;font-family:monospace">' + url + '</td>' +
+      '<td>' + depToggle + '</td>' +
+      '<td>' + witToggle + '</td>' +
+      '<td>' +
+        '<span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openSiteSettingModal(this.closest(\'tr\'))">&#9998; 编辑</span>' +
+        '<span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteSiteSetting(this)">&#9998; 删除</span>' +
+      '</td>';
+    tbody.appendChild(tr);
+  }
+  closeSiteSettingModal();
+}
+
+function deleteSiteSetting(btn) {
+  var row = btn.closest('tr');
+  var name = row.cells[1].textContent.trim();
+  openConfirmModal('确定删除站点「' + name + '」？', function() { row.remove(); });
+}
+
+function openConfirmModal(text, onConfirm) {
+  document.getElementById('confirm-modal-text').textContent = text;
+  var btn = document.getElementById('confirm-modal-btn');
+  btn.onclick = function() { closeConfirmModal(); onConfirm(); };
+  document.getElementById('confirm-modal').style.display = 'block';
+}
+
+function closeConfirmModal() {
+  document.getElementById('confirm-modal').style.display = 'none';
+}
+
+function deleteRole(roleKey, btn) {
+  var row = btn.closest('tr');
+  var roleName = row.cells[0].textContent.trim();
+  openConfirmModal('确定删除角色「' + roleName + '」？', function() {
+    delete ROLES[roleKey];
+    row.remove();
+  });
+}
+
+function searchRoles() {
+  var q = document.getElementById('role-search').value.trim();
+  document.querySelectorAll('#role-table-body tr').forEach(function(row) {
+    row.style.display = (!q || row.textContent.includes(q)) ? '' : 'none';
+  });
+}
+
+function resetRoleSearch() {
+  document.getElementById('role-search').value = '';
+  document.querySelectorAll('#role-table-body tr').forEach(function(row) { row.style.display = ''; });
+}
+
+function changeAdminStatus(btn){
+  // legacy, kept for compatibility
+}
+
+function toggleAdminStatus(wrapper) {
+  var isOn = wrapper.classList.contains('on');
+  var label = wrapper.querySelector('.toggle-label');
+  if (isOn) {
+    wrapper.classList.remove('on');
+    wrapper.classList.add('off');
+    label.textContent = '禁用';
+  } else {
+    wrapper.classList.remove('off');
+    wrapper.classList.add('on');
+    label.textContent = '启用';
+  }
+}
+
+var _editingAccountRow = null;
+
+function buildRoleOptions(selectedKey) {
+  var select = document.getElementById('account-input-role');
+  select.innerHTML = '<option value="">请选择角色</option>';
+  Object.keys(ROLES).forEach(function(key) {
+    var opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = ROLES[key].name;
+    if (key === selectedKey) opt.selected = true;
+    select.appendChild(opt);
+  });
+}
+
+function openAddAccountModal() {
+  _editingAccountRow = null;
+  document.getElementById('account-modal-title').textContent = '添加账号';
+  document.getElementById('account-input-account').value = '';
+  document.getElementById('account-field-account').style.display = '';
+  document.getElementById('account-field-account-readonly').style.display = 'none';
+  document.getElementById('account-input-name').value = '';
+  document.getElementById('account-input-password').value = '';
+  document.getElementById('account-field-password').style.display = '';
+  buildRoleOptions('');
+  document.getElementById('account-modal').style.display = 'block';
+}
+
+function openEditAccountModal(btn) {
+  var row = btn.closest('tr');
+  _editingAccountRow = row;
+  var account = row.cells[0].textContent.trim();
+  var name = row.cells[1].textContent.trim();
+  document.getElementById('account-modal-title').textContent = '修改账号';
+  // 隐藏可编辑账号输入框，显示只读账号
+  document.getElementById('account-field-account').style.display = 'none';
+  document.getElementById('account-field-account-readonly').style.display = '';
+  document.getElementById('account-show-account').value = account;
+  document.getElementById('account-field-password').style.display = 'none';
+  document.getElementById('account-input-name').value = name;
+  // Get role key from badge text
+  var badgeText = row.cells[2].textContent.trim();
+  var roleKey = Object.keys(ROLES).find(function(k){ return ROLES[k].name === badgeText; }) || '';
+  buildRoleOptions(roleKey);
+  document.getElementById('account-modal').style.display = 'block';
+}
+
+function closeAccountModal() {
+  document.getElementById('account-modal').style.display = 'none';
+  _editingAccountRow = null;
+}
+
+function confirmAccountModal() {
+  var name = document.getElementById('account-input-name').value.trim();
+  var roleKey = document.getElementById('account-input-role').value;
+  if (!name) { alert('请输入名称'); return; }
+  if (!roleKey) { alert('请选择角色'); return; }
+  var role = ROLES[roleKey];
+
+  var now = new Date();
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  var nowStr = now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate()) + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+
+  if (_editingAccountRow) {
+    // Update existing row
+    _editingAccountRow.cells[1].textContent = name;
+    _editingAccountRow.cells[2].innerHTML = '<span class="badge ' + (roleKey === 'super' ? 'badge-vip' : 'badge-normal') + '">' + role.name + '</span>';
+  } else {
+    var account = document.getElementById('account-input-account').value.trim();
+    var pwd = document.getElementById('account-input-password').value.trim();
+    if (!account) { alert('请输入账号'); return; }
+    if (!pwd) { alert('请输入初始密码'); return; }
+    var tbody = document.getElementById('admin-table-body');
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td style="padding-left:14px;font-family:monospace;font-size:12px;color:#333">' + account + '</td>' +
+      '<td style="color:#333">' + name + '</td>' +
+      '<td><span class="badge ' + (roleKey === 'super' ? 'badge-vip' : 'badge-normal') + '">' + role.name + '</span></td>' +
+      '<td style="color:#666;font-size:12px">—</td>' +
+      '<td style="color:#666;font-size:12px">' + nowStr + '</td>' +
+      '<td style="color:#666;font-size:12px">admin</td>' +
+      '<td><div class="labeled-toggle on" onclick="toggleAdminStatus(this)"><span class="toggle-label">启用</span><div class="toggle-knob"></div></div></td>' +
+      '<td>' +
+        '<span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openEditAccountModal(this)">&#9998; 修改</span>' +
+        '<span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openPwdModal(\'' + account + '\')">&#9998; 密码重制</span>' +
+        '<span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteAccount(this)">&#9998; 删除</span>' +
+      '</td>';
+    tbody.appendChild(tr);
+  }
+  closeAccountModal();
+}
+
+function deleteAccount(btn) {
+  var row = btn.closest('tr');
+  var account = row.cells[0].textContent.trim();
+  var name = row.cells[1].textContent.trim();
+  openConfirmModal('确定删除账号「' + account + '（' + name + '）」？', function() {
+    row.remove();
+  });
+}
+
+function changeAdminStatus(btn){
+  const row = btn.closest('tr');
+  const badge = row.querySelector('[data-status]');
+  const cur = badge.getAttribute('data-status');
+  if (cur === 'normal') {
+    badge.setAttribute('data-status', 'blocked');
+    badge.textContent = '禁用';
+    badge.className = 'badge badge-block';
+    row.dataset.status = 'blocked';
+    btn.innerHTML = '&#9998; 启用';
+    btn.style.color = '#409EFF';
+  } else {
+    badge.setAttribute('data-status', 'normal');
+    badge.textContent = '启用';
+    badge.className = 'badge badge-active';
+    row.dataset.status = 'normal';
+    btn.innerHTML = '&#9998; 禁用';
+    btn.style.color = '#909399';
+  }
+}
+
+function searchOplog() {
+  var filterPage = document.getElementById('oplog-filter-page').value;
+  var filterAction = document.getElementById('oplog-filter-action').value;
+  var filterOp = document.getElementById('oplog-filter-operator').value.trim();
+  var dateStart = document.getElementById('oplog-date-start').value;
+  var dateEnd = document.getElementById('oplog-date-end').value;
+  document.querySelectorAll('#oplog-table-body tr').forEach(function(row) {
+    var show = true;
+    if (filterPage && row.dataset.page !== filterPage) show = false;
+    if (filterAction && row.dataset.action !== filterAction) show = false;
+    if (filterOp && !row.textContent.includes(filterOp)) show = false;
+    if (dateStart && row.dataset.date && row.dataset.date < dateStart) show = false;
+    if (dateEnd && row.dataset.date && row.dataset.date > dateEnd) show = false;
+    row.style.display = show ? '' : 'none';
+  });
+}
+
+function resetOplog() {
+  document.getElementById('oplog-filter-page').value = '';
+  document.getElementById('oplog-filter-action').value = '';
+  document.getElementById('oplog-filter-operator').value = '';
+  document.getElementById('oplog-date-start').value = '';
+  document.getElementById('oplog-date-end').value = '';
+  document.querySelectorAll('#oplog-table-body tr').forEach(function(row) { row.style.display = ''; });
+}
+
+// ── 操作日志写入函数（供各页面操作后调用）──
+function writeOplog(page, action, target, detail) {
+  var tbody = document.getElementById('oplog-table-body');
+  if (!tbody) return;
+  var now = new Date();
+  var pad = function(n) { return String(n).padStart(2, '0'); };
+  var dateStr = now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate());
+  var timeStr = dateStr + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+  var actionClass = action === '新增' ? 'badge-active' : action === '删除' ? 'badge-block' : 'badge-vip';
+  var tr = document.createElement('tr');
+  tr.dataset.page = page;
+  tr.dataset.action = action;
+  tr.dataset.date = dateStr;
+  tr.innerHTML =
+    '<td style="padding-left:14px;color:#666;font-size:12px">' + timeStr + '</td>' +
+    '<td style="color:#333">admin</td>' +
+    '<td><span class="badge badge-normal">' + page + '</span></td>' +
+    '<td><span class="badge ' + actionClass + '">' + action + '</span></td>' +
+    '<td style="color:#333">' + target + '</td>' +
+    '<td style="color:#666;font-size:12px">' + detail + '</td>';
+  tbody.insertBefore(tr, tbody.firstChild);
+}
+
+function saveGlobalLimits() {
+  const depCount = document.getElementById('limit-deposit-count').value;
+  const depMin = document.getElementById('limit-deposit-min').value;
+  const depMax = document.getElementById('limit-deposit-max').value;
+  const depDaily = document.getElementById('limit-deposit-daily').value;
+  const witCount = document.getElementById('limit-withdraw-count').value;
+  const witMin = document.getElementById('limit-withdraw-min').value;
+  const witMax = document.getElementById('limit-withdraw-max').value;
+  const witDaily = document.getElementById('limit-withdraw-daily').value;
+
+  if (Number(depMin) > Number(depMax)) { alert('上分单笔金额：最低不可大于最高'); return; }
+  if (Number(witMin) > Number(witMax)) { alert('下分单笔金额：最低不可大于最高'); return; }
+
+  alert(
+    '已保存全局限制设置\n\n' +
+    '上分：每日 ' + depCount + ' 次，单笔 ' + depMin + '–' + depMax + ' 元，每日累计上限 ' + depDaily + ' 元\n' +
+    '下分：每日 ' + witCount + ' 次，单笔 ' + witMin + '–' + witMax + ' 元，每日累计上限 ' + witDaily + ' 元'
+  );
+}
+
+function searchAdmins(){
+  const account = document.getElementById('admin-search-account').value.trim();
+  document.querySelectorAll('#admin-table-body tr').forEach(function(row){
+    const show = !account || row.textContent.includes(account);
+    row.style.display = show ? '' : 'none';
+  });
+}
+
+function resetAdminSearch(){
+  document.getElementById('admin-search-account').value = '';
+  document.querySelectorAll('#admin-table-body tr').forEach(function(row){ row.style.display = ''; });
+}
+
+function searchUsers(siteIds){
+  const tgid=document.getElementById('search-tgid').value.trim();
+  const status=document.getElementById('search-status') ? document.getElementById('search-status').value : '';
+  const dateStart=document.getElementById('search-date-start') ? document.getElementById('search-date-start').value : '';
+  const dateEnd=document.getElementById('search-date-end') ? document.getElementById('search-date-end').value : '';
+  const state = _pickerRegistry['users-site-selector'];
+  const ids = siteIds || (state ? [...state.selected] : []);
+  document.querySelectorAll('.user-checkbox').forEach(cb=>{
+    const row=cb.closest('tr');
+    const badge=row.querySelector('[data-status]');
+    const rowDate=row.dataset.date || '';
+    let show=true;
+    if(tgid&&!row.textContent.includes(tgid))show=false;
+    if(status&&badge&&badge.getAttribute('data-status')!==status)show=false;
+    if(ids.length > 0 && !ids.includes(row.dataset.site)) show=false;
+    if(dateStart && rowDate && rowDate < dateStart) show=false;
+    if(dateEnd && rowDate && rowDate > dateEnd) show=false;
+    row.style.display=show?'':'none';
+  });
+}
+
+function resetSearch(){
+  document.getElementById('search-tgid').value='';
+  if(document.getElementById('search-status')) document.getElementById('search-status').value='';
+  if(document.getElementById('search-date-start')) document.getElementById('search-date-start').value='';
+  if(document.getElementById('search-date-end')) document.getElementById('search-date-end').value='';
+  const state = _pickerRegistry['users-site-selector'];
+  if (state) state.selected.clear();
+  const label = document.getElementById('users-site-selector-label');
+  if (label) label.textContent = '全部站点';
+  document.querySelectorAll('.user-checkbox').forEach(cb=>{cb.closest('tr').style.display='';cb.checked=false;});
+  document.getElementById('select-all').checked=false;
+}
+
+
+// ── Remark modal ──
+let _remarkCallback = null;
+
+function openRemarkModal(title, callback) {
+  _remarkCallback = callback;
+  document.getElementById('remark-modal-title').textContent = title;
+  document.getElementById('remark-input').value = '';
+  var m = document.getElementById('remark-modal');
+  m.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;display:block';
+}
+
+function closeRemarkModal() {
+  document.getElementById('remark-modal').style.display = 'none';
+  _remarkCallback = null;
+}
+
+function confirmRemarkModal() {
+  const remark = document.getElementById('remark-input').value.trim();
+  if (_remarkCallback) _remarkCallback(remark);
+  closeRemarkModal();
+}
+
+function openAddModal() {
+  document.getElementById('add-username').value = '';
+  document.getElementById('add-tgid').value = '';
+  document.getElementById('add-remark').value = '';
+  document.getElementById('add-modal').style.display = 'block';
+}
+
+function closeAddModal() {
+  document.getElementById('add-modal').style.display = 'none';
+}
+
+function openPwdModal(tgid) {
+  // 从表格里查找对应行，取出账号和名称
+  var account = tgid;
+  var name = '';
+  document.querySelectorAll('#admin-table-body tr').forEach(function(row) {
+    if (row.cells[0] && row.cells[0].textContent.trim() === tgid) {
+      name = row.cells[1] ? row.cells[1].textContent.trim() : '';
+    }
+  });
+  document.getElementById('pwd-modal-title').textContent = '密码重制';
+  document.getElementById('pwd-show-account').value = account;
+  document.getElementById('pwd-show-name').value = name || '—';
+  document.getElementById('pwd-new').value = '';
+  document.getElementById('pwd-confirm').value = '';
+  document.getElementById('pwd-modal').style.display = 'block';
+}
+
+function closePwdModal() {
+  document.getElementById('pwd-modal').style.display = 'none';
+}
+
+function confirmPwdModal() {
+  var pwd = document.getElementById('pwd-new').value;
+  var confirmPwd = document.getElementById('pwd-confirm').value;
+  if (!pwd) { alert('请输入新密码'); return; }
+  if (pwd !== confirmPwd) { alert('两次输入的密码不一致'); return; }
+  alert('密码修改成功');
+  closePwdModal();
+}
+
+function confirmAddModal() {
+  var username = document.getElementById('add-username').value.trim();
+  var tgid = document.getElementById('add-tgid').value.trim();
+  var remark = document.getElementById('add-remark').value.trim();
+  if (!username || !tgid) { alert('请填写用户名称和 Telegram ID'); return; }
+  var tbody = document.getElementById('user-table-body');
+  var tr = document.createElement('tr');
+  var today = new Date().toISOString().slice(0,10);
+  tr.innerHTML =
+    '<td style="padding-left:12px"><input type="checkbox" class="user-checkbox" value="' + tgid + '"></td>' +
+    '<td><span class="site-tag">—</span></td>' +
+    '<td style="color:#333">' + username + '</td>' +
+    '<td style="color:#333">' + tgid + '</td>' +
+    '<td style="color:#666;font-size:12px">' + today + '</td>' +
+    '<td><span class="badge badge-active" data-status="normal">启用</span></td>' +
+    '<td style="color:#666;font-size:12px">' + remark + '</td>' +
+    '<td>' +
+      '<span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openPwdModal(\'' + tgid + '\')">&#9998; 修改密码</span>' +
+      '<span style="color:#909399;font-size:12px;cursor:pointer;margin-right:10px" onclick="changeStatus(this,\'' + tgid + '\')">&#9998; 禁用</span>' +
+      '<span style="color:#409EFF;font-size:12px;cursor:pointer">&#9998; 谷歌验证</span>' +
+    '</td>';
+  tbody.appendChild(tr);
+  closeAddModal();
+}
+
+// click backdrop to close
+document.addEventListener('click', function(e) {
+  if (e.target === document.getElementById('remark-modal')) closeRemarkModal();
+  if (e.target === document.getElementById('add-modal')) closeAddModal();
+});
+
+function changeStatus(btn, tgid) {
+  const row = btn.closest('tr');
+  const badge = row.querySelector('[data-status]');
+  const cur = badge.getAttribute('data-status');
+  const action = cur === 'normal' ? '禁用' : '启用';
+  openRemarkModal(action + '用户 ' + tgid, function(remark) {
+    const remarkTd = row.cells[row.cells.length - 2]; // 备注列
+    if (cur === 'normal') {
+      badge.setAttribute('data-status', 'blocked');
+      badge.textContent = '禁用';
+      badge.className = 'badge badge-block';
+      btn.innerHTML = '&#9998; 启用';
+      btn.style.color = '#409EFF';
+    } else {
+      badge.setAttribute('data-status', 'normal');
+      badge.textContent = '启用';
+      badge.className = 'badge badge-active';
+      btn.innerHTML = '&#9998; 禁用';
+      btn.style.color = '#909399';
+    }
+    if (remark && remarkTd) remarkTd.textContent = remark;
+  });
+}
+
+function batchToggleStatus() {
+  var selected = Array.from(document.querySelectorAll('.user-checkbox:checked'));
+  if (!selected.length) { alert('请先勾选用户'); return; }
+  selected.forEach(function(cb) {
+    var row = cb.closest('tr');
+    // 列顺序：0=checkbox,1=用户ID,2=TG用户名,3=名称,4=账号类型,5=邮箱,6=手机号,7=加入时间,8=状态,9=操作
+    var statusTd = row.cells[8];
+    if (!statusTd) return;
+    var badge = statusTd.querySelector('[data-status]');
+    if (!badge) return;
+    if (badge.getAttribute('data-status') === 'blocked') {
+      badge.setAttribute('data-status', 'normal');
+      badge.textContent = '启用';
+      badge.className = 'badge badge-active';
+    } else {
+      badge.setAttribute('data-status', 'blocked');
+      badge.textContent = '禁用';
+      badge.className = 'badge badge-block';
+    }
+    cb.checked = false;
+  });
+  document.getElementById('select-all').checked = false;
+}
+
+function batchGoogleAuth() {
+  var selected = Array.from(document.querySelectorAll('.user-checkbox:checked'));
+  if (!selected.length) { alert('请先勾选用户'); return; }
+  openRemarkModal('批量启用谷歌验证 (' + selected.length + ' 人)', function(remark) {
+    selected.forEach(function(cb) {
+      var row = cb.closest('tr');
+      var remarkTd = row.cells[row.cells.length - 2];
+      if (remarkTd) remarkTd.textContent = remark || '';
+    });
+  });
+}
+
+function batchBlock() {
+  const sel = [...document.querySelectorAll('.user-checkbox:checked')].map(c=>c.value);
+  if (!sel.length) { alert('请先选择用户'); return; }
+  if (confirm(`确定封锁 ${sel.length} 个用户？`)) {
+    sel.forEach(id => {
+      const row = document.querySelector(`.user-checkbox[value="${id}"]`).closest('tr');
+      const b = row.querySelector('[data-status]');
+      b.setAttribute('data-status','blocked'); b.textContent='封禁'; b.className='badge badge-block';
+    });
+  }
+}
+
+function batchUnblock() {
+  const sel = [...document.querySelectorAll('.user-checkbox:checked')].map(c=>c.value);
+  if (!sel.length) { alert('请先选择用户'); return; }
+  if (confirm(`确定解封 ${sel.length} 个用户？`)) {
+    sel.forEach(id => {
+      const row = document.querySelector(`.user-checkbox[value="${id}"]`).closest('tr');
+      const b = row.querySelector('[data-status]');
+      b.setAttribute('data-status','normal'); b.textContent='正常'; b.className='badge badge-active';
+    });
+  }
+}
+
+
+function depSiteFilter(siteIds) {
+  // 站点选择器回调：仅更新选中站点状态，实际过滤统一走 searchDepositOrders
+  searchDepositOrders(siteIds);
+}
+
+function searchDepositOrders(siteIds) {
+  const orderNo = document.getElementById('dep-search-order') ? document.getElementById('dep-search-order').value.trim() : '';
+  const uid = document.getElementById('dep-search-uid') ? document.getElementById('dep-search-uid').value.trim() : '';
+  const dateStart = document.getElementById('dep-date-start') ? document.getElementById('dep-date-start').value : '';
+  const dateEnd = document.getElementById('dep-date-end') ? document.getElementById('dep-date-end').value : '';
+  const state = _pickerRegistry['dep-site-selector'];
+  const ids = siteIds || (state ? [...state.selected] : []);
+  document.querySelectorAll('#page-deposit-order tbody tr').forEach(function(row) {
+    const rowDate = row.dataset.date || '';
+    let show = true;
+    if (ids.length > 0 && !ids.includes(row.dataset.site)) show = false;
+    if (orderNo && !row.textContent.includes(orderNo)) show = false;
+    if (uid && !row.textContent.includes(uid)) show = false;
+    if (dateStart && rowDate && rowDate < dateStart) show = false;
+    if (dateEnd && rowDate && rowDate > dateEnd) show = false;
+    row.style.display = show ? '' : 'none';
+  });
+}
+
+function resetDepositOrders() {
+  if (document.getElementById('dep-search-order')) document.getElementById('dep-search-order').value = '';
+  if (document.getElementById('dep-search-uid')) document.getElementById('dep-search-uid').value = '';
+  if (document.getElementById('dep-date-start')) document.getElementById('dep-date-start').value = '';
+  if (document.getElementById('dep-date-end')) document.getElementById('dep-date-end').value = '';
+  const state = _pickerRegistry['dep-site-selector'];
+  if (state) state.selected.clear();
+  const label = document.getElementById('dep-site-selector-label');
+  if (label) label.textContent = '全部站点';
+  document.querySelectorAll('#page-deposit-order tbody tr').forEach(function(row) { row.style.display = ''; });
+}
+
+function witSiteFilter(siteIds) {
+  searchWithdrawOrders(siteIds);
+}
+
+function searchWithdrawOrders(siteIds) {
+  const orderNo = document.getElementById('wit-search-order') ? document.getElementById('wit-search-order').value.trim() : '';
+  const uid = document.getElementById('wit-search-uid') ? document.getElementById('wit-search-uid').value.trim() : '';
+  const dateStart = document.getElementById('wit-date-start') ? document.getElementById('wit-date-start').value : '';
+  const dateEnd = document.getElementById('wit-date-end') ? document.getElementById('wit-date-end').value : '';
+  const state = _pickerRegistry['wit-site-selector'];
+  const ids = siteIds || (state ? [...state.selected] : []);
+  document.querySelectorAll('#page-withdraw-order tbody tr').forEach(function(row) {
+    const rowDate = row.dataset.date || '';
+    let show = true;
+    if (ids.length > 0 && !ids.includes(row.dataset.site)) show = false;
+    if (orderNo && !row.textContent.includes(orderNo)) show = false;
+    if (uid && !row.textContent.includes(uid)) show = false;
+    if (dateStart && rowDate && rowDate < dateStart) show = false;
+    if (dateEnd && rowDate && rowDate > dateEnd) show = false;
+    row.style.display = show ? '' : 'none';
+  });
+}
+
+function resetWithdrawOrders() {
+  if (document.getElementById('wit-search-order')) document.getElementById('wit-search-order').value = '';
+  if (document.getElementById('wit-search-uid')) document.getElementById('wit-search-uid').value = '';
+  if (document.getElementById('wit-date-start')) document.getElementById('wit-date-start').value = '';
+  if (document.getElementById('wit-date-end')) document.getElementById('wit-date-end').value = '';
+  const state = _pickerRegistry['wit-site-selector'];
+  if (state) state.selected.clear();
+  const label = document.getElementById('wit-site-selector-label');
+  if (label) label.textContent = '全部站点';
+  document.querySelectorAll('#page-withdraw-order tbody tr').forEach(function(row) { row.style.display = ''; });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  try{
+    updateClock();
+    renderSitePicker('overview-site-selector', { mode: 'multi', onApply: selectSiteForOverview });
+    renderSitePicker('dep-site-selector', { mode: 'multi', onApply: depSiteFilter });
+    renderSitePicker('wit-site-selector', { mode: 'multi', onApply: witSiteFilter });
+    renderSitePicker('users-site-selector', { mode: 'multi', onApply: function(ids) { searchUsers(ids); } });
+    renderSitePermTabs();
+    applyRoleToNav();
+  }catch(e){}
+});
+</script>
+
+<!-- ── 弹窗遮罩 ── -->
+<div id="remark-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:6px;width:380px;box-shadow:0 4px 24px rgba(0,0,0,0.18);overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center">
+      <span id="remark-modal-title" style="font-size:14px;font-weight:600;color:#333">操作备注</span>
+      <span onclick="closeRemarkModal()" style="cursor:pointer;color:#999;font-size:20px;line-height:1">&times;</span>
+    </div>
+    <div style="padding:18px 18px 12px">
+      <label style="font-size:13px;color:#606266;display:block;margin-bottom:6px">备注内容</label>
+      <textarea id="remark-input" style="width:100%;height:88px;padding:8px 10px;border:1px solid #DCDFE6;border-radius:3px;font-size:13px;font-family:inherit;resize:none;outline:none;box-sizing:border-box" placeholder="请输入备注（可选）"></textarea>
+    </div>
+    <div style="padding:8px 18px 16px;display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn" onclick="closeRemarkModal()">取消</button>
+      <button class="btn btn-green" onclick="confirmRemarkModal()">确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 添加用户弹窗 ── -->
+<div id="add-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:6px;width:400px;box-shadow:0 4px 24px rgba(0,0,0,0.18);overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:14px;font-weight:600;color:#333">添加用户</span>
+      <span onclick="closeAddModal()" style="cursor:pointer;color:#999;font-size:20px;line-height:1">&times;</span>
+    </div>
+    <div style="padding:18px;display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">用户名称</label>
+        <input id="add-username" class="fi" style="width:100%" placeholder="请输入用户名称">
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">Telegram ID</label>
+        <input id="add-tgid" class="fi" style="width:100%" placeholder="请输入 Telegram ID（如 @sunny_trader）">
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">备注</label>
+        <textarea id="add-remark" style="width:100%;height:72px;padding:8px 10px;border:1px solid #DCDFE6;border-radius:3px;font-size:13px;font-family:inherit;resize:none;outline:none;box-sizing:border-box" placeholder="请输入备注（可选）"></textarea>
+      </div>
+    </div>
+    <div style="padding:8px 18px 16px;display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn" onclick="closeAddModal()">取消</button>
+      <button class="btn btn-green" onclick="confirmAddModal()">确认添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 修改密码弹窗 ── -->
+<div id="pwd-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:6px;width:380px;box-shadow:0 4px 24px rgba(0,0,0,0.18);overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center">
+      <span id="pwd-modal-title" style="font-size:14px;font-weight:600;color:#333">密码重制</span>
+      <span onclick="closePwdModal()" style="cursor:pointer;color:#999;font-size:20px;line-height:1">&times;</span>
+    </div>
+    <div style="padding:18px;display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">账号</label>
+        <input id="pwd-show-account" class="fi" style="width:100%;background:#F5F7FA;color:#909399;cursor:not-allowed" disabled>
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">名称</label>
+        <input id="pwd-show-name" class="fi" style="width:100%;background:#F5F7FA;color:#909399;cursor:not-allowed" disabled>
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">新密码</label>
+        <input id="pwd-new" type="password" class="fi" style="width:100%" placeholder="请输入新密码">
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">确认新密码</label>
+        <input id="pwd-confirm" type="password" class="fi" style="width:100%" placeholder="请再次输入新密码">
+      </div>
+    </div>
+    <div style="padding:8px 18px 16px;display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn" onclick="closePwdModal()">取消</button>
+      <button class="btn btn-green" onclick="confirmPwdModal()">确认修改</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 角色权限编辑弹窗 ── -->
+<div id="role-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:6px;width:420px;box-shadow:0 4px 24px rgba(0,0,0,0.18);overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center">
+      <span id="role-modal-title" style="font-size:14px;font-weight:600;color:#333">新增角色</span>
+      <span onclick="closeRoleModal()" style="cursor:pointer;color:#999;font-size:20px;line-height:1">&times;</span>
+    </div>
+    <div style="padding:18px;display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px"><span style="color:#F56C6C;margin-right:2px">*</span>角色名称</label>
+        <input id="role-name-input" class="fi" style="width:100%" placeholder="请输入角色名称">
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">备注</label>
+        <input id="role-desc-input" class="fi" style="width:100%" placeholder="简单描述该角色的职责">
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <label style="font-size:13px;color:#606266"><span style="color:#F56C6C;margin-right:2px">*</span>可访问菜单</label>
+          <div style="display:flex;gap:10px">
+            <span onclick="rolePermSelectAll(true)" style="display:flex;align-items:center;gap:4px;font-size:12px;color:#409EFF;cursor:pointer">
+              <span style="width:14px;height:14px;border-radius:3px;background:#409EFF;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:10px">✓</span> 全选
+            </span>
+            <span onclick="rolePermSelectAll(false)" style="display:flex;align-items:center;gap:4px;font-size:12px;color:#F56C6C;cursor:pointer">
+              <span style="width:14px;height:14px;border-radius:3px;background:#F56C6C;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:10px">✕</span> 全不选
+            </span>
+          </div>
+        </div>
+        <div id="role-perm-list" style="display:flex;flex-direction:column;gap:2px;max-height:300px;overflow-y:auto;border:1px solid #EBEEF5;border-radius:4px;padding:6px 8px"></div>
+      </div>
+    </div>
+    <div style="padding:8px 18px 16px;display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn" onclick="closeRoleModal()">取消</button>
+      <button class="btn btn-green" onclick="confirmRoleModal()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 添加/修改账号弹窗 ── -->
+<div id="account-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:6px;width:400px;box-shadow:0 4px 24px rgba(0,0,0,0.18);overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center">
+      <span id="account-modal-title" style="font-size:14px;font-weight:600;color:#333">添加账号</span>
+      <span onclick="closeAccountModal()" style="cursor:pointer;color:#999;font-size:20px;line-height:1">&times;</span>
+    </div>
+    <div style="padding:18px;display:flex;flex-direction:column;gap:12px">
+      <!-- 新增时：可编辑账号输入框；编辑时：只读显示账号 -->
+      <div id="account-field-account">
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px"><span style="color:#F56C6C;margin-right:2px">*</span>账号</label>
+        <input id="account-input-account" class="fi" style="width:100%" placeholder="请输入账号">
+      </div>
+      <div id="account-field-account-readonly" style="display:none">
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">账号</label>
+        <input id="account-show-account" class="fi" style="width:100%;background:#F5F7FA;color:#909399;cursor:not-allowed" disabled>
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px"><span style="color:#F56C6C;margin-right:2px">*</span>名称</label>
+        <input id="account-input-name" class="fi" style="width:100%" placeholder="请输入名称">
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px"><span style="color:#F56C6C;margin-right:2px">*</span>角色</label>
+        <select id="account-input-role" class="fi" style="width:100%">
+          <option value="">请选择角色</option>
+          <option value="super">超级管理员</option>
+          <option value="general">一般管理员</option>
+        </select>
+      </div>
+      <div id="account-field-password">
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px"><span style="color:#F56C6C;margin-right:2px">*</span>初始密码</label>
+        <input id="account-input-password" type="password" class="fi" style="width:100%" placeholder="请输入初始密码">
+      </div>
+    </div>
+    <div style="padding:8px 18px 16px;display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn" onclick="closeAccountModal()">取消</button>
+      <button class="btn btn-green" onclick="confirmAccountModal()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 删除二次确认弹窗 ── -->
+<div id="confirm-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:10000;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:6px;width:360px;box-shadow:0 4px 24px rgba(0,0,0,0.18);overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:14px;font-weight:600;color:#333">确认删除</span>
+      <span onclick="closeConfirmModal()" style="cursor:pointer;color:#999;font-size:20px;line-height:1">&times;</span>
+    </div>
+    <div style="padding:20px 18px 12px;display:flex;align-items:flex-start;gap:12px">
+      <span style="font-size:22px;color:#F56C6C;line-height:1.2">&#9888;</span>
+      <div>
+        <p style="font-size:14px;color:#333;margin:0 0 6px;font-weight:500" id="confirm-modal-text">确定要删除吗？</p>
+        <p style="font-size:12px;color:#909399;margin:0">此操作不可恢复，请确认后继续。</p>
+      </div>
+    </div>
+    <div style="padding:8px 18px 16px;display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn" onclick="closeConfirmModal()">取消</button>
+      <button class="btn btn-red" id="confirm-modal-btn" onclick="">确认删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 编辑 TG 用户弹窗 ── -->
+<div id="user-edit-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:6px;width:420px;box-shadow:0 4px 24px rgba(0,0,0,0.18);overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:14px;font-weight:600;color:#333">编辑用户</span>
+      <span onclick="closeUserEditModal()" style="cursor:pointer;color:#999;font-size:20px;line-height:1">&times;</span>
+    </div>
+    <div style="padding:18px;display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">用户ID</label>
+        <input id="ue-uid" class="fi" style="width:100%;background:#F5F7FA;color:#909399;cursor:not-allowed" disabled>
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">TG用户名</label>
+        <input id="ue-username" class="fi" style="width:100%;background:#F5F7FA;color:#909399;cursor:not-allowed" disabled placeholder="从 Telegram 同步">
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">名称</label>
+        <input id="ue-displayname" class="fi" style="width:100%" placeholder="备注这个用户是谁">
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">邮箱</label>
+        <input id="ue-email" class="fi" style="width:100%" placeholder="请输入邮箱">
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">手机号</label>
+        <input id="ue-phone" class="fi" style="width:100%" placeholder="请输入手机号">
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px"><span style="color:#F56C6C;margin-right:2px">*</span>账号类型</label>
+        <div style="display:flex;gap:20px;padding-top:4px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+            <input type="radio" name="ue-type" value="normal" checked> 一般
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+            <input type="radio" name="ue-type" value="test"> 测试
+          </label>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px"><span style="color:#F56C6C;margin-right:2px">*</span>状态</label>
+        <select id="ue-status" class="fi" style="width:100%">
+          <option value="blocked">禁用</option>
+          <option value="normal">启用</option>
+        </select>
+      </div>
+    </div>
+    <div style="padding:8px 18px 16px;display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn" onclick="closeUserEditModal()">取消</button>
+      <button class="btn btn-green" onclick="confirmUserEditModal()">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 订单详情弹窗 ── -->
+<!-- ── 批量添加用户弹窗 ── -->
+<div id="batch-add-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:6px;width:460px;box-shadow:0 4px 24px rgba(0,0,0,0.18);overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:14px;font-weight:600;color:#333">批量添加用户</span>
+      <span onclick="closeBatchAddModal()" style="cursor:pointer;color:#999;font-size:20px;line-height:1">&times;</span>
+    </div>
+    <div style="padding:18px;display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">
+          <span style="color:#F56C6C;margin-right:2px">*</span>TG 用户名
+          <span style="color:#999;font-weight:400;margin-left:6px">每行一个，如 @username</span>
+        </label>
+        <textarea id="batch-add-input" class="fi" style="width:100%;height:160px;resize:vertical;font-family:monospace;font-size:12px;line-height:1.8" placeholder="@sunny_trader&#10;@ace024&#10;@powerbank_li"></textarea>
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px">账号类型</label>
+        <div style="display:flex;gap:20px;padding-top:4px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+            <input type="radio" name="batch-type" value="normal" checked> 一般
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+            <input type="radio" name="batch-type" value="test"> 测试
+          </label>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px"><span style="color:#F56C6C;margin-right:2px">*</span>状态</label>
+        <select id="batch-add-status" class="fi" style="width:100%">
+          <option value="blocked">禁用</option>
+          <option value="normal">启用</option>
+        </select>
+      </div>
+      <div id="batch-add-result" style="display:none;font-size:12px;color:#67C23A;background:#F0FFF0;border-radius:4px;padding:8px 12px"></div>
+    </div>
+    <div style="padding:8px 18px 16px;display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn" onclick="closeBatchAddModal()">取消</button>
+      <button class="btn btn-green" onclick="confirmBatchAdd()">批量导入</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 添加/编辑站点弹窗 ── -->
+<div id="site-setting-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:6px;width:420px;box-shadow:0 4px 24px rgba(0,0,0,0.18);overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center">
+      <span id="site-setting-modal-title" style="font-size:14px;font-weight:600;color:#333">添加站点</span>
+      <span onclick="closeSiteSettingModal()" style="cursor:pointer;color:#999;font-size:20px;line-height:1">&times;</span>
+    </div>
+    <div style="padding:18px;display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px"><span style="color:#F56C6C;margin-right:2px">*</span>产品别</label>
+        <select id="ss-product" class="fi" style="width:100%" onchange="onSsProductChange()">
+          <option value="">请选择产品</option>
+          <option value="交易所">交易所</option>
+          <option value="股票">股票</option>
+          <option value="充电宝">充电宝</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px"><span style="color:#F56C6C;margin-right:2px">*</span>站点</label>
+        <select id="ss-site-num" class="fi" style="width:100%;margin-bottom:6px" onchange="onSsSiteNumChange()">
+          <option value="">请先选择产品</option>
+        </select>
+        <input id="ss-site-name" class="fi" style="width:100%" placeholder="站点名称（可修改，如「交易所-01」）">
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:5px"><span style="color:#F56C6C;margin-right:2px">*</span>URL</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="ss-url" class="fi" style="flex:1" placeholder="https://example.com/api">
+          <button class="btn" style="flex-shrink:0;padding:0 12px" onclick="testSiteUrl()">测试</button>
+        </div>
+        <div id="ss-url-result" style="display:none;margin-top:6px;font-size:12px;padding:5px 10px;border-radius:4px"></div>
+      </div>
+      <div>
+        <label style="font-size:13px;color:#606266;display:block;margin-bottom:8px">功能开关</label>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label style="display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#333">
+            <span>上分（充值）</span>
+            <div id="ss-toggle-deposit" class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+          </label>
+          <label style="display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#333">
+            <span>下分（提现）</span>
+            <div id="ss-toggle-withdraw" class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div style="padding:8px 18px 16px;display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn" onclick="closeSiteSettingModal()">取消</button>
+      <button class="btn btn-green" onclick="confirmSiteSettingModal()">保存</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
