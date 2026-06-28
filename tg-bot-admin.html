@@ -914,7 +914,7 @@
               <td style="font-family:monospace;font-size:12px;color:#333">ORD20260618001</td>
               <td style="color:#666;font-size:12px">@sunny_trader</td>
               <td style="color:#666">104821</td>
-              <td style="color:#55C92A;font-weight:500">¥500</td>
+              <td style="color:#55C92A;font-weight:500">500</td>
               <td style="color:#666;font-size:12px">2026-06-18 14:30</td>
               <td style="color:#666;font-size:12px">2026-06-18 14:32</td>
               <td><span class="badge badge-active">成功</span></td>
@@ -926,7 +926,7 @@
               <td style="font-family:monospace;font-size:12px;color:#333">ORD20260618002</td>
               <td style="color:#666;font-size:12px">@ace024</td>
               <td style="color:#666">208374</td>
-              <td style="color:#55C92A;font-weight:500">¥1000</td>
+              <td style="color:#55C92A;font-weight:500">1000</td>
               <td style="color:#666;font-size:12px">2026-06-18 13:45</td>
               <td style="color:#ccc;font-size:12px">—</td>
               <td><span class="badge" style="background:#FFF3E0;color:#E6A23C">申请中</span></td>
@@ -938,7 +938,7 @@
               <td style="font-family:monospace;font-size:12px;color:#333">ORD20260618003</td>
               <td style="color:#666;font-size:12px">@powerbank_li</td>
               <td style="color:#666">418203</td>
-              <td style="color:#55C92A;font-weight:500">¥200</td>
+              <td style="color:#55C92A;font-weight:500">200</td>
               <td style="color:#666;font-size:12px">2026-06-18 12:15</td>
               <td style="color:#666;font-size:12px">2026-06-18 12:17</td>
               <td><span class="badge badge-block">失败</span></td>
@@ -950,7 +950,7 @@
               <td style="font-family:monospace;font-size:12px;color:#333">ORD20260618004</td>
               <td style="color:#666;font-size:12px">@sunyan_88</td>
               <td style="color:#666">519042</td>
-              <td style="color:#55C92A;font-weight:500">¥800</td>
+              <td style="color:#55C92A;font-weight:500">800</td>
               <td style="color:#666;font-size:12px">2026-06-18 10:05</td>
               <td style="color:#ccc;font-size:12px">—</td>
               <td><span class="badge badge-block">失败</span></td>
@@ -1013,7 +1013,7 @@
               <td style="font-family:monospace;font-size:12px;color:#333">WTH20260618001</td>
               <td style="color:#666;font-size:12px">@sunny_trader</td>
               <td style="color:#666">104821</td>
-              <td style="color:#F56C6C;font-weight:500">¥300</td>
+              <td style="color:#F56C6C;font-weight:500">300</td>
               <td style="color:#666;font-size:12px">2026-06-18 14:20</td>
               <td style="color:#666;font-size:12px">2026-06-18 14:25</td>
               <td><span class="badge badge-active">成功</span></td>
@@ -1025,7 +1025,7 @@
               <td style="font-family:monospace;font-size:12px;color:#333">WTH20260618004</td>
               <td style="color:#666;font-size:12px">@stock_chen</td>
               <td style="color:#666">631928</td>
-              <td style="color:#F56C6C;font-weight:500">¥600</td>
+              <td style="color:#F56C6C;font-weight:500">600</td>
               <td style="color:#666;font-size:12px">2026-06-18 09:40</td>
               <td style="color:#ccc;font-size:12px">—</td>
               <td><span class="badge badge-block">失败</span></td>
@@ -1239,70 +1239,72 @@
 
     <!-- ══ 站点功能设置 ══ -->
     <div class="page" id="page-settings">
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">站点功能设置</span>
-          <span style="font-size:12px;color:#999">设定各站点可使用的机器人功能，未开放会收到"功能未开放"的提示</span>
+      <div class="filter-panel">
+        <div class="filter-row">
+          <input class="fi" style="width:200px" id="site-search-name" placeholder="搜索站点名称...">
+          <input class="fi" style="width:260px" id="site-search-url" placeholder="搜索 URL...">
+          <button class="btn btn-green" onclick="searchSiteSettings()"><i class="ti ti-search"></i> 搜索</button>
+          <button class="btn btn-teal" onclick="resetSiteSettings()"><i class="ti ti-rotate-clockwise"></i> 重置</button>
         </div>
-        <div class="filter-panel" style="margin-bottom:12px">
-          <div class="filter-row">
-            <input class="fi" style="width:200px" id="site-search-name" placeholder="搜索站点名称...">
-            <input class="fi" style="width:260px" id="site-search-url" placeholder="搜索 URL...">
-            <button class="btn btn-green" onclick="searchSiteSettings()"><i class="ti ti-search"></i> 搜索</button>
-            <button class="btn btn-teal" onclick="resetSiteSettings()"><i class="ti ti-rotate-clockwise"></i> 重置</button>
+      </div>
+      <div class="action-bar" style="margin-bottom:12px">
+        <button class="btn" style="background:#fff" onclick="openBatchSiteModal()"><i class="ti ti-plus"></i> 批量添加</button>
+      </div>
+      <div class="table-card">
+        <table class="data-table" id="site-setting-table">
+          <thead>
+            <tr>
+              <th style="padding-left:14px">产品</th>
+              <th>站点</th>
+              <th>URL</th>
+              <th>上分</th>
+              <th>下分</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="site-setting-body">
+            <tr>
+              <td style="padding-left:14px"><span class="site-tag">交易所</span></td>
+              <td style="color:#333;font-weight:500">交易所-01</td>
+              <td style="color:#666;font-size:12px;font-family:monospace">https://ex01.example.com/api</td>
+              <td><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></td>
+              <td><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></td>
+              <td>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openSiteSettingModal(this.closest('tr'))">&#9998; 编辑</span>
+                <span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteSiteSetting(this)">&#9998; 删除</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding-left:14px"><span class="site-tag">股票</span></td>
+              <td style="color:#333;font-weight:500">股票-01</td>
+              <td style="color:#666;font-size:12px;font-family:monospace">https://st01.example.com/api</td>
+              <td><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></td>
+              <td><div class="toggle-switch" onclick="this.classList.toggle('on')"></div></td>
+              <td>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openSiteSettingModal(this.closest('tr'))">&#9998; 编辑</span>
+                <span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteSiteSetting(this)">&#9998; 删除</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding-left:14px"><span class="site-tag">充电宝</span></td>
+              <td style="color:#333;font-weight:500">充电宝-01</td>
+              <td style="color:#666;font-size:12px;font-family:monospace">https://pb01.example.com/api</td>
+              <td><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></td>
+              <td><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></td>
+              <td>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openSiteSettingModal(this.closest('tr'))">&#9998; 编辑</span>
+                <span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteSiteSetting(this)">&#9998; 删除</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span class="page-info">共 3 条记录</span>
+          <div class="page-btns">
+            <button class="page-btn">上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">下一页</button>
           </div>
-        </div>
-        <div class="action-bar" style="margin-bottom:12px">
-          <button class="btn" style="background:#fff" onclick="openBatchSiteModal()"><i class="ti ti-plus"></i> 批量添加</button>
-        </div>
-        <div class="table-card" style="box-shadow:none;border:1px solid var(--border)">
-          <table class="data-table" id="site-setting-table">
-            <thead>
-              <tr>
-                <th style="padding-left:14px">产品</th>
-                <th>站点</th>
-                <th>URL</th>
-                <th>上分</th>
-                <th>下分</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody id="site-setting-body">
-              <tr>
-                <td style="padding-left:14px"><span class="site-tag">交易所</span></td>
-                <td style="color:#333;font-weight:500">交易所-01</td>
-                <td style="color:#666;font-size:12px;font-family:monospace">https://ex01.example.com/api</td>
-                <td><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></td>
-                <td><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></td>
-                <td>
-                  <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openSiteSettingModal(this.closest('tr'))">&#9998; 编辑</span>
-                  <span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteSiteSetting(this)">&#9998; 删除</span>
-                </td>
-              </tr>
-              <tr>
-                <td style="padding-left:14px"><span class="site-tag">股票</span></td>
-                <td style="color:#333;font-weight:500">股票-01</td>
-                <td style="color:#666;font-size:12px;font-family:monospace">https://st01.example.com/api</td>
-                <td><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></td>
-                <td><div class="toggle-switch" onclick="this.classList.toggle('on')"></div></td>
-                <td>
-                  <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openSiteSettingModal(this.closest('tr'))">&#9998; 编辑</span>
-                  <span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteSiteSetting(this)">&#9998; 删除</span>
-                </td>
-              </tr>
-              <tr>
-                <td style="padding-left:14px"><span class="site-tag">充电宝</span></td>
-                <td style="color:#333;font-weight:500">充电宝-01</td>
-                <td style="color:#666;font-size:12px;font-family:monospace">https://pb01.example.com/api</td>
-                <td><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></td>
-                <td><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></td>
-                <td>
-                  <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openSiteSettingModal(this.closest('tr'))">&#9998; 编辑</span>
-                  <span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteSiteSetting(this)">&#9998; 删除</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
     </div>
@@ -1469,7 +1471,7 @@
                 <div class="labeled-toggle on" onclick="toggleAdminStatus(this)"><span class="toggle-label">启用</span><div class="toggle-knob"></div></div>
               </td>
               <td>
-                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openEditAccountModal(this)">&#9998; 修改#9998; 编辑</span>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openEditAccountModal(this)">&#9998; 编辑</span>
                 <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openPwdModal('admin')">&#9998; 密码重制</span>
                 <span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteAccount(this)">&#9998; 删除</span>
               </td>
@@ -1485,13 +1487,21 @@
                 <div class="labeled-toggle on" onclick="toggleAdminStatus(this)"><span class="toggle-label">启用</span><div class="toggle-knob"></div></div>
               </td>
               <td>
-                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openEditAccountModal(this)">&#9998; 修改#9998; 编辑</span>
+                <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openEditAccountModal(this)">&#9998; 编辑</span>
                 <span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openPwdModal('operator01')">&#9998; 密码重制</span>
                 <span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteAccount(this)">&#9998; 删除</span>
               </td>
             </tr>
           </tbody>
         </table>
+        <div class="pagination">
+          <span class="page-info">共 2 条记录</span>
+          <div class="page-btns">
+            <button class="page-btn">上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">下一页</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1538,6 +1548,14 @@
             </tr>
           </tbody>
         </table>
+        <div class="pagination">
+          <span class="page-info">共 2 条记录</span>
+          <div class="page-btns">
+            <button class="page-btn">上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">下一页</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -2615,11 +2633,8 @@ function deleteSiteSetting(btn) {
 
 // ── 批量添加站点 ──
 function openBatchSiteModal() {
-  document.getElementById('bs-product').value = '';
-  document.getElementById('bs-site-list').innerHTML = '<span style="color:#C0C4CC;font-size:12px;line-height:24px">请先选择产品别</span>';
-  document.getElementById('bs-entries').style.display = 'none';
-  document.getElementById('bs-empty').style.display = 'block';
   document.getElementById('bs-entries-body').innerHTML = '';
+  addBsRow(); addBsRow(); addBsRow();
   document.getElementById('batch-site-modal').style.display = 'block';
 }
 
@@ -2627,82 +2642,39 @@ function closeBatchSiteModal() {
   document.getElementById('batch-site-modal').style.display = 'none';
 }
 
-function onBsProductChange() {
-  var product = document.getElementById('bs-product').value;
-  var listEl = document.getElementById('bs-site-list');
-  var count = SITE_NUMS[product] || 0;
-  if (!count) {
-    listEl.innerHTML = '<span style="color:#C0C4CC;font-size:12px;line-height:24px">请先选择产品别</span>';
-    renderBsEntries();
-    return;
-  }
-  var html = '';
-  for (var i = 1; i <= count; i++) {
-    var num = String(i).padStart(2, '0');
-    var name = product + '-' + num;
-    html += '<label style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#333;cursor:pointer;padding:3px 8px;border:1px solid #DCDFE6;border-radius:3px;background:#fff">' +
-      '<input type="checkbox" class="bs-site-cb" value="' + name + '" onchange="renderBsEntries()"> ' + name + '</label>';
-  }
-  listEl.innerHTML = html;
-  renderBsEntries();
-}
-
-function bsSiteSelectAll(checked) {
-  document.querySelectorAll('.bs-site-cb').forEach(function(cb) { cb.checked = checked; });
-  renderBsEntries();
-}
-
-function renderBsEntries() {
-  var selected = Array.from(document.querySelectorAll('.bs-site-cb:checked')).map(function(cb){ return cb.value; });
+function addBsRow() {
   var tbody = document.getElementById('bs-entries-body');
-  var entriesEl = document.getElementById('bs-entries');
-  var emptyEl = document.getElementById('bs-empty');
-
-  if (!selected.length) {
-    entriesEl.style.display = 'none';
-    emptyEl.style.display = 'block';
-    tbody.innerHTML = '';
-    return;
-  }
-  entriesEl.style.display = 'block';
-  emptyEl.style.display = 'none';
-
-  // 保留已填入的 URL 值，避免重新渲染时丢失
-  var existing = {};
-  tbody.querySelectorAll('tr').forEach(function(row) {
-    var name = row.dataset.site;
-    var urlVal = row.querySelector('.bs-url-input') ? row.querySelector('.bs-url-input').value : '';
-    var customName = row.querySelector('.bs-site-name') ? row.querySelector('.bs-site-name').value : name;
-    var dep = row.querySelector('.bs-dep') ? row.querySelector('.bs-dep').classList.contains('on') : true;
-    var wit = row.querySelector('.bs-wit') ? row.querySelector('.bs-wit').classList.contains('on') : true;
-    existing[name] = { url: urlVal, customName: customName, dep: dep, wit: wit };
-  });
-
-  tbody.innerHTML = selected.map(function(name) {
-    var prev = existing[name] || {};
-    var url = prev.url || '';
-    var customName = prev.customName || name;
-    var dep = prev.dep !== false;
-    var wit = prev.wit !== false;
-    return '<tr data-site="' + name + '" style="border-bottom:1px solid #F0F0F0">' +
-      '<td style="padding:4px 6px;border:1px solid #EBEEF5">' +
-        '<input type="text" class="fi bs-site-name" style="width:100%;font-size:12px;padding:4px 6px" value="' + customName + '">' +
-      '</td>' +
-      '<td style="padding:4px 6px;border:1px solid #EBEEF5">' +
-        '<div style="display:flex;gap:4px;align-items:center">' +
-          '<input type="text" class="fi bs-url-input" style="flex:1;font-size:12px;padding:4px 6px" placeholder="https://..." value="' + url + '">' +
-          '<button class="btn" style="flex-shrink:0;padding:0 8px;font-size:11px;height:28px;white-space:nowrap" onclick="testBsUrl(this)">测试</button>' +
-        '</div>' +
-        '<div class="bs-url-result" style="display:none;font-size:11px;padding:2px 4px;margin-top:3px;border-radius:3px"></div>' +
-      '</td>' +
-      '<td style="padding:4px 8px;text-align:center;border:1px solid #EBEEF5">' +
-        '<div class="toggle-switch' + (dep ? ' on' : '') + ' bs-dep" onclick="this.classList.toggle(\'on\')"></div>' +
-      '</td>' +
-      '<td style="padding:4px 8px;text-align:center;border:1px solid #EBEEF5">' +
-        '<div class="toggle-switch' + (wit ? ' on' : '') + ' bs-wit" onclick="this.classList.toggle(\'on\')"></div>' +
-      '</td>' +
-    '</tr>';
-  }).join('');
+  var tr = document.createElement('tr');
+  tr.style.borderBottom = '1px solid #F0F0F0';
+  tr.innerHTML =
+    '<td style="padding:4px 6px;border:1px solid #EBEEF5">' +
+      '<select class="fi bs-product" style="width:100%;font-size:12px;padding:4px 6px">' +
+        '<option value="">请选择</option>' +
+        '<option value="交易所">交易所</option>' +
+        '<option value="股票">股票</option>' +
+        '<option value="充电宝">充电宝</option>' +
+      '</select>' +
+    '</td>' +
+    '<td style="padding:4px 6px;border:1px solid #EBEEF5">' +
+      '<input type="text" class="fi bs-site-name" style="width:100%;font-size:12px;padding:4px 6px" placeholder="如：交易所-01">' +
+    '</td>' +
+    '<td style="padding:4px 6px;border:1px solid #EBEEF5">' +
+      '<div style="display:flex;gap:4px;align-items:center">' +
+        '<input type="text" class="fi bs-url-input" style="flex:1;font-size:12px;padding:4px 6px" placeholder="https://...">' +
+        '<button class="btn" style="flex-shrink:0;padding:0 8px;font-size:11px;height:28px;white-space:nowrap" onclick="testBsUrl(this)">测试</button>' +
+      '</div>' +
+      '<div class="bs-url-result" style="display:none;font-size:11px;padding:2px 4px;margin-top:3px;border-radius:3px"></div>' +
+    '</td>' +
+    '<td style="padding:4px 8px;text-align:center;border:1px solid #EBEEF5">' +
+      '<div class="toggle-switch on bs-dep" onclick="this.classList.toggle(\'on\')"></div>' +
+    '</td>' +
+    '<td style="padding:4px 8px;text-align:center;border:1px solid #EBEEF5">' +
+      '<div class="toggle-switch on bs-wit" onclick="this.classList.toggle(\'on\')"></div>' +
+    '</td>' +
+    '<td style="padding:4px 8px;text-align:center;border:1px solid #EBEEF5">' +
+      '<span style="color:#F56C6C;font-size:16px;cursor:pointer;line-height:1" onclick="this.closest(\'tr\').remove()" title="删除此行">&times;</span>' +
+    '</td>';
+  tbody.appendChild(tr);
 }
 
 function testBsUrl(btn) {
@@ -2710,28 +2682,23 @@ function testBsUrl(btn) {
   var urlInput = row.querySelector('.bs-url-input');
   var resultEl = row.querySelector('.bs-url-result');
   var url = urlInput.value.trim();
-
   resultEl.style.display = 'block';
-
   if (!url) {
     resultEl.style.background = '#F4F4F5';
     resultEl.style.color = '#909399';
     resultEl.textContent = '— 请先填写 URL';
     return;
   }
-
   resultEl.style.background = '#F4F4F5';
   resultEl.style.color = '#909399';
   resultEl.textContent = '⏳ 测试中...';
   btn.disabled = true;
-
   var timer = setTimeout(function() {
     btn.disabled = false;
     resultEl.style.background = '#FEF0F0';
     resultEl.style.color = '#F56C6C';
     resultEl.textContent = '✕ 连接失败：连接超时';
   }, 5000);
-
   fetch(url, { method: 'HEAD', mode: 'no-cors', signal: AbortSignal.timeout(5000) })
     .then(function() {
       clearTimeout(timer);
@@ -2750,21 +2717,28 @@ function testBsUrl(btn) {
     });
 }
 
+function bsShowError(msg) {
+  var el = document.getElementById('bs-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
 function confirmBatchSite() {
-  var product = document.getElementById('bs-product').value;
-  if (!product) { alert('请选择产品别'); return; }
+  document.getElementById('bs-error').style.display = 'none';
   var rows = document.querySelectorAll('#bs-entries-body tr');
-  if (!rows.length) { alert('请至少选择一个站点'); return; }
+  if (!rows.length) { bsShowError('请至少添加一行'); return; }
 
   var tbody = document.getElementById('site-setting-body');
   var added = 0;
+  var incomplete = 0;
   rows.forEach(function(row) {
-    var siteName = row.querySelector('.bs-site-name').value.trim() || row.dataset.site;
-    var url = row.querySelector('.bs-url-input').value.trim();
+    var product  = row.querySelector('.bs-product').value;
+    var siteName = row.querySelector('.bs-site-name').value.trim();
+    var url      = row.querySelector('.bs-url-input').value.trim();
+    if (!product && !siteName && !url) return;
+    if (!product || !siteName || !url) { incomplete++; return; }
     var depOn = row.querySelector('.bs-dep').classList.contains('on');
     var witOn = row.querySelector('.bs-wit').classList.contains('on');
-    if (!url) return;
-
     var tr = document.createElement('tr');
     tr.innerHTML =
       '<td style="padding-left:14px"><span class="site-tag">' + product + '</span></td>' +
@@ -2780,7 +2754,9 @@ function confirmBatchSite() {
     added++;
   });
 
-  if (!added) { alert('请至少填写一个站点的 URL'); return; }
+  if (!added && incomplete) { bsShowError('请确认每行都填写了产品别、站点名称和 URL'); return; }
+  if (!added) { bsShowError('请至少填写一行的产品别、站点名称和 URL'); return; }
+  if (incomplete) { bsShowError('已保存 ' + added + ' 条，另有 ' + incomplete + ' 行资料不完整已略过'); return; }
   closeBatchSiteModal();
 }
 
@@ -2916,7 +2892,7 @@ function confirmAccountModal() {
       '<td style="color:#666;font-size:12px">admin</td>' +
       '<td><div class="labeled-toggle on" onclick="toggleAdminStatus(this)"><span class="toggle-label">启用</span><div class="toggle-knob"></div></div></td>' +
       '<td>' +
-        '<span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openEditAccountModal(this)">&#9998; 修改#9998; 编辑</span>' +
+        '<span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openEditAccountModal(this)">&#9998; 编辑</span>' +
         '<span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openPwdModal(\'' + account + '\')">&#9998; 密码重制</span>' +
         '<span style="color:#F56C6C;font-size:12px;cursor:pointer" onclick="deleteAccount(this)">&#9998; 删除</span>' +
       '</td>';
@@ -3152,7 +3128,7 @@ function confirmAddModal() {
     '<td><span class="badge badge-active" data-status="normal">启用</span></td>' +
     '<td style="color:#666;font-size:12px">' + remark + '</td>' +
     '<td>' +
-      '<span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openPwdModal(\'' + tgid + '\')">&#9998; 修改#9998; 编辑密码</span>' +
+      '<span style="color:#409EFF;font-size:12px;cursor:pointer;margin-right:10px" onclick="openPwdModal(\'' + tgid + '\')">&#9998; 编辑密码</span>' +
       '<span style="color:#909399;font-size:12px;cursor:pointer;margin-right:10px" onclick="changeStatus(this,\'' + tgid + '\')">&#9998; 禁用</span>' +
       '<span style="color:#409EFF;font-size:12px;cursor:pointer">&#9998; 谷歌验证</span>' +
     '</td>';
@@ -3707,57 +3683,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <!-- ── 批量添加站点弹窗 ── -->
 <div id="batch-site-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;">
-  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:6px;width:580px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,0.18);overflow:hidden">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:6px;width:680px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,0.18);overflow:hidden">
     <div style="padding:14px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
       <span style="font-size:14px;font-weight:600;color:#333">批量添加站点</span>
       <span onclick="closeBatchSiteModal()" style="cursor:pointer;color:#999;font-size:20px;line-height:1">&times;</span>
     </div>
-    <div style="padding:16px 18px 8px;flex-shrink:0">
-      <!-- 第一步：选品牌 -->
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <label style="font-size:13px;color:#606266;white-space:nowrap"><span style="color:#F56C6C;margin-right:2px">*</span>产品别：</label>
-        <select id="bs-product" class="fi" style="width:160px" onchange="onBsProductChange()">
-          <option value="">请选择产品</option>
-          <option value="交易所">交易所</option>
-          <option value="股票">股票</option>
-          <option value="充电宝">充电宝</option>
-        </select>
-      </div>
-      <!-- 第二步：复选站点 -->
-      <div style="margin-bottom:10px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-          <label style="font-size:13px;color:#606266"><span style="color:#F56C6C;margin-right:2px">*</span>选择站点</label>
-          <div style="display:flex;gap:10px">
-            <span onclick="bsSiteSelectAll(true)" style="font-size:12px;color:#409EFF;cursor:pointer">全选</span>
-            <span onclick="bsSiteSelectAll(false)" style="font-size:12px;color:#909399;cursor:pointer">清空</span>
-          </div>
-        </div>
-        <div id="bs-site-list" style="display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:#F9FAFB;border:1px solid #EBEEF5;border-radius:4px;min-height:36px">
-          <span style="color:#C0C4CC;font-size:12px;line-height:24px">请先选择产品别</span>
-        </div>
-      </div>
+    <div style="flex:1;overflow-y:auto;padding:14px 18px 8px">
+      <table style="width:100%;border-collapse:collapse" id="bs-entries-table">
+        <thead>
+          <tr style="background:#F5F7FA">
+            <th style="font-size:12px;font-weight:600;color:#606266;padding:6px 8px;text-align:left;border:1px solid #EBEEF5;width:110px">产品别</th>
+            <th style="font-size:12px;font-weight:600;color:#606266;padding:6px 8px;text-align:left;border:1px solid #EBEEF5;width:130px">站点名称</th>
+            <th style="font-size:12px;font-weight:600;color:#606266;padding:6px 8px;text-align:left;border:1px solid #EBEEF5">URL</th>
+            <th style="font-size:12px;font-weight:600;color:#606266;padding:6px 8px;text-align:center;border:1px solid #EBEEF5;width:46px">上分</th>
+            <th style="font-size:12px;font-weight:600;color:#606266;padding:6px 8px;text-align:center;border:1px solid #EBEEF5;width:46px">下分</th>
+            <th style="font-size:12px;font-weight:600;color:#606266;padding:6px 8px;text-align:center;border:1px solid #EBEEF5;width:36px"></th>
+          </tr>
+        </thead>
+        <tbody id="bs-entries-body"></tbody>
+      </table>
+      <button class="btn" style="margin-top:8px;background:#fff;font-size:12px" onclick="addBsRow()">＋ 添加一行</button>
     </div>
-    <!-- 第三步：已选站点列出 URL + 开关 -->
-    <div style="flex:1;overflow-y:auto;padding:0 18px">
-      <div id="bs-entries" style="display:none">
-        <div style="font-size:13px;color:#606266;margin-bottom:8px;padding-top:4px">填写各站点 URL 及功能开关</div>
-        <table style="width:100%;border-collapse:collapse" id="bs-entries-table">
-          <thead>
-            <tr style="background:#F5F7FA">
-              <th style="font-size:12px;font-weight:600;color:#606266;padding:6px 8px;text-align:left;border:1px solid #EBEEF5;width:110px">站点名称</th>
-              <th style="font-size:12px;font-weight:600;color:#606266;padding:6px 8px;text-align:left;border:1px solid #EBEEF5">URL</th>
-              <th style="font-size:12px;font-weight:600;color:#606266;padding:6px 8px;text-align:center;border:1px solid #EBEEF5;width:50px">上分</th>
-              <th style="font-size:12px;font-weight:600;color:#606266;padding:6px 8px;text-align:center;border:1px solid #EBEEF5;width:50px">下分</th>
-            </tr>
-          </thead>
-          <tbody id="bs-entries-body"></tbody>
-        </table>
+    <div style="padding:12px 18px;border-top:1px solid #eee;flex-shrink:0">
+      <div id="bs-error" style="display:none;font-size:12px;color:#F56C6C;background:#FEF0F0;border:1px solid #fde2e2;border-radius:4px;padding:6px 10px;margin-bottom:8px"></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px">
+        <button class="btn" onclick="closeBatchSiteModal()">取消</button>
+        <button class="btn btn-green" onclick="confirmBatchSite()">保存</button>
       </div>
-      <div id="bs-empty" style="color:#C0C4CC;font-size:12px;text-align:center;padding:20px 0">请先选择产品别和站点</div>
-    </div>
-    <div style="padding:12px 18px;border-top:1px solid #eee;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0">
-      <button class="btn" onclick="closeBatchSiteModal()">取消</button>
-      <button class="btn btn-green" onclick="confirmBatchSite()">保存</button>
     </div>
   </div>
 </div>
